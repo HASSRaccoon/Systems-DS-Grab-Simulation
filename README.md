@@ -1,1 +1,4 @@
 # Systems-DS-Grab-Simulation
+A ride hailing system is to match the drivers with the demand for taxis through digitized platform. In order to maximize the efficiency for this platform, a lot of algorithms would be developed and experiments will be carried out.
+However, carrying out the experiments in real world comes at a cost of time and money. All the ride hailing platforms have developed simulation systems to replicate the real world into a digital environment such that the experiments can be carried out with better velocity and scale.
+In this proposal, we want the students to construct a minimum version of the simulation for the demand, supply and matching of a ride hailing system. The objective is to make the end to end simulation flow work and opens up interfaces for tuning and experimentation.
