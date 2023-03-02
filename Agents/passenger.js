@@ -1,36 +1,39 @@
-class Passenger {
+export default class Passenger {
     constructor(location, destination) {
         this.state = 'waiting';
         this.location = location;
         this.currentLocation = location;
         this.destination = destination;
         this.waitingTime = 0;
+        this.driver = null;
+
+        this.appearTime = Date.now() / 1000 | 0;
+        console.log(`Passenger appear at ${this.appearTime}`)
     }
-    carArrived(timestamp){
-        this.waitingTime = timestamp; //FIXME: find how to create a timestamp when the passenger is created
+    carArrived(timestamp, driver){ 
+        this.waitingTime = timestamp - this.appearTime;
+        console.log(`Passenger waiting time: ${this.waitingTime}`)
         this.state = 'transit';
+        this.driver = driver;
     }
     transit(){
-        // this.currentLocation = driver.currentLocation; //FIXME: update the current location of the passenger while transiting (same as grab's location)
+        this.currentLocation = this.driver.currentLocation; //FIXME: update the current location of the passenger while transiting (same as grab's location)
+        console.log(`passenger current location when transit: ${this.currentLocation}`)
         if (this.currentLocation == this.destination){
             this.state = 'arrived';
-        }
-        else { //DEBUG: current testing method, will remove later
-            this.currentLocation += 1;
         }
     }
     arrived(){
         this.state = 'arrived';
-        this.removePassenger(); //FIXME: remove passenger from the screen
+        // this.removePassenger(); //FIXME: remove passenger from the screen
     }
 
     test(){
-        let seconds = 10;
         while (true){ //FIXME:
             switch (this.state){
                 case 'waiting':
-                    console.log("Car arrived")
-                    this.carArrived(seconds);
+                    console.log("Car arrived");
+                    this.carArrived(Date.now() / 1000 | 0, driver);
                     break;
                 case 'transit':
                     console.log('Transiting')
@@ -50,5 +53,5 @@ class Passenger {
 }
 
 
-let pass = new Passenger(0, 5);
-pass.test();
+// let pass = new Passenger(0, 5);
+// pass.test();
