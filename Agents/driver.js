@@ -19,27 +19,21 @@ export default class Driver {
         //     this.speed = 5;
         //     Passenger.emotion = 'scared';
         // }
-
-        //DEBUG: for testing purpose, will remove later
-        this.passengers = 3; 
-        this.passengerLocation = [100,50,10];
-        this.passengerDestination = [120,70,20];
     }
-    search(){
-        if (true){ //FIXME: if there is passenger appear
+    search(passenger){
+        this.passenger = passenger;
+        if (this.passenger){ 
             this.state = 'picking up';
-            this.passengers -= 1; //DEBUG: for testing
         }
-        else{ //while waiting passenger to appear
-            this.location += this.speed; //FIXME: driver roaming ard the map
+        else{
+            this.currentLocation += this.speed;
         }
     }
     pickUp(passenger){
-        this.passenger = passenger;
-        this.destination = passenger.location;
-        while (this.currentLocation != this.destination){
-            console.log(`driver current location when picking up: ${this.currentLocation}`)
+        this.destination = this.passenger.location;
+        if (this.currentLocation != this.destination){
             this.currentLocation += this.speed;
+            console.log(`driver current location when picking up: ${this.currentLocation}`)
         }
         if (this.currentLocation == this.destination){
             this.state = 'transit';
@@ -47,11 +41,11 @@ export default class Driver {
     }
     transit(){
         this.destination = this.passenger.destination;
-        while (this.currentLocation != this.destination){
-            console.log(`driver current location when transit: ${this.currentLocation}`)
+        if (this.currentLocation != this.destination){
             this.currentLocation += this.speed;
+            console.log(`driver current location when transit: ${this.currentLocation}`)
         }
-        if (this.currentLocation == this.destination){
+        else{
             this.state = 'completed';
         }
     }
@@ -81,7 +75,3 @@ export default class Driver {
         }
     }
 }
-
-
-// let driver = new Driver(0);
-// driver.test();

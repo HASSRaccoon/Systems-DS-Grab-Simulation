@@ -11,10 +11,12 @@ export default class Passenger {
         console.log(`Passenger appear at ${this.appearTime}`)
     }
     carArrived(timestamp, driver){ 
-        this.waitingTime = timestamp - this.appearTime;
-        console.log(`Passenger waiting time: ${this.waitingTime}`)
-        this.state = 'transit';
         this.driver = driver;
+        if (this.driver.currentLocation == this.location){
+            this.waitingTime = timestamp - this.appearTime;
+            console.log(`Passenger waiting time: ${this.waitingTime}`)
+            this.state = 'transit';
+        }
     }
     transit(){
         this.currentLocation = this.driver.currentLocation; //FIXME: update the current location of the passenger while transiting (same as grab's location)
