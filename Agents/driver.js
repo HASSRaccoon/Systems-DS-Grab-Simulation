@@ -1,20 +1,24 @@
+import Globals from './globals.js' // sprint 2 shit
+
 export default class Driver {
-    constructor(location) {
+    constructor(location, speed = 1) {
         this.state = 'searching';
         this.location = location;
         this.currentLocation = location;
         this.destination = null;
         this.waitingTime = 0;
-        this.speed = 1;
+        this.speed = speed;
+        this.distanceWillingToTravel = 0;
+        this.completedJobs = 0;
 
         this.passenger = null;
 
         // dumping some other (maybe stupid) attributes
         this.earnings = 0;
         this.rating = 0;
-        this.raining = false;
-        this.traffic = false;
-        this.emotion = 'angry';
+        // this.raining = false;
+        // this.traffic = false;
+        // this.emotion = 'angry';
         // if (this.emotion == 'angry'){
         //     this.speed = 5;
         //     Passenger.emotion = 'scared';
@@ -27,15 +31,16 @@ export default class Driver {
         }
         else{
             this.currentLocation += this.speed;
+            this.waitingTime += 1; //FIXME: need to add the correct timestamp
         }
     }
-    pickUp(passenger){
+    pickUp(){
         this.destination = this.passenger.location;
         if (this.currentLocation != this.destination){
             this.currentLocation += this.speed;
             console.log(`driver current location when picking up: ${this.currentLocation}`)
         }
-        if (this.currentLocation == this.destination){
+        else{ //FIXME:
             this.state = 'transit';
         }
     }

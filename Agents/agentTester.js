@@ -15,7 +15,7 @@ while (passenger){
             break;
         case 'picking up':
             console.log('picking up')
-            driver.pickUp(passenger);
+            driver.pickUp();
             passenger.carArrived(Date.now() / 1000 | 0, driver);
             break;
         case 'transit':
