@@ -7,6 +7,7 @@ function Passenger(props) {
   const [driver, setDriver] = useState(null);
   const [happyFactor, setHappyFactor] = useState(0);
   const [speed, setSpeed] = useState(1);
+  const [state, setState] = useState("WAITING");
   const ballRef = useRef(null);
 
   useEffect(() => {

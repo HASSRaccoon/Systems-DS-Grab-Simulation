@@ -8,9 +8,11 @@ function Driver() {
   const [passenger, setPassenger] = useState(null);
   const [happyFactor, setHappyFactor] = useState(0);
   const [speed, setSpeed] = useState(1);
+  const [state, setState] = useState("SEARCHING");
   const ballRef = useRef(null);
 
   useEffect(() => {
+    // setRandomSpawnPosition();
     setRandomDestination();
   }, []);
 
@@ -31,6 +33,12 @@ function Driver() {
     const y = Math.floor(Math.random() * 200);
     setDestination({ x, y });
   }
+
+  // function setRandomSpawnPosition() {
+  //   const x = Math.floor(Math.random() * 200);
+  //   const y = Math.floor(Math.random() * 200);
+  //   setPosition({ x, y });
+  // }
 
   return (
     <div>

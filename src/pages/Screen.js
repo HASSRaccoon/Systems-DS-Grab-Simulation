@@ -11,6 +11,7 @@ function Screen(props) {
       destination: { x: 50, y: 40 },
       happyfactor: 3,
       driver: null,
+      state: "WAITING",
       speed: 0,
     },
     {
@@ -19,6 +20,7 @@ function Screen(props) {
       destination: { x: 30, y: 50 },
       happyfactor: 3,
       driver: null,
+      state: "WAITING",
       speed: 0,
     },
     {
@@ -27,6 +29,7 @@ function Screen(props) {
       destination: { x: 30, y: 40 },
       happyfactor: 2,
       driver: null,
+      state: "WAITING",
       speed: 0,
     },
     {
@@ -35,6 +38,7 @@ function Screen(props) {
       destination: { x: 20, y: 90 },
       happyfactor: 1,
       driver: null,
+      state: "WAITING",
       speed: 0,
     },
   ]);
@@ -45,6 +49,7 @@ function Screen(props) {
       destination: { x: 200, y: 100 },
       speed: 5,
       passenger: null,
+      state: "SEARCHING",
       happyfactor: 4,
     },
     {
@@ -53,6 +58,7 @@ function Screen(props) {
       destination: { x: 60, y: 130 },
       speed: 4,
       passenger: null,
+      state: "SEARCHING",
       happyfactor: 3,
     },
     {
@@ -61,22 +67,34 @@ function Screen(props) {
       destination: { x: 160, y: 30 },
       speed: 3,
       passenger: null,
+      state: "SEARCHING",
       happyfactor: 2,
     },
   ]);
-  console.log(drivers, "hello");
-  console.log(passengers, "hello2");
+  // console.log(drivers, "hello");
+  // console.log(passengers, "hello2");
+
+  //function spawnDriver, append to driver list given probability
+  //function spawnPassenger, append to passenger list given probability
 
   function search(driver) {
+    //next detail:
+    //start timer, when timeElapsed where driver no passenger > driver.tolerance
+    //driver disappear or move to new area
+    //start timer, when timeElapsed where passenger no driver> passenger.tolerance
+    //passenger disappear
     for (let i = 0; i < passengers.length; i++) {
       const passenger = passengers[i];
+      passenger.state = "WAITING";
 
       if (
         passenger.driver === null &&
         passenger.happyfactor < driver.happyfactor
       ) {
-        console.log(driver.happyfactor, "test");
-        console.log("passenger found");
+        console.log(driver.happyfactor, "check");
+
+        driver.state = "PICKINGUP";
+        console.log(driver.state);
         pickingup(driver, passenger);
         break;
       }
@@ -99,12 +117,17 @@ function Screen(props) {
       driver.position.x === passenger.position.x &&
       driver.position.y === passenger.position.y
     ) {
+      driver.state = "DELIVER";
       deliver(driver, passenger);
+      passenger.state = "TRANSIT";
     }
   }
   function deliver(driver, passenger) {
     driver.destination = passenger.destination;
     //passenger move together as a unit with driver to destination
+    // console.log(driver.position, "pos");
+    // console.log(driver.destination, "des");
+
     if (
       driver.position.x === passenger.destination.x &&
       driver.position.y === passenger.destination.y &&
@@ -112,12 +135,15 @@ function Screen(props) {
       passenger.position.y === passenger.destination.y
     ) {
       arrive(passenger);
+      passenger.state = "ARRIVED";
+      console.log(passenger.state);
       completejob(driver);
     }
   }
 
   function completejob(driver) {
     search(driver);
+    driver.state = "SEARCHING";
   }
   function arrive() {
     //passenger disappear
@@ -127,6 +153,7 @@ function Screen(props) {
     const intervalId = setInterval(() => {
       for (let i = 0; i < drivers.length; i++) {
         const driver = drivers[i];
+        driver.state = "SEARCHING";
 
         if (driver.passenger === null) {
           search(driver);
@@ -148,6 +175,7 @@ function Screen(props) {
             speed={driver.speed}
             passenger={driver.passenger}
             happyFactor={driver.happyfactor}
+            state={driver.state}
           />
         ))}
         {passengers.map((passenger) => (
@@ -157,6 +185,7 @@ function Screen(props) {
             destination={passenger.destination}
             driver={passenger.driver}
             happyFactor={passenger.happyfactor}
+            state={passenger.state}
           />
         ))}
       </div>
