@@ -7,8 +7,13 @@
     <title>Map + PathFinder</title>
 
     <!-- GeoJSON Path Finder -->
-    <script src="https://unpkg.com/geojson-path-finder@1.1.0/dist/geojson-path-finder.min.js"></script>
 
+    <!-- <script src="https://unpkg.com/geojson-path-finder@1.1.0/dist/geojson-path-finder.min.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/geojson-path-finder@2.0.1"></script> -->
+    <!-- <script type="module">
+        import PathFinder from 'https://cdn.jsdelivr.net/npm/geojson-path-finder@2.0.1/+esm'
+    </script> -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/geojson-path-finder@2.0.1/+esm"></script>
 
     <!-- leaflet css  -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
@@ -18,8 +23,6 @@
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
     integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM="
     crossorigin=""></script>
-
-    <script src="index.js"></script>
 
     <style>
         #map {
@@ -52,7 +55,7 @@
 
     request.onload = function() {
         if (request.status === 200) {
-            geojsonLayer.addData(request.response);
+            geojsonLayer= request.response;
             // L.geoJSON(geojsonLayer).addTo(map);
         } else {
         console.log('Failed to load GeoJSON data');
@@ -107,10 +110,12 @@
     //   Set Start and End Points objects
     const startPoint = L.latLng(1.3413760280356875, 103.96375049044487);
     const endPoint = L.latLng(1.3606607628285536, 103.98979608694115);
-    const marker = L.marker(startPoint).addTo(map);
+    const markerStart = L.marker(startPoint).addTo(map);
+    const markerEnd = L.marker(endPoint).addTo(map);
 
-    
-    const pathFinder = new PathFinder(geojsonLayer, {
+    // import PathFinder from 'https://cdn.jsdelivr.net/npm/geojson-path-finder@2.0.1/+esm'
+    // var PathFinder = require('geojson-path-finder')
+    const pathFinder = PathFinder(geojsonLayer, {
         precision: 1e-6, // sets the tolerance for snapping the start and end points to the nearest graph node.
         snapToFirst: true, //Indicates whether to snap the start point to the nearest node, or to the nearest point on an edge.
         edgeDataReduceFunction: (r, e) => r + e.properties.distance, //reduce function that accumulates edge data along the path
