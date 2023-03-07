@@ -7,13 +7,12 @@
     <title>Map + PathFinder</title>
 
     <!-- GeoJSON Path Finder -->
-
     <!-- <script src="https://unpkg.com/geojson-path-finder@1.1.0/dist/geojson-path-finder.min.js"></script> -->
     <!-- <script src="https://cdn.jsdelivr.net/npm/geojson-path-finder@2.0.1"></script> -->
     <!-- <script type="module">
         import PathFinder from 'https://cdn.jsdelivr.net/npm/geojson-path-finder@2.0.1/+esm'
     </script> -->
-    <script type="module" src="https://cdn.jsdelivr.net/npm/geojson-path-finder@2.0.1/+esm"></script>
+    <!-- <script type="module" src="https://cdn.jsdelivr.net/npm/geojson-path-finder@2.0.1/+esm"></script> -->
 
     <!-- leaflet css  -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
@@ -39,29 +38,32 @@
     </div>
 </body>
 
-
 <!-- leaflet js  -->
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
-<script>
-    // Var to store the GeoJSON layer
-    var geojsonLayer;
+<script type="module"> 
 
+    var response
     // Load GeoJSON from a file using XMLHttpRequest
     var request = new XMLHttpRequest();
-    request.open('GET', 'data/lta-lane-marking-geojson.geojson'); //import geojson file
+    // request.open('GET', 'data/road-network.geojson'); //https://sutdapac-my.sharepoint.com/:u:/g/personal/kewei_yeo_mymail_sutd_edu_sg/Edrq6Jhy-3tIpNl6n2d21SYBNbCvrlU4fTPl3hbyY5L0hQ?e=Vmq9MD
+    request.open('GET', 'https://raw.githubusercontent.com/perliedman/geojson-path-finder/master/test/network.json'); //import geojson file
     request.responseType = 'json';
     request.send();
 
     request.onload = function() {
         if (request.status === 200) {
-            geojsonLayer= request.response;
-            // L.geoJSON(geojsonLayer).addTo(map);
+            response = request.response;
+            // L.geoJSON(request.response).addTo(map);
+            console.log('Loaded GeoJSON data');
+            console.log(request.response);
         } else {
         console.log('Failed to load GeoJSON data');
         }
     };
     
+    const geojson = response
+
     // // Load GeoJSON data when the map moves
     // map.on('moveend', function() {
     //     if (!geojsonLayer) {
@@ -78,13 +80,13 @@
 
     // Map initialization 
     var center = L.bounds([1.56073, 104.11475], [1.16, 103.502]).getCenter();
-    var map = L.map('map').setView([center.x, center.y], 13);
-    // var map = L.map('map').setView([1.3397254088067054, 103.70038345301907], 12);
+    var map = L.map('map').setView([center.x, center.y], 12);
+    // var map = L.map('map').setView([59.473875, 8.439036], 12); //geojson's location
         
-        /*==============================================
-        TILE LAYER and WMS
-        ================================================*/
-        //osm layer
+    /*==============================================
+    TILE LAYER and WMS
+    ================================================*/
+    //osm layer
     var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     });
@@ -108,24 +110,38 @@
     // oneMap.addTo(map);
 
     //   Set Start and End Points objects
-    const startPoint = L.latLng(1.3413760280356875, 103.96375049044487);
-    const endPoint = L.latLng(1.3606607628285536, 103.98979608694115);
+    const startPoint = L.latLng(1.3413760280356875, 103.96375049044487); //SUTD
+    // const startPoint = L.latLng(59.493692403184525,8.469248824847734);
+    const endPoint = L.latLng(1.3606607628285536, 103.98979608694115); // Jewel
+    // const endPoint = L.latLng(59.498964, 8.420861);
     const markerStart = L.marker(startPoint).addTo(map);
     const markerEnd = L.marker(endPoint).addTo(map);
 
-    // import PathFinder from 'https://cdn.jsdelivr.net/npm/geojson-path-finder@2.0.1/+esm'
-    // var PathFinder = require('geojson-path-finder')
-    const pathFinder = PathFinder(geojsonLayer, {
-        precision: 1e-6, // sets the tolerance for snapping the start and end points to the nearest graph node.
-        snapToFirst: true, //Indicates whether to snap the start point to the nearest node, or to the nearest point on an edge.
-        edgeDataReduceFunction: (r, e) => r + e.properties.distance, //reduce function that accumulates edge data along the path
-        edgeDataInserter: (d, e) => { d.distance = e.properties.distance; }, // inserts edge data into the path.
+    // on mouse click on map return coordinates
+    map.on('click', function(e) {
+        console.log(e.latlng);
     });
-    
+    // console.log(geojson);
+
+
+    // <!-- <script src="https://cdn.jsdelivr.net/npm/geojson-path-finder@2.0.1/dist/cjs/index.min.js"> -->
+    // <script type="module">
+
+    import PathFinder, { pathToGeoJSON } from "https://cdn.jsdelivr.net/npm/geojson-path-finder@2.0.1/+esm";
+    // import PathFinder from "https://cdn.jsdelivr.net/npm/geojson-path-finder@2.0.1/src/index.ts";
+
+
+    var pathFinder = new PathFinder(geojson);
+    // const pathFinder = new PathFinder(geojsonLayer, {
+    //     precision: 1e-6, // sets the tolerance for snapping the start and end points to the nearest graph node.
+    //     snapToFirst: true, //Indicates whether to snap the start point to the nearest node, or to the nearest point on an edge.
+    //     edgeDataReduceFunction: (r, e) => r + e.properties.distance, //reduce function that accumulates edge data along the path
+    //     edgeDataInserter: (d, e) => { d.distance = e.properties.distance; }, // inserts edge data into the path.
+    // });
+    const pathLineString = pathToGeoJSON(pathFinder.findPath(startPoint, endPoint));
     //finds the shortest path between the start and end points.
-    const path = pathFinder.findPath(startPoint, endPoint); // returns an array of L.LatLng objects representing the shortest path between the start and end points.
+    // const path = pathFinder.findPath(startPoint, endPoint); // returns an array of L.LatLng objects representing the shortest path between the start and end points.
     const pathPolyline = L.polyline(path, { color: 'blue', weight: 5 }).addTo(map); // returns a Leaflet Polyline object representing the shortest path between the start and end points.
     
-
 
 </script>
