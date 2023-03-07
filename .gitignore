@@ -6,3 +6,6 @@ sdsgvenv/
 
 # library folder
 lib/
+
+# .vscode folder
+.vscode/
