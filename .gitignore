@@ -10,4 +10,6 @@ lib/
 
 # .vscode folder
 .vscode/
+
 # node_modules
+node_modules/

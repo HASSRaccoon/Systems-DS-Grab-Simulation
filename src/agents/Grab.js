@@ -1,7 +1,8 @@
 import styles from "./styles.module.css";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Driver from "./Driver";
 import Passenger from "./Passenger";
+// import { moveTo } from "../utils/moveTo";
 
 function Grab(props) {
   const [passengers, setPassengers] = useState([
@@ -23,24 +24,6 @@ function Grab(props) {
       state: "WAITING",
       speed: 0,
     },
-    {
-      id: "passenger3",
-      position: { x: 160, y: 10 },
-      destination: { x: 30, y: 40 },
-      happyfactor: 2,
-      driver: null,
-      state: "WAITING",
-      speed: 0,
-    },
-    {
-      id: "passenger4",
-      position: { x: 20, y: 70 },
-      destination: { x: 20, y: 90 },
-      happyfactor: 1,
-      driver: null,
-      state: "WAITING",
-      speed: 0,
-    },
   ]);
   const [drivers, setDrivers] = useState([
     {
@@ -52,63 +35,12 @@ function Grab(props) {
       state: "SEARCHING",
       happyfactor: 4,
     },
-    {
-      id: "driver2",
-      position: { x: 190, y: 100 },
-      destination: { x: 60, y: 130 },
-      speed: 4,
-      passenger: null,
-      state: "SEARCHING",
-      happyfactor: 3,
-    },
-    {
-      id: "driver3",
-      position: { x: 60, y: 50 },
-      destination: { x: 160, y: 30 },
-      speed: 3,
-      passenger: null,
-      state: "SEARCHING",
-      happyfactor: 2,
-    },
   ]);
   // console.log(drivers, "hello");
   // console.log(passengers, "hello2");
 
   //function spawnDriver, append to driver list given probability
   //function spawnPassenger, append to passenger list given probability
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      for (let i = 0; i < drivers.length; i++) {
-        const driver = drivers[i];
-
-        switch (driver.state) {
-          case "SEARCHING":
-            search(driver);
-            break;
-          case "PICKINGUP":
-            if (driver.passenger) {
-              pickingup(driver, driver.passenger);
-            } else {
-              driver.state = "SEARCHING";
-            }
-            break;
-          case "DELIVER":
-            if (driver.passenger) {
-              deliver(driver, driver.passenger);
-            } else {
-              driver.state = "SEARCHING";
-            }
-            break;
-          default:
-            console.error(`Unknown driver state: ${driver.state}`);
-            break;
-        }
-      }
-    }, 1000);
-
-    return () => clearInterval(intervalId);
-  }, [drivers, passengers]);
 
   function search(driver) {
     //next detail:
@@ -120,13 +52,13 @@ function Grab(props) {
     for (let i = 0; i < passengers.length; i++) {
       const passenger = passengers[i];
       passenger.state = "WAITING";
+      console.log(passenger.state, "check passenger state!!");
 
       if (
         passenger.state === "WAITING" &&
         passenger.driver === null &&
         passenger.happyfactor < driver.happyfactor
       ) {
-        console.log(driver.state, "checking pickup state");
         driver.state = "PICKINGUP";
         pickingup(driver, passenger);
 
@@ -141,6 +73,7 @@ function Grab(props) {
     console.log(passenger.driver, driver.passenger, "hi");
     //ok works until here but why driver not moving?
     driver.destination = passenger.position;
+
     console.log(driver.destination, "new driver destination");
     console.log(driver.position, "new driver position");
     driver.speed = passenger.speed;
@@ -181,23 +114,39 @@ function Grab(props) {
   function arrive() {
     //passenger disappear
   }
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      for (let i = 0; i < drivers.length; i++) {
+        const driver = drivers[i];
+        console.log(driver.state, "checking state");
 
-  // useEffect(() => {
-  //   const intervalId = setInterval(() => {
-  //     for (let i = 0; i < drivers.length; i++) {
-  //       const driver = drivers[i];
+        switch (driver.state) {
+          case "SEARCHING":
+            search(driver);
+            break;
+          case "PICKINGUP":
+            if (driver.passenger) {
+              pickingup(driver, driver.passenger);
+            } else {
+              driver.state = "SEARCHING";
+            }
+            break;
+          case "DELIVER":
+            if (driver.passenger) {
+              deliver(driver, driver.passenger);
+            } else {
+              driver.state = "SEARCHING";
+            }
+            break;
+          default:
+            console.error(`Unknown driver state: ${driver.state}`);
+            break;
+        }
+      }
+    }, 1000);
 
-  //       if (driver.passenger === null) {
-  //         driver.state = "SEARCHING";
-  //         if (driver.state === "SEARCHING") {
-  //           search(driver);
-  //         }
-  //       }
-  //     }
-  //   }, 1000);
-
-  //   return () => clearInterval(intervalId);
-  // }, [drivers, passengers]);
+    return () => clearInterval(intervalId);
+  }, [drivers, passengers]);
 
   return (
     <div>
