@@ -59,8 +59,9 @@ function Grab(props) {
         passenger.driver === null &&
         passenger.happyfactor < driver.happyfactor
       ) {
+        passenger.driver = driver;
+        driver.passenger = passenger;
         driver.state = "PICKINGUP";
-        pickingup(driver, passenger);
 
         break;
       }
@@ -68,8 +69,6 @@ function Grab(props) {
   }
 
   function pickingup(driver, passenger) {
-    passenger.driver = driver;
-    driver.passenger = passenger;
     console.log(passenger.driver, driver.passenger, "hi");
     //ok works until here but why driver not moving?
     driver.destination = passenger.position;
@@ -84,7 +83,6 @@ function Grab(props) {
       driver.position.y === passenger.position.y
     ) {
       driver.state = "DELIVER";
-      deliver(driver, passenger);
       passenger.state = "TRANSIT";
     }
   }
@@ -101,17 +99,15 @@ function Grab(props) {
       passenger.position.y === passenger.destination.y
     ) {
       passenger.state = "ARRIVED";
-      arrive(passenger);
-      console.log(passenger.state);
+
       completejob(driver);
     }
   }
 
   function completejob(driver) {
     driver.state = "SEARCHING";
-    search(driver);
   }
-  function arrive() {
+  function arrive(passenger) {
     //passenger disappear
   }
   useEffect(() => {
