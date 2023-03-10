@@ -77,32 +77,65 @@ function Grab(props) {
   //function spawnDriver, append to driver list given probability
   //function spawnPassenger, append to passenger list given probability
 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      for (let i = 0; i < drivers.length; i++) {
+        const driver = drivers[i];
+
+        switch (driver.state) {
+          case "SEARCHING":
+            search(driver);
+            break;
+          case "PICKINGUP":
+            if (driver.passenger) {
+              pickingup(driver, driver.passenger);
+            } else {
+              driver.state = "SEARCHING";
+            }
+            break;
+          case "DELIVER":
+            if (driver.passenger) {
+              deliver(driver, driver.passenger);
+            } else {
+              driver.state = "SEARCHING";
+            }
+            break;
+          default:
+            console.error(`Unknown driver state: ${driver.state}`);
+            break;
+        }
+      }
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [drivers, passengers]);
+
   function search(driver) {
     //next detail:
     //start timer, when timeElapsed where driver no passenger > driver.tolerance
     //driver disappear or move to new area
     //start timer, when timeElapsed where passenger no driver> passenger.tolerance
     //passenger disappear
+
     for (let i = 0; i < passengers.length; i++) {
       const passenger = passengers[i];
       passenger.state = "WAITING";
 
       if (
+        passenger.state === "WAITING" &&
         passenger.driver === null &&
         passenger.happyfactor < driver.happyfactor
       ) {
-        console.log(driver.happyfactor, "check");
-
+        console.log(driver.state, "checking pickup state");
         driver.state = "PICKINGUP";
-        console.log(driver.state);
         pickingup(driver, passenger);
+
         break;
       }
     }
   }
 
   function pickingup(driver, passenger) {
-    console.log("helpppp");
     passenger.driver = driver;
     driver.passenger = passenger;
     console.log(passenger.driver, driver.passenger, "hi");
@@ -134,35 +167,37 @@ function Grab(props) {
       passenger.position.y === passenger.destination.x &&
       passenger.position.y === passenger.destination.y
     ) {
-      arrive(passenger);
       passenger.state = "ARRIVED";
+      arrive(passenger);
       console.log(passenger.state);
       completejob(driver);
     }
   }
 
   function completejob(driver) {
-    search(driver);
     driver.state = "SEARCHING";
+    search(driver);
   }
   function arrive() {
     //passenger disappear
   }
 
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      for (let i = 0; i < drivers.length; i++) {
-        const driver = drivers[i];
-        driver.state = "SEARCHING";
+  // useEffect(() => {
+  //   const intervalId = setInterval(() => {
+  //     for (let i = 0; i < drivers.length; i++) {
+  //       const driver = drivers[i];
 
-        if (driver.passenger === null) {
-          search(driver);
-        }
-      }
-    }, 1000);
+  //       if (driver.passenger === null) {
+  //         driver.state = "SEARCHING";
+  //         if (driver.state === "SEARCHING") {
+  //           search(driver);
+  //         }
+  //       }
+  //     }
+  //   }, 1000);
 
-    return () => clearInterval(intervalId);
-  }, [drivers, passengers]);
+  //   return () => clearInterval(intervalId);
+  // }, [drivers, passengers]);
 
   return (
     <div>
