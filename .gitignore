@@ -11,5 +11,8 @@ lib/
 # .vscode folder
 .vscode/
 
-# node_modules
+# dependencies
 node_modules/
+/node_modules
+node_modules
+package-lock.json
