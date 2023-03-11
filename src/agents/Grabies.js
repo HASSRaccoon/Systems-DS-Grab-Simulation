@@ -12,15 +12,15 @@ function Grabies(props) {
       state: "WAITING",
       speed: 0,
     },
-    {
-      id: "passenger2",
-      position: { x: 140, y: 120 },
-      destination: { x: 30, y: 50 },
-      happyfactor: 3,
-      driver: null,
-      state: "WAITING",
-      speed: 0,
-    },
+    // {
+    //   id: "passenger2",
+    //   position: { x: 140, y: 120 },
+    //   destination: { x: 30, y: 50 },
+    //   happyfactor: 3,
+    //   driver: null,
+    //   state: "WAITING",
+    //   speed: 0,
+    // },
   ];
 
   var drivers = [
@@ -33,15 +33,15 @@ function Grabies(props) {
       state: "SEARCHING",
       happyfactor: 4,
     },
-    {
-      id: "driver2",
-      position: { x: 100, y: 80 },
-      destination: { x: 20, y: 10 },
-      speed: 5,
-      passenger: null,
-      state: "SEARCHING",
-      happyfactor: 4,
-    },
+    // {
+    //   id: "driver2",
+    //   position: { x: 100, y: 80 },
+    //   destination: { x: 20, y: 10 },
+    //   speed: 5,
+    //   passenger: null,
+    //   state: "SEARCHING",
+    //   happyfactor: 4,
+    // },
   ];
 
   const driverRef = useRef(null);
@@ -91,88 +91,93 @@ function Grabies(props) {
     }, duration * 1000);
   }
   useEffect(() => {
+    spawnDriversandPassengers();
+  }, []);
+
+  function spawnDriversandPassengers() {
     for (let i = 0; i < drivers.length; i++) {
       const driver = drivers[i];
-      moveTo(driverRef.current, driver.position, driver.position, driverRef);
-      // driverRef.current.style.left = driver.position.x + "px";
-      // driverRef.current.style.top = driver.position.y + "px";
+      // moveTo(driverRef.current, driver.position, driver.position, driverRef);
+      driverRef.current.style.left = driver.position.x + "px";
+      driverRef.current.style.top = driver.position.y + "px";
     }
     for (let i = 0; i < passengers.length; i++) {
       const passenger = passengers[i];
-      moveTo(
-        passengerRef.current,
-        passenger.position,
-        passenger.position,
-        passengerRef
-      );
-      // passengerRef.current.style.left = passenger.position.x + "px";
-      // passengerRef.current.style.top = passenger.position.y + "px";
+      // moveTo(
+      //   passengerRef.current,
+      //   passenger.position,
+      //   passenger.position,
+      //   passengerRef
+      // );
+      passengerRef.current.style.left = passenger.position.x + "px";
+      passengerRef.current.style.top = passenger.position.y + "px";
     }
-  }, []);
+  }
+  const combinedArray = [
+    ...drivers.map((driver) => ({ ...driver, type: "driver" })),
+    ...passengers.map((passenger) => ({ ...passenger, type: "passenger" })),
+  ];
 
   useEffect(() => {
-    console.log(drivers, "hello");
-    console.log(passengers, "hello2");
-
     const intervalId = setInterval(() => {
-      for (let i = 0; i < drivers.length; i++) {
-        const driver = drivers[i];
-
-        switch (driver.state) {
+      for (let i = 0; i < combinedArray.length; i++) {
+        const obj = combinedArray[i];
+        switch (obj.state) {
           case "SEARCHING":
-            search(driver);
+            console.log(obj.id, "is", obj.state);
+            search(obj);
+
             break;
           case "PICKINGUP":
-            if (driver.passenger) {
-              pickingup(driver, driver.passenger);
+            if (obj.type === "driver" && obj.passenger) {
+              console.log(obj.id, "is", obj.state, obj.passenger.id);
+              pickingup(obj, obj.passenger);
             } else {
-              driver.state = "SEARCHING";
+              obj.state = "SEARCHING";
             }
             break;
           case "DELIVER":
-            if (driver.passenger) {
-              deliver(driver, driver.passenger);
+            if (obj.type === "driver" && obj.passenger) {
+              console.log(obj.id, obj.state, obj.passenger.id);
+              deliver(obj, obj.passenger);
             } else {
-              driver.state = "SEARCHING";
+              obj.state = "SEARCHING";
             }
             break;
           case "COMPLETED":
-            if (driver.passenger) {
-              completejob(driver, driver.passenger);
+            if (obj.type === "driver" && obj.passenger) {
+              console.log(obj.id, "has", obj.state);
+              completejob(obj, obj.passenger);
+            }
+            break;
+          case "WAITING":
+            if (obj.type === "passenger") {
+              console.log(obj.id, "is", obj.state);
+              waiting(obj);
+            }
+            break;
+          case "TRANSIT":
+            if (obj.type === "passenger") {
+              console.log(obj.id, "in", obj.state);
+              transit(obj);
+            }
+            break;
+          case "ARRIVED":
+            if (obj.type === "passenger") {
+              console.log(obj.id, "has", obj.state);
+              arrive(obj);
+
+              passengers.splice(passengers.indexOf(obj), 1);
             }
             break;
           default:
-            console.error(`Unknown driver state: ${driver.state}`);
+            console.error(`Unknown state: ${obj.state}`);
             break;
         }
       }
     }, 1000);
-
-    const interval2Id = setInterval(() => {
-      for (let i = 0; i < passengers.length; i++) {
-        const passenger = passengers[i];
-
-        switch (passenger.state) {
-          case "WAITING":
-            waiting(passenger);
-            break;
-
-          case "ARRIVED":
-            arrive(passenger);
-            console.log(passengers, "before pop");
-            passengers.pop(passenger);
-            console.log(passengers, "after pop");
-            break;
-
-          default:
-            console.error(`Unknown passenger state: ${passenger.state}`);
-            break;
-        }
-      }
-    }, 1000);
-
-    return () => clearInterval(intervalId) && clearInterval(interval2Id);
-  }, [drivers, passengers]);
+    return () => clearInterval(intervalId);
+  }, [combinedArray]);
 
   function search(driver) {
     //next detail:
@@ -183,18 +188,15 @@ function Grabies(props) {
 
     for (let i = 0; i < passengers.length; i++) {
       const passenger = passengers[i];
-      // passenger.state = "WAITING";
 
       if (
-        // passenger.state === "WAITING" &&
+        passenger.state === "WAITING" &&
         passenger.driver === null &&
         passenger.happyfactor < driver.happyfactor
       ) {
         passenger.driver = driver;
         driver.passenger = passenger;
         driver.state = "PICKINGUP";
-        console.log(driver.state, "checking pickup state");
-
         break;
       }
     }
@@ -208,29 +210,18 @@ function Grabies(props) {
     driver.destination = passenger.position;
     driver.speed = passenger.speed;
     moveTo(driverRef.current, driver.position, driver.destination, driverRef);
-    console.log(driver.position, "new driver position");
-    //when driver reached the passenger, then it will start deliver
+
     if (
       driver.position.x === passenger.position.x &&
       driver.position.y === passenger.position.y
     ) {
-      setTimeout(function () {
-        driver.state = "DELIVER";
-        // passenger.state = "TRANSIT";
-      }, 500);
+      driver.state = "DELIVER";
+      passenger.state = "TRANSIT";
     }
   }
   function deliver(driver, passenger) {
     driver.destination = passenger.destination;
-    console.log(driver.state, "DELIVER");
-    console.log(driverRef.current, "hi");
     moveTo(driverRef.current, driver.position, driver.destination, driverRef);
-    moveTo(
-      passengerRef.current,
-      passenger.position,
-      passenger.destination,
-      passengerRef
-    );
 
     if (
       driver.position.x === passenger.destination.x &&
@@ -241,6 +232,12 @@ function Grabies(props) {
   }
 
   function transit(passenger) {
+    moveTo(
+      passengerRef.current,
+      passenger.position,
+      passenger.destination,
+      passengerRef
+    );
     if (
       passenger.position.y === passenger.destination.x &&
       passenger.position.y === passenger.destination.y
