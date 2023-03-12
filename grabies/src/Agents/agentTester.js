@@ -1,38 +1,36 @@
 import Driver from './driver.js';
-import {passenger} from './passenger.js';
+import Passenger from './passenger.js';
 
-let location,speed
-let driver1 = new Driver(location=0, speed=1);
-console.log(driver1)
+let driver = new Driver(0);
 
 let numPassenger = 1;
-let passenger1 = new passenger(3*numPassenger, 10*numPassenger, driver1)
+let passenger = new Passenger(3*numPassenger, 10*numPassenger)
 
-while (passenger1){
-    switch (driver1.state){
+while (passenger){
+    switch (driver.state){
         case 'searching':
             console.log("Searching")
-            driver1.search(passenger1);
+            driver.search(passenger);
             console.log('Searching new passenger...')
             break;
         case 'picking up':
             console.log('picking up')
-            driver1.pickUp();
-            passenger1.carArrived(Date.now() / 1000 | 0, driver1);
+            driver.pickUp();
+            passenger.carArrived(Date.now() / 1000 | 0, driver);
             break;
         case 'transit':
             console.log('Transiting')
-            driver1.transit();
-            passenger1.transit();
+            driver.transit();
+            passenger.transit();
             break
         case 'completed':
-            driver1.completed();
-            passenger1.arrived();
+            driver.completed();
+            passenger.arrived();
             console.log('passenger arrived')
-            if (passenger1.destination == 10){
+            if (passenger.destination == 10){
                 console.log('====================')
                 console.log('create new passenger')
-                passenger1 = new passenger(20, 30);
+                passenger = new Passenger(20, 30);
                 numPassenger += 1;
             }
             else{

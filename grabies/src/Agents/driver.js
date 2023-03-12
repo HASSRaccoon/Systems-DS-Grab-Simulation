@@ -1,111 +1,144 @@
-import React, { useState } from 'react';
+import React from "react";
+import styles from "./styles.module.css";
+import moveTo from "./move.js";
 
-function Driver(props){
-    const [state, setState] = useState('searching');
-    const [waitingTime, setWaitingTime] = useState(0);
-    const [currentLocation, setCurrentLocation] = useState(props.location);
-    const [destination, setDestination] = useState(props.destination);
-    const [drivingSpeed, setDrivingSpeed] = useState(props.speed);
-    // const [distanceWillingToTravel, setDistanceWillingToTravel] = useState(0);
-    // const [completedJobs, setCompletedJobs] = useState(0);
-    const [passenger, setPassenger] = useState(props.passenger);
-    const [earnings, setEarnings] = useState(0);
-    // const [rating, setRating] = useState(0);
+export default class Driver extends React.Component {
+    constructor(props) {
+        super(props);
+        console.log('props')
+        console.log(props)
+        this.state = {
+            state: 'searching',
+            currentLocation: props.currentLocation,
+            destination: null,
+            waitingTime: 0,
+            speed: props.speed,
+            distanceWillingToTravel: 0,
+            completedJobs: 0,
+            passenger: props.passenger,
+            earnings: 0,
+            // rating: 0,
+        };
 
-    function search(passenger){
-        setPassenger(passenger);
-        if (passenger){ 
-            setState('picking up');
+        if (this.state.start){
+            switch (this.state.state){
+                case 'searching':
+                    console.log("Searching")
+                    this.search();
+                    break;
+                case 'picking up':
+                    console.log('picking up')
+                    this.pickUp(this.passengerLocation[this.passengers - 1]);
+                    break;
+                case 'transit':
+                    console.log('Transiting')
+                    this.transit(this.passengerDestination[this.passengers - 1]);
+                    break
+                case 'completed':
+                    this.completed();
+                    break
+            }
+        }
+
+
+        // this.location = location;
+        // this.currentLocation = location;
+        // this.destination = null;
+        // this.waitingTime = 0;
+        // this.speed = speed;
+        // this.distanceWillingToTravel = 0;
+        // this.completedJobs = 0;
+
+        // this.passenger = null;
+
+        // // dumping some other (maybe stupid) attributes
+        // this.earnings = 0;
+        // this.rating = 0;
+        // // this.raining = false;
+        // // this.traffic = false;
+        // // this.emotion = 'angry';
+        // // if (this.emotion == 'angry'){
+        // //     this.speed = 5;
+        // //     Passenger.emotion = 'scared';
+        // // }
+        // console.log(this.state)
+    }
+    search(driver, passenger){
+        if (this.state.passenger){ 
+            console.log('debug')
+            this.state.state = 'picking up';
+            console.log(this.state)
         }
         else{
-            setCurrentLocation(currentLocation + drivingSpeed);
-            setWaitingTime(waitingTime + 1); //FIXME: need to add the correct timestamp
+            this.state.passenger = passenger;
+            this.state.currentLocation += this.state.speed;
+            this.waitingTime += 1; //FIXME: need to add the correct timestamp
+            console.log('debug1')
+            console.log(this.state)
         }
     }
-
-    function pickUp(){
-        setDestination(passenger.location);
-        if (currentLocation != destination){
-            setCurrentLocation(currentLocation + drivingSpeed);
-            console.log(`driver current location when picking up: ${currentLocation}`)
+    pickUp(){
+        this.destination = this.passenger.location;
+        if (this.currentLocation != this.destination){
+            this.currentLocation += this.speed;
+            console.log(`driver current location when picking up: ${this.currentLocation}`)
         }
         else{ //FIXME:
-            setState('transit');
+            this.state = 'transit';
         }
     }
-
-    function transit(){
-        setDestination(passenger.destination);
-        if (currentLocation != destination){
-            setCurrentLocation(currentLocation + drivingSpeed);
-            console.log(`driver current location when transit: ${currentLocation}`)
+    transit(){
+        this.destination = this.passenger.destination;
+        if (this.currentLocation != this.destination){
+            this.currentLocation += this.speed;
+            console.log(`driver current location when transit: ${this.currentLocation}`)
         }
         else{
-            setState('completed');
+            this.state = 'completed';
+        }
+    }
+    completed(){
+        this.state = 'searching';
+    }
+
+    test(){
+        while (this.passenger > 0){ //FIXME:
+            switch (this.state){
+                case 'searching':
+                    console.log("Searching")
+                    this.search();
+                    break;
+                case 'picking up':
+                    console.log('picking up')
+                    this.pickUp(this.passengerLocation[this.passengers - 1]);
+                    break;
+                case 'transit':
+                    console.log('Transiting')
+                    this.transit(this.passengerDestination[this.passengers - 1]);
+                    break
+                case 'completed':
+                    this.completed();
+                    break
+            }
         }
     }
 
-    function completed(){
-        setState('searching');
-        setEarnings(earnings + 10);
+    changeLocation = () => {
+        this.setState({currentLocation: [this.state.currentLocation[0] + this.state.speed[0],this.state.currentLocation[1] + this.state.speed[1]]});
+      }
+    show = () => {
+        console.log(this.state)
     }
-
-    while (passenger){ //FIXME:
-        switch (state){
-            case 'searching':
-                console.log("Searching")
-                search();
-                break;
-            case 'picking up':
-                console.log('picking up')
-                pickUp();
-                break;
-            case 'transit':
-                console.log('Transiting')
-                transit();
-                break
-            case 'completed':
-                completed();
-                break
-        }
-    }
+    render() {
+        return (
+          <div>
+            <div className={styles.driver}></div>
+            {/* <button type="button" onClick={this.changeLocation}>Change location</button> */}
+            <button type="button" onClick={this.show}>Show</button>
+            <button onClick={this.search}>Search</button>
+            <div>{this.state.currentLocation[0]}</div>
+            <div>{this.state.currentLocation[1]}</div>
+          </div>
+        );
+      }
 }
-
-export default Driver;
-
-// function search(passenger){
-//     passenger = passenger;
-//     if (passenger){ 
-//         state = 'picking up';
-//     }
-//     else{
-//         currentLocation += drivingSpeed;
-//         waitingTime += 1; //FIXME: need to add the correct timestamp
-//     }
-// }
-
-// function pickUp(){
-//     destination = passenger.location;
-//     if (currentLocation != destination){
-//         currentLocation += drivingSpeed;
-//         console.log(`driver current location when picking up: ${currentLocation}`)
-//     }
-//     else{ //FIXME:
-//         state = 'transit';
-//     }
-// }
-
-// function transit(){
-//     destination = passenger.destination;
-//     if (currentLocation != destination){
-//         currentLocation += drivingSpeed;
-//         console.log(`driver current location when transit: ${currentLocation}`)
-//     }
-//     else{
-//         state = 'completed';
-//     }
-// }
-
-// function completed(){
-//     state = 'searching';
-// }

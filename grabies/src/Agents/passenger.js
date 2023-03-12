@@ -1,54 +1,76 @@
-export function passenger(location, destination, driver){
-    let state = 'waiting';
-    let currentLocation = location;
-    let passengerDestination = destination;
-    let waitingTime = 0;
-    // let driver = null;
+import React from "react";
+import styles from "./styles.module.css";
 
-    let appearTime = Date.now() / 1000 | 0;
-    console.log(`Passenger appear at ${appearTime}`)
-
-    while (true){ //FIXME:
-        switch (state){
-            case 'waiting':
-                console.log("Car arrived");
-                carArrived(Date.now() / 1000 | 0, driver);
-                break;
-            case 'transit':
-                console.log('Transiting')
-                transit();
-                break;
-            case 'arrived':
-                console.log('Arrived')
-                break
+export default class Passenger extends React.Component{
+    constructor(props) {
+        super(props);
+        this.state = {
+            state: 'waiting',
+            currentLocation: props.location,
+            destination: props.destination,
+            waitingTime: 0,
+            driver: null,
         }
-        if (state == 'arrived'){
-            console.log('Disappearing')
-            console.log(`Total waiting time: ${waitingTime}`)
-            break;
+        // this.location = location;
+        // this.currentLocation = location;
+        // this.destination = destination;
+        // this.waitingTime = 0;
+        // this.driver = null;
+
+        this.appearTime = Date.now() / 1000 | 0;
+        console.log(`Passenger appear at ${this.appearTime}`)
+    }    
+
+    // do we need a state for car not arrived yet?
+    
+    carArrived(timestamp, driver){ 
+        this.driver = driver;
+        if (this.driver.currentLocation == this.location){
+            this.waitingTime = timestamp - this.appearTime;
+            console.log(`Passenger waiting time: ${this.waitingTime}`)
+            this.state = 'transit';
         }
     }
-}
-
-function carArrived(timestamp, driver){ 
-    console.log(driver)
-    driver = driver;
-    if (driver.currentLocation == location){
-        waitingTime = timestamp - appearTime;
-        console.log(`Passenger waiting time: ${waitingTime}`)
-        state = 'transit';
+    transit(){
+        this.currentLocation = this.driver.currentLocation; //FIXME: update the current location of the passenger while transiting (same as grab's location)
+        console.log(`passenger current location when transit: ${this.currentLocation}`)
+        if (this.currentLocation == this.destination){
+            this.state = 'arrived';
+        }
     }
-}
-
-function transit(){
-    currentLocation = driver.currentLocation; //FIXME: update the current location of the passenger while transiting (same as grab's location)
-    console.log(`passenger current location when transit: ${currentLocation}`)
-    if (currentLocation == destination){
-        state = 'arrived';
+    arrived(){
+        this.state = 'arrived';
+        // this.removePassenger(); //FIXME: remove passenger from the screen
     }
-}
 
-function arrived(){
-    state = 'arrived';
-    // removePassenger(); //FIXME: remove passenger from the screen
+    test(){
+        while (true){ //FIXME:
+            switch (this.state){
+                case 'waiting':
+                    console.log("Car arrived");
+                    this.carArrived(Date.now() / 1000 | 0);
+                    break;
+                case 'transit':
+                    console.log('Transiting')
+                    this.transit();
+                    break;
+                case 'arrived':
+                    console.log('Arrived')
+                    break
+            }
+            if (this.state == 'arrived'){
+                console.log('Disappearing')
+                console.log(`Total waiting time: ${this.waitingTime}`)
+                break;
+            }
+        }
+    }
+    
+    render() {
+        return (
+          <div>
+            <div className={styles.passenger}></div>
+          </div>
+        );
+    }
 }
