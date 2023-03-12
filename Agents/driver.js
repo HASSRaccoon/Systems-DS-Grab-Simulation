@@ -1,14 +1,17 @@
-import Globals from './globals.js' // sprint 2 shit
-
-
 export default class Driver {
     constructor(location, speed = 1) {
+         // GLOBALS AFFECTED ATTRIBUTES/////////////////////////////
+        this.defaultSpeed = speed;
+        this.speed = this.defaultSpeed;
+
+   
+        ////////////////////////////////////////////////////////////
+
         this.state = 'searching';
         this.location = location;
         this.currentLocation = location;
         this.destination = null;
         this.waitingTime = 0;
-        this.speed = speed;
         this.distanceWillingToTravel = 0;
         this.completedJobs = 0;
 
@@ -32,6 +35,20 @@ export default class Driver {
         this.passengerDestination = [120,70,20];
         
     }
+    // GLOBALS AFFECTED ATTRIBUTES/////////////////////////////
+    
+    updateSpeed(raining) {
+        if (raining) {
+          this.speed = this.defaultSpeed * 0.8;
+        }
+        else {
+            this.speed = this.defaultSpeed;
+            }
+      }
+    
+    
+    ////////////////////////////////////////////////////////////
+
     search(){
         if (this.passenger != null){ //FIXME: if there is passenger appear
             this.state = 'picking up';
@@ -91,6 +108,7 @@ export default class Driver {
         }
     }
 }
+
 
 
 // let driver = new Driver(0);
