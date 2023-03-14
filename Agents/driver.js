@@ -13,16 +13,6 @@ export default class Driver {
 
         this.passenger = null;
 
-        // dumping some other (maybe stupid) attributes
-        this.earnings = 0;
-        this.rating = 0;
-        // this.raining = false;
-        // this.traffic = false;
-        // this.emotion = 'angry';
-        // if (this.emotion == 'angry'){
-        //     this.speed = 5;
-        //     Passenger.emotion = 'scared';
-        // }
     }
     search(passenger){
         this.passenger = passenger;

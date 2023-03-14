@@ -1,21 +1,15 @@
 import React from "react";
 import styles from "./styles.module.css";
 
-export default class Passenger extends React.Component{
+export default class Passenger{
     constructor(props) {
-        super(props);
         this.state = {
             state: 'waiting',
-            currentLocation: props.location,
+            currentLocation: props.currentLocation,
             destination: props.destination,
             waitingTime: 0,
             driver: null,
         }
-        // this.location = location;
-        // this.currentLocation = location;
-        // this.destination = destination;
-        // this.waitingTime = 0;
-        // this.driver = null;
 
         this.appearTime = Date.now() / 1000 | 0;
         console.log(`Passenger appear at ${this.appearTime}`)
@@ -66,11 +60,11 @@ export default class Passenger extends React.Component{
         }
     }
     
-    render() {
-        return (
-          <div>
-            <div className={styles.passenger}></div>
-          </div>
-        );
-    }
+    // render() {
+    //     return (
+    //       <div>
+    //         <div className={styles.passenger}></div>
+    //       </div>
+    //     );
+    // }
 }

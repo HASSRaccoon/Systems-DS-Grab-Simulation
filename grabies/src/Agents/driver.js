@@ -2,85 +2,39 @@ import React from "react";
 import styles from "./styles.module.css";
 import moveTo from "./move.js";
 
-export default class Driver extends React.Component {
+export default class Driver {
     constructor(props) {
-        super(props);
-        console.log('props')
-        console.log(props)
-        this.state = {
-            state: 'searching',
-            currentLocation: props.currentLocation,
-            destination: null,
-            waitingTime: 0,
-            speed: props.speed,
-            distanceWillingToTravel: 0,
-            completedJobs: 0,
-            passenger: props.passenger,
-            earnings: 0,
-            // rating: 0,
-        };
-
-        if (this.state.start){
-            switch (this.state.state){
-                case 'searching':
-                    console.log("Searching")
-                    this.search();
-                    break;
-                case 'picking up':
-                    console.log('picking up')
-                    this.pickUp(this.passengerLocation[this.passengers - 1]);
-                    break;
-                case 'transit':
-                    console.log('Transiting')
-                    this.transit(this.passengerDestination[this.passengers - 1]);
-                    break
-                case 'completed':
-                    this.completed();
-                    break
-            }
-        }
-
-
-        // this.location = location;
-        // this.currentLocation = location;
-        // this.destination = null;
-        // this.waitingTime = 0;
-        // this.speed = speed;
-        // this.distanceWillingToTravel = 0;
-        // this.completedJobs = 0;
-
-        // this.passenger = null;
-
-        // // dumping some other (maybe stupid) attributes
-        // this.earnings = 0;
-        // this.rating = 0;
-        // // this.raining = false;
-        // // this.traffic = false;
-        // // this.emotion = 'angry';
-        // // if (this.emotion == 'angry'){
-        // //     this.speed = 5;
-        // //     Passenger.emotion = 'scared';
-        // // }
-        // console.log(this.state)
+        this.state = 'searching';
+        this.currentLocation = props.currentLocation;
+        this.destination = null;
+        this.waitingTime = 0;
+        this.speed = props.speed;
+        this.distanceWillingToTravel = 0;
+        this.completedJobs = 0;
+        this.passenger = props.passenger;
+        this.earnings = 0;
+        this.rating = 0;
     }
     search(driver, passenger){
-        if (this.state.passenger){ 
-            console.log('debug')
-            this.state.state = 'picking up';
-            console.log(this.state)
+        console.log('Search')
+        console.log(passenger)
+        if (this.passenger){ 
+            this.destination = this.passenger.state.currentLocation;
+            this.state = 'picking up';
         }
         else{
-            this.state.passenger = passenger;
-            this.state.currentLocation += this.state.speed;
+            console.log('no passenger')
+            this.passenger = passenger;
+            this.currentLocation[0] += this.speed[0];
+            this.currentLocation[1] += this.speed[1];
             this.waitingTime += 1; //FIXME: need to add the correct timestamp
-            console.log('debug1')
-            console.log(this.state)
         }
     }
     pickUp(){
-        this.destination = this.passenger.location;
-        if (this.currentLocation != this.destination){
-            this.currentLocation += this.speed;
+        // this.destination = this.passenger.state.currentLocation;
+        if (this.currentLocation <= this.destination - this.speed){
+            this.currentLocation[0] += this.speed[0];
+            this.currentLocation[1] += this.speed[1];
             console.log(`driver current location when picking up: ${this.currentLocation}`)
         }
         else{ //FIXME:
@@ -88,9 +42,13 @@ export default class Driver extends React.Component {
         }
     }
     transit(){
-        this.destination = this.passenger.destination;
-        if (this.currentLocation != this.destination){
-            this.currentLocation += this.speed;
+        console.log('transit')
+        // console.log('stop')
+        console.log(this.state)
+        this.destination = this.passenger.state.destination;
+        if (this.currentLocation < this.destination - this.speed){
+            this.currentLocation[0] += this.speed[0];
+            this.currentLocation[1] += this.speed[1];
             console.log(`driver current location when transit: ${this.currentLocation}`)
         }
         else{
@@ -98,7 +56,12 @@ export default class Driver extends React.Component {
         }
     }
     completed(){
+        console.log('completed')
+        this.passenger = null;
+        this.currentLocation = this.destination;
+        this.destination = null;
         this.state = 'searching';
+        console.log(this.state)
     }
 
     test(){
@@ -124,21 +87,21 @@ export default class Driver extends React.Component {
     }
 
     changeLocation = () => {
-        this.setState({currentLocation: [this.state.currentLocation[0] + this.state.speed[0],this.state.currentLocation[1] + this.state.speed[1]]});
+        this.setState({currentLocation: [this.currentLocation[0] + this.speed[0],this.currentLocation[1] + this.speed[1]]});
       }
     show = () => {
         console.log(this.state)
     }
-    render() {
-        return (
-          <div>
-            <div className={styles.driver}></div>
-            {/* <button type="button" onClick={this.changeLocation}>Change location</button> */}
-            <button type="button" onClick={this.show}>Show</button>
-            <button onClick={this.search}>Search</button>
-            <div>{this.state.currentLocation[0]}</div>
-            <div>{this.state.currentLocation[1]}</div>
-          </div>
-        );
-      }
+    // render() {
+    //     return (
+    //       <div>
+    //         <div className={styles.driver}></div>
+    //         {/* <button type="button" onClick={this.changeLocation}>Change location</button> */}
+    //         <button type="button" onClick={this.show}>Show</button>
+    //         <button onClick={this.search}>Search</button>
+    //         <div>{this.currentLocation[0]}</div>
+    //         <div>{this.currentLocation[1]}</div>
+    //       </div>
+    //     );
+    //   }
 }

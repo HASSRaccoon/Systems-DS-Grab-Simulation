@@ -1,17 +1,18 @@
-import logo from './logo.svg';
-import './App.css';
+import styles from './styles.module.css';
 import Driver from './Agents/driver.js';
 import Passenger from './Agents/passenger.js';
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 import { moveTo } from "./Agents/move";
 
 function App() {
+  const driverRef = useRef(null);
+  const passengerRef = useRef(null);
   const [drivers, setDrivers] = useState([
     {
       id: "driver1",
       currentLocation: [25, 25],
-      speed: [3,1],
+      speed: [10,5],
       state: 'searching',
     },
   ]);
@@ -19,109 +20,120 @@ function App() {
   const [passengers, setPassengers] = useState([
     {
       id: "passenger1",
-      currentLocation: [75, 75],
-      destination: [200,200],
+      currentLocation: [85, 55],
+      destination: [135,90],
     },
   ]);
 
+  function render(driver) {
+    return (
+      <div>
+        <div className={styles.driver} ref={driverRef} />
+      </div>
+    )
+  }
+
+  function renderp(passenger) {
+    return (
+      <div>
+        <div className={styles.passenger} ref={passengerRef} />
+      </div>
+    )
+  }
+
+  let d = new Driver(drivers[0])
+  let p = new Passenger(passengers[0])
+
+  let driverLs = []
+  let passengerLs = []
+  driverLs.push(d)
+  passengerLs.push(p)
+
+  let workDriver = driverLs[0]
+  let workPassenger = passengerLs[0]
+
+  function spawnDriver() {
+    driverRef.current.style.left = workDriver.currentLocation[0] + "px";
+    driverRef.current.style.top = workDriver.currentLocation[1] + "px";
+    passengerRef.current.style.left = p.state.currentLocation[0] + "px";
+    passengerRef.current.style.top = p.state.currentLocation[1] + "px";
+  }
+
+  useEffect(() => {
+    spawnDriver();
+    console.log('spawning')
+  }, []);
+
   useEffect(() => {
     const intervalId = setInterval(() => {
-      for (let i = 0; i < drivers.length; i++) {
-        const driver = drivers[i];
-
-        // setDrivers((drivers) => {
-        //   const newDrivers = [...drivers];
-        //   newDrivers[i] = driver;
-        //   // console.log(newDrivers)
-        //   return newDrivers;
-        // });
-        // driver.changeLocation();
-
-        switch (driver.state) {
-          case "searching":
-            search(driver, passengers[0]);
-            // console.log(driver.state.currentLocation)
-            break;
-          case "picking up":
-            pickingup(driver);
-            console.log(driver.state)
-            break;
-          case "DELIVER":
-            console.log(driver.state)
-            driver.state = 'searching'
-            break;
-          default:
-            // console.error(`Unknown driver state: ${driver.state}`);
-            break;
-        }
+      switch (workDriver.state) {
+        case "searching":
+          setTimeout(() => {
+            workDriver.search(workDriver, passengerLs[0])
+          }, 1000);
+          break;
+        case "picking up":
+          setTimeout(() => {
+            workDriver.pickUp()
+            moveTo(driverRef.current, workDriver.currentLocation, workDriver.destination, driverRef)
+          }, 1000);
+          break;
+        case "transit":
+          setTimeout(() => {
+            workDriver.transit()
+            moveTo(driverRef.current, workDriver.currentLocation, workDriver.destination, driverRef)
+          }, 1000);
+          break;
+        case 'completed':
+          setTimeout(() => {
+            workDriver.completed()
+          }, 1000);
+          passengerLs.pop()
+          console.log(passengerLs)
+          console.log('hihi', workDriver.state)
+          break;
       }
-    }, 1000);
 
-    return () => clearInterval(intervalId);
-  }, [drivers, passengers]);
+    }, 1000);
+  }, [])
+
+  // useEffect(() => {
+  //   const intervalId = setInterval(() => {
+  //     for (let i = 0; i < drivers.length; i++) {
+  //       const driver = drivers[i];
+
+  //       switch (driver.state) {
+  //         case "searching":
+  //           search(driver, passengers[0]);
+  //           // console.log(driver.state.currentLocation)
+  //           break;
+  //         case "picking up":
+  //           pickingup(driver);
+  //           console.log(driver.state)
+  //           break;
+  //         case "DELIVER":
+  //           console.log(driver.state)
+  //           driver.state = 'searching'
+  //           break;
+  //         default:
+  //           // console.error(`Unknown driver state: ${driver.state}`);
+  //           break;
+  //       }
+  //     }
+  //   }, 1000);
+
+  //   return () => clearInterval(intervalId);
+  // }, [drivers, passengers]);
 
   // console.log('debug2')
   // console.log(drivers)
 
-  function search(driver, passenger) {
-    if (driver.passenger){ 
-        // console.log('debug')
-        driver.currentLocation = driver.passenger.currentLocation;
-        driver.state = 'picking up';
-        // console.log(driver)
-    }
-    else{
-        driver.passenger = passenger;
-        driver.currentLocation[0] += driver.speed[0];
-        driver.currentLocation[1] += driver.speed[1];
-        console.log('updated oh yeah')
-        // this.waitingTime += 1; //FIXME: need to add the correct timestamp
-        // console.log('debug1')
-        // console.log(driver)
-    }
-  }
-
-  function pickingup(driver){
-    driver.destination = driver.passenger.destination;
-    console.log('===current location===')
-    console.log(driver.currentLocation)
-    console.log('===destination===')
-    console.log(driver.destination)
-    
-    if (driver.currentLocation[0] >= driver.destination[0] || driver.currentLocation[1] >= driver.destination[1]){
-      driver.state='DELIVER';
-      driver.passenger = null;
-    }
-    else{
-      driver.currentLocation[0] += driver.speed[0];
-      driver.currentLocation[1] += driver.speed[1];
-    }
-  }
-
-  // let driver = new Driver(3);
-  // console.log(driver.state)
-  // let dstate, pstate;
-  // let driver = new Driver(dstate={speed: 7, location: 7});
-  // let passenger = new Passenger(pstate={location: 3, destination: 10});
-
-  // console.log(driver.state)
-  // driver.search(passenger);
-
-
-  // let passenger = new Passenger(3, 10);
   return (
-    <div className="App">
-      {drivers.map((driver) => (
-        <Driver
-            key={driver.id}
-            currentLocation={driver.currentLocation}
-            speed={driver.speed}
-          />
-        ))}
-      {/* <Driver 
-        speed={5}
-        location={5}
-      /> */}
+    <div className={styles.App}>
+      <div className={styles.arena}>
+        {render(d)}
+        {renderp(p)}
+      </div>
     </div>
   );
 }
