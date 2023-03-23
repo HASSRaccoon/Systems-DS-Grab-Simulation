@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./styles.module.css";
-import moveTo from "./move.js";
+import { moveTo } from "./move.js";
 
 export default class Driver {
     constructor(props) {
@@ -14,12 +14,12 @@ export default class Driver {
         this.passenger = props.passenger;
         this.earnings = 0;
         this.rating = 0;
+        this.ref = props.ref;
     }
-    search(driver, passenger){
+    search(passenger){
         console.log('Search')
-        console.log(passenger)
         if (this.passenger){ 
-            this.destination = this.passenger.state.currentLocation;
+            this.destination = this.passenger.currentLocation;
             this.state = 'picking up';
         }
         else{
@@ -31,7 +31,6 @@ export default class Driver {
         }
     }
     pickUp(){
-        // this.destination = this.passenger.state.currentLocation;
         if (this.currentLocation <= this.destination - this.speed){
             this.currentLocation[0] += this.speed[0];
             this.currentLocation[1] += this.speed[1];
@@ -40,12 +39,12 @@ export default class Driver {
         else{ //FIXME:
             this.state = 'transit';
         }
+        moveTo(this.ref.current, this.currentLocation, this.destination, this.ref, this.speed)
+        // this.passenger.carArrived(Date.now() / 1000 | 0, this);
     }
     transit(){
         console.log('transit')
-        // console.log('stop')
-        console.log(this.state)
-        this.destination = this.passenger.state.destination;
+        this.destination = this.passenger.destination;
         if (this.currentLocation < this.destination - this.speed){
             this.currentLocation[0] += this.speed[0];
             this.currentLocation[1] += this.speed[1];
@@ -54,14 +53,16 @@ export default class Driver {
         else{
             this.state = 'completed';
         }
+        console.log(this.ref.current)
+        moveTo(this.ref.current, this.currentLocation, this.destination, this.ref, this.speed)
     }
     completed(){
         console.log('completed')
         this.passenger = null;
-        this.currentLocation = this.destination;
-        this.destination = null;
+        this.destination = [200,200];
         this.state = 'searching';
         console.log(this.state)
+        moveTo(this.ref.current, this.currentLocation, this.destination, this.ref, this.speed)
     }
 
     test(){
@@ -92,16 +93,4 @@ export default class Driver {
     show = () => {
         console.log(this.state)
     }
-    // render() {
-    //     return (
-    //       <div>
-    //         <div className={styles.driver}></div>
-    //         {/* <button type="button" onClick={this.changeLocation}>Change location</button> */}
-    //         <button type="button" onClick={this.show}>Show</button>
-    //         <button onClick={this.search}>Search</button>
-    //         <div>{this.currentLocation[0]}</div>
-    //         <div>{this.currentLocation[1]}</div>
-    //       </div>
-    //     );
-    //   }
 }
