@@ -9,6 +9,10 @@ export default class Passenger {
 
         this.appearTime = Date.now() / 1000 | 0;
         console.log(`Passenger appear at ${this.appearTime}`)
+    }
+    
+    // do we need a state for car not arrived yet?
+
     }    
 
     // do we need a state for car not arrived yet?

@@ -2,7 +2,7 @@ export default class Globals{
     constructor(){
 
         // INPUTS
-        this.raining = false;
+        this._raining = false;
         this.traffic = false;
         this.location = 'Singapore';
         this.timeofday = 'day';
@@ -23,6 +23,7 @@ export default class Globals{
         this.overallSatisfactionIndex = (this.passengerSatisfactionIndex + this.driverSatisfactionIndex) / 2;
         
         // STATUS
+        this._drivers = [];
         this.jobsCompleted = 0;
         this.jobsCancelled = 0;
         this.idleDrivers = 0;
@@ -35,4 +36,26 @@ export default class Globals{
         // OTHERS
         this.pricePerKm = 1;
     }
+
+    // FUNCTIONS
+    set raining(value) {
+        if (this._raining !== value) {
+            this._raining = value;
+            this._drivers.forEach(driver => driver.updateSpeed(this._raining));
+      }}
+    
+    get raining() {
+        return this._raining;
+      }
+    
+    registerDriver(driver) {
+        this._drivers.push(driver);
+      }
+    
+    unregisterDriver(driver) {
+        const index = this.drivers.indexOf(driver);
+        if (index !== -1) {
+          this._drivers.splice(index, 1);
+        }
+      }
 }
