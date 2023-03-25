@@ -3,25 +3,21 @@ import Driver from './Agents/driver.js';
 import Passenger from './Agents/passenger.js';
 import React, { useState, useEffect, useRef } from "react";
 
-import { moveTo } from "./Agents/move";
-
 function App() {
-  // const driverRef = useRef(null);
-  // const passengerRef = useRef(null);
   const [drivers, setDrivers] = useState([
     {
       id: "driver1",
       currentLocation: [25, 25],
       speed: [10,5],
       state: 'searching',
-      ref: useRef(null),
+      ref: useRef({}),
     },
     {
       id: "driver2",
       currentLocation: [50, 25],
       speed: [10,5],
       state: 'searching',
-      ref: useRef(null),
+      ref: useRef({}),
     },
   ]);
 
@@ -34,22 +30,13 @@ function App() {
     },
   ]);
 
-  function render(driver) {
-    console.log(driver)
-    for (let i = 0; i < drivers.length; i++) {
-      console.log(drivers[i])
-      return (
-        <div>
-          <div className={styles.driver} ref={drivers[i].ref} />
-        </div>
-      )
-    }
+  function renderd(driver) {
+    return (
+      <div>
+        <div className={styles.driver} ref={driver.ref} />
+      </div>
+    )
   }
-    // return (
-    //   <div>
-    //     <div className={styles.driver} ref={driver.ref} />
-    //   </div>
-    // )
 
   function renderp(passenger) {
     return (
@@ -59,31 +46,35 @@ function App() {
     )
   }
 
-  let d = new Driver(drivers[0])
-  let p = new Passenger(passengers[0])
-
   let driverLs = []
   let passengerLs = []
-  driverLs.push(d)
-  passengerLs.push(p)
+
+  drivers.map((driver) => driverLs.push(new Driver(driver)))
+  passengers.map((passenger) => passengerLs.push(new Passenger(passenger)))
 
   let workDriver = driverLs[0]
   let workPassenger = passengerLs[0]
 
   function spawnDriver() {
-    workDriver.ref.current.style.left = workDriver.currentLocation[0] + "px";
-    workDriver.ref.current.style.top = workDriver.currentLocation[1] + "px";
-    workPassenger.ref.current.style.left = workPassenger.currentLocation[0] + "px";
-    workPassenger.ref.current.style.top = workPassenger.currentLocation[1] + "px";
+    for (let i = 0; i < driverLs.length; i++) {
+      let currentDriver = driverLs[i];
+      currentDriver.ref.current.style.left = currentDriver.currentLocation[0] + "px";
+      currentDriver.ref.current.style.top = currentDriver.currentLocation[1] + "px";
+    }
+
+    for (let i = 0; i < passengerLs.length; i++) {
+      let currentPassenger = passengerLs[i];
+      currentPassenger.ref.current.style.left = currentPassenger.currentLocation[0] + "px";
+      currentPassenger.ref.current.style.top = currentPassenger.currentLocation[1] + "px";
+    }
   }
 
   useEffect(() => {
     spawnDriver();
-    console.log('spawning')
   }, []);
 
   useEffect(() => {
-    const intervalId = setInterval(() => {
+    setInterval(() => {
       switch (workDriver.state) {
         case "searching":
           // NOTE: just to make it dun have errors
@@ -121,8 +112,8 @@ function App() {
   return (
     <div className={styles.App}>
       <div className={styles.arena}>
-        {render(drivers.map((driver) => driver))}
-        {renderp(p)}
+        {driverLs.map((driver) => renderd(driver))}
+        {passengerLs.map((passenger) => renderp(passenger))}
       </div>
     </div>
   );

@@ -53,7 +53,7 @@ export default class Driver {
         else{
             this.state = 'completed';
         }
-        console.log(this.ref.current)
+        console.log(this.ref)
         moveTo(this.ref.current, this.currentLocation, this.destination, this.ref, this.speed)
     }
     completed(){
