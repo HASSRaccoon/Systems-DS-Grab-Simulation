@@ -37,7 +37,6 @@ export default class Globals{
         this.pricePerKm = 1;
     }
 
-
     // FUNCTIONS
     set raining(value) {
         if (this._raining !== value) {

@@ -1,3 +1,5 @@
+import Globals from './globals.js' // sprint 2 shit
+
 export default class Driver {
     constructor(location, speed = 1) {
          // GLOBALS AFFECTED ATTRIBUTES/////////////////////////////
@@ -6,12 +8,13 @@ export default class Driver {
 
    
         ////////////////////////////////////////////////////////////
-
+        
         this.state = 'searching';
         this.location = location;
         this.currentLocation = location;
         this.destination = null;
         this.waitingTime = 0;
+
         this.distanceWillingToTravel = 0;
         this.completedJobs = 0;
 
@@ -49,34 +52,46 @@ export default class Driver {
     
     ////////////////////////////////////////////////////////////
 
-    search(){
+    search(){ //TODO:
         if (this.passenger != null){ //FIXME: if there is passenger appear
             this.state = 'picking up';
             this.passengers -= 1; //DEBUG: for testing ?? idk what this means
             this.waitingTime += 1; // idk if this is correct
+        this.speed = speed;
+        this.distanceWillingToTravel = 0;
+        this.completedJobs = 0;
+
+        this.passenger = null;
+
+    }
+    
+    search(passenger){ //TODO:
+        this.passenger = passenger;
+        if (this.passenger){ 
+            this.state = 'picking up';
         }
-        else{ //while waiting passenger to appear
-            this.location += this.speed; //FIXME: driver roaming ard the map
+        else{
+            this.currentLocation += this.speed;
+            this.waitingTime += 1; //FIXME: need to add the correct timestamp
         }
     }
-    pickUp(passenger){
-        this.passenger = passenger;
-        this.destination = passenger.location;
-        while (this.currentLocation != this.destination){
-            console.log(`driver current location when picking up: ${this.currentLocation}`)
+    pickUp(){
+        this.destination = this.passenger.location;
+        if (this.currentLocation != this.destination){
             this.currentLocation += this.speed;
+            console.log(`driver current location when picking up: ${this.currentLocation}`)
         }
-        if (this.currentLocation == this.destination){
+        else{ //FIXME:
             this.state = 'transit';
         }
     }
     transit(){
         this.destination = this.passenger.destination;
-        while (this.currentLocation != this.destination){
-            console.log(`driver current location when transit: ${this.currentLocation}`)
+        if (this.currentLocation != this.destination){
             this.currentLocation += this.speed;
+            console.log(`driver current location when transit: ${this.currentLocation}`)
         }
-        if (this.currentLocation == this.destination){
+        else{
             this.state = 'completed';
         }
     }
@@ -113,3 +128,4 @@ export default class Driver {
 
 // let driver = new Driver(0);
 // driver.test();
+}
