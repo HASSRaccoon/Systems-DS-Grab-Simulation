@@ -3,14 +3,14 @@ import "./App.css";
 import React from "react";
 
 import Screen from "./pages/Screen";
+import Map from "./component/Map";
+import Grabies from "./agents/Grabies";
 
 function App() {
   return (
     <div>
-      <div>
-        <Screen />
-      </div>
-      <div></div>
+      <Map />
+      {/* <Screen></Screen> */}
     </div>
   );
 }

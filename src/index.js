@@ -1,14 +1,20 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import ReactDOM from "react-dom/client";
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+import "mapbox-gl/dist/mapbox-gl.css";
+import "./index.css";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
+import Map from "./component/Map";
+import { MantineProvider } from "@mantine/core";
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <React.StrictMode>
+  <MantineProvider withGlobalStyles withNormalizeCSS>
+    {/* <React.StrictMode> */}
     <App />
-  </React.StrictMode>
+    {/* </React.StrictMode> */}
+  </MantineProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function
