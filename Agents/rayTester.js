@@ -1,4 +1,4 @@
-import Globals from "./globals.js";
+import Globals from "../src/Agents/globals.js";
 import Driver from './driver.js';
 
 // create globals and driver

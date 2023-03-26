@@ -1,4 +1,4 @@
-import Globals from './globals.js' // sprint 2 shit
+import Globals from '../src/Agents/globals.js' // sprint 2 shit
 
 export default class Driver {
     constructor(location, speed = 1) {
@@ -63,9 +63,10 @@ export default class Driver {
 
         this.passenger = null;
 
+        }
     }
-    
-    search(passenger){ //TODO:
+
+    search(passenger){
         this.passenger = passenger;
         if (this.passenger){ 
             this.state = 'picking up';
@@ -128,4 +129,4 @@ export default class Driver {
 
 // let driver = new Driver(0);
 // driver.test();
-}
+

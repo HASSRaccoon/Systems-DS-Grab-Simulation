@@ -24,8 +24,8 @@ export default class Globals{
         
         // STATUS
         this._drivers = [];
-        this.jobsCompleted = 0;
-        this.jobsCancelled = 0;
+        this.jobsCompleted = [];
+        this.jobsCancelled = [];
         this.idleDrivers = 0;
         this.busyDrivers = 0;
 
@@ -39,10 +39,12 @@ export default class Globals{
 
     // FUNCTIONS
     set raining(value) {
-        if (this._raining !== value) {
-            this._raining = value;
-            this._drivers.forEach(driver => driver.updateSpeed(this._raining));
-      }}
+      if (this._raining !== value) {
+        console.log('weather changed')
+        this._raining = value;
+        this._drivers.forEach(driver => driver.updateSpeed(this._raining));
+      }
+    }
     
     get raining() {
         return this._raining;
@@ -50,6 +52,7 @@ export default class Globals{
     
     registerDriver(driver) {
         this._drivers.push(driver);
+        console.log(`registered driver ${driver}`)
       }
     
     unregisterDriver(driver) {
@@ -58,4 +61,14 @@ export default class Globals{
           this._drivers.splice(index, 1);
         }
       }
+    
+    showStats(){
+      this._drivers.forEach(driver => this.jobsCompleted.push(driver.completedJobs));
+      this._drivers.forEach(driver => this.jobsCancelled.push(driver.cancelledJobs));
+      console.log('Completed jobs:', this.jobsCompleted);
+      console.log('Cancelled jobs:', this.jobsCancelled);
+      // clear the arrays
+      this.jobsCompleted = [];
+      this.jobsCancelled = [];
+    }
 }

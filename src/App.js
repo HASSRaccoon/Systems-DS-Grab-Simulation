@@ -1,20 +1,21 @@
 import styles from './styles.module.css';
 import Driver from './Agents/driver.js';
 import Passenger from './Agents/passenger.js';
+import Globals from './Agents/globals.js';
 import React, { useState, useEffect, useRef } from "react";
 
 function App() {
   const [drivers, setDrivers] = useState([
     {
       id: "driver1",
-      currentLocation: [25, 25],
+      currentLocation: [Math.random()*200,Math.random()*200],
       speed: [10,5],
       state: 'searching',
       ref: useRef({}),
     },
     {
       id: "driver2",
-      currentLocation: [50, 25],
+      currentLocation: [Math.random()*200,Math.random()*200],
       speed: [10,5],
       state: 'searching',
       ref: useRef({}),
@@ -24,8 +25,14 @@ function App() {
   const [passengers, setPassengers] = useState([
     {
       id: "passenger1",
-      currentLocation: [85, 55],
-      destination: [135,90],
+      currentLocation: [Math.random()*200,Math.random()*200],
+      destination: [Math.random()*200,Math.random()*200],
+      ref: useRef(null),
+    },
+    {
+      id: "passenger2",
+      currentLocation: [Math.random()*200,Math.random()*200],
+      destination: [Math.random()*200,Math.random()*200],
       ref: useRef(null),
     },
   ]);
@@ -46,18 +53,20 @@ function App() {
     )
   }
 
+  let god = new Globals();
+
   let driverLs = []
   let passengerLs = []
 
   drivers.map((driver) => driverLs.push(new Driver(driver)))
   passengers.map((passenger) => passengerLs.push(new Passenger(passenger)))
 
-  let workDriver = driverLs[0]
-  let workPassenger = passengerLs[0]
+  let currentPassenger;
 
   function spawnDriver() {
     for (let i = 0; i < driverLs.length; i++) {
       let currentDriver = driverLs[i];
+      god.registerDriver(currentDriver)
       currentDriver.ref.current.style.left = currentDriver.currentLocation[0] + "px";
       currentDriver.ref.current.style.top = currentDriver.currentLocation[1] + "px";
     }
@@ -75,36 +84,46 @@ function App() {
 
   useEffect(() => {
     setInterval(() => {
-      switch (workDriver.state) {
-        case "searching":
-          // NOTE: just to make it dun have errors
-          if (passengerLs.length > 0) {
+      // using probability to set is it raining 
+      let rainProb = Math.random()
+      console.log(rainProb)
+      if (rainProb < 0.5) {
+        god.raining = true;
+      }
+      else {
+        god.raining = false;
+      }
+      for (let i = 0; i < driverLs.length; i++) {
+        let currentDriver = driverLs[i];
+        if (passengerLs.length > 0) {
+          currentPassenger = passengerLs.pop();
+          currentDriver.passenger = currentPassenger;
+        }
+        switch (currentDriver.state) {
+          case "searching":
+              setTimeout(() => {
+                currentDriver.search(currentDriver.passenger)
+              }, 1000);
+            break;
+          case "picking up":
             setTimeout(() => {
-              workDriver.search(passengerLs[0])
+              currentDriver.pickUp()
+              currentDriver.passenger.carArrived(Date.now() / 1000 | 0, currentDriver)
             }, 1000);
-          }
-          else {
-            console.log('no passenger')
-          }
-          break;
-        case "picking up":
-          setTimeout(() => {
-            workDriver.pickUp()
-            passengerLs[0].carArrived(Date.now() / 1000 | 0, workDriver)
-          }, 1000);
-          break;
-        case "transit":
-          setTimeout(() => {
-            workDriver.transit()
-            passengerLs[0].transit()
-          }, 1000);
-          break;
-        case 'completed':
-          setTimeout(() => {
-            workDriver.completed()
-            passengerLs.pop()
-          }, 1000);
-          break;
+            break;
+          case "transit":
+            setTimeout(() => {
+              currentDriver.transit()
+              currentDriver.passenger.transit()
+            }, 1000);
+            break;
+          case 'completed':
+            setTimeout(() => {
+              currentDriver.passenger.arrived()
+              currentDriver.completed()
+            }, 1000);
+            break;
+        }
       }
     }, 1000);
   }, [])
@@ -115,6 +134,7 @@ function App() {
         {driverLs.map((driver) => renderd(driver))}
         {passengerLs.map((passenger) => renderp(passenger))}
       </div>
+      <button onClick={() => god.showStats()}>Show stats</button>
     </div>
   );
 }

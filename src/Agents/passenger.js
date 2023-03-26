@@ -25,52 +25,14 @@ export default class Passenger{
             console.log(`Passenger waiting time: ${this.waitingTime}`)
             this.state = 'transit';
         }
-        console.log('here', this)
     }
     transit(){
         // this.currentLocation = this.driver.currentLocation; //FIXME: update the current location of the passenger while transiting (same as grab's location)
         console.log(`passenger current location when transit: ${this.currentLocation}`)
-        if (this.currentLocation == this.destination){
-            this.state = 'arrived';
-        }
-        // console.log('passenger', this.state)
-        console.log(this.ref.current)
-        console.log('speed', this.driver.speed)
         moveTo(this.ref.current, this.currentLocation, this.destination, this.ref, this.driver.speed)
     }
     arrived(){
         this.state = 'arrived';
-        // this.removePassenger(); //FIXME: remove passenger from the screen
+        this.ref.current.remove(); // remove from map
     }
-
-    test(){
-        while (true){ //FIXME:
-            switch (this.state){
-                case 'waiting':
-                    console.log("Car arrived");
-                    this.carArrived(Date.now() / 1000 | 0);
-                    break;
-                case 'transit':
-                    console.log('Transiting')
-                    this.transit();
-                    break;
-                case 'arrived':
-                    console.log('Arrived')
-                    break
-            }
-            if (this.state == 'arrived'){
-                console.log('Disappearing')
-                console.log(`Total waiting time: ${this.waitingTime}`)
-                break;
-            }
-        }
-    }
-    
-    // render() {
-    //     return (
-    //       <div>
-    //         <div className={styles.passenger}></div>
-    //       </div>
-    //     );
-    // }
 }
