@@ -30,38 +30,95 @@ export default function Map() {
         .geometry.coordinates[0];
     return Pos;
   }
-  let driver = new Driver(0);
-  //what is numPassenger
-  let numPassenger = 1;
-  let passenger = new Passenger(3 * numPassenger, 10 * numPassenger);
+  let driver1;
+  driver1 = new Driver({
+    id: 1,
+    currentLocation: generateRandomCoord(),
+    speed: 70,
+    destination: generateRandomCoord(),
+    path: 0,
+  });
 
-  const [drivers, setDrivers] = useState([driver]);
-  console.log(drivers, "driver list");
-  const [passengers, setPassengers] = useState([passenger]);
-  console.log(passengers, "passenger list");
+  let driver2;
+  driver2 = new Driver({
+    id: 1,
+    currentLocation: generateRandomCoord(),
+    speed: 70,
+    destination: generateRandomCoord(),
+    path: 0,
+  });
+
+  const [drivers, setDrivers] = useState([driver1, driver2]);
+  // console.log(drivers, "driver list");
+
+  //do passenger later
+  // let numPassenger = 1;
+  // let passenger = new Passenger(3 * numPassenger, 10 * numPassenger);
+  // const [passengers, setPassengers] = useState([passenger]);
+  // console.log(passengers, "passenger list");
 
   const pathBuilder = new PathFinder(sgJSON, { tolerance: 1e-4 });
   var pathGeo = pathToGeoJSON(
     pathBuilder.findPath(turf.point(startPos), turf.point(endPos))
   );
+
+  //make pathGeo a function
+  function buildPath(start, end) {
+    const path = pathToGeoJSON(
+      pathBuilder.findPath(turf.point(start), turf.point(end))
+    );
+    return path;
+  }
+
+  //can put into a function
+  for (let i = 0; i < drivers.length; i++) {
+    const driver = drivers[i];
+    driver.path = buildPath(driver.currentLocation, driver.destination);
+    // console.log(driver.path, "new path");
+    const lineDistance = turf.length(driver.path);
+    const arc = [];
+    const steps = 500;
+    for (let i = 0; i < lineDistance; i += lineDistance / steps) {
+      const segment = turf.along(driver.path, i);
+      arc.push(segment.geometry.coordinates);
+    }
+    driver.path.geometry.coordinates = arc;
+  }
+
   const mapContainer = useRef(null);
   const [map, setMap] = useState(null);
   const [lng, setLng] = useState(103.908009);
   const [lat, setLat] = useState(1.406741);
   const [zoom, setZoom] = useState(13);
-  const markerstartPos = startPos;
-  const driverpoint = {
+
+  // const driverpoint = {
+  //   type: "FeatureCollection",
+  //   features: [
+  //     {
+  //       type: "Feature",
+  //       properties: {},
+  //       geometry: {
+  //         type: "Point",
+  //         coordinates: markerstartPos,
+  //       },
+  //     },
+  //   ],
+  // };
+
+  let driverPoints = {
     type: "FeatureCollection",
-    features: [
-      {
+    features: drivers.map((driver) => {
+      return {
         type: "Feature",
-        properties: {},
         geometry: {
           type: "Point",
-          coordinates: markerstartPos,
+          coordinates: driver.currentLocation,
         },
-      },
-    ],
+        properties: {
+          id: driver.id,
+        },
+      };
+    }),
   };
 
   const passengerpoint = {
@@ -77,64 +134,56 @@ export default function Map() {
       },
     ],
   };
-  console.log(driverpoint.features[0].geometry.coordinates, "coordinates");
-  const lineDistance = turf.length(pathGeo);
-  const arc = [];
-  const steps = 500;
-  for (let i = 0; i < lineDistance; i += lineDistance / steps) {
-    const segment = turf.along(pathGeo, i);
-    arc.push(segment.geometry.coordinates);
-  }
-  pathGeo.geometry.coordinates = arc;
-  //arc formed by small segments
-  console.log(pathGeo.geometry.coordinates, "arc");
-  let counter = 0;
+
+  let driverPaths = {
+    type: "FeatureCollection",
+    features: drivers.map((driver) => {
+      return {
+        type: "Feature",
+        geometry: {
+          type: "LineString",
+          coordinates: driver.path.geometry.coordinates,
+        },
+        properties: {
+          id: driver.id,
+          weight: driver.path.properties.weight,
+          edgeDatas: driver.path.properties.edgeDatas,
+        },
+      };
+    }),
+  };
+
+  //debug
+  let driverPoint = {
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: driver1.currentLocation,
+        },
+        properties: {
+          id: driver1.id,
+        },
+      },
+    ],
+  };
+
   let running = false;
-  function animate() {
-    running = true;
-    const start =
-      pathGeo.geometry.coordinates[counter >= steps ? counter - 1 : counter];
-    const end =
-      pathGeo.geometry.coordinates[counter >= steps ? counter : counter + 1];
-    if (!start || !end) {
-      running = false;
-      return;
-    }
-    driverpoint.features[0].geometry.coordinates =
-      pathGeo.geometry.coordinates[counter];
-    console.log(
-      driverpoint.features[0].geometry.coordinates,
-      "new coordinates"
-    );
+  function animate() {}
 
-    driverpoint.features[0].properties.bearing = turf.bearing(
-      turf.point(start),
-      turf.point(end)
-    );
-    console.log(driverpoint.features[0].geometry.coordinates, "new bearing");
-
-    map.getSource("point").setData(driverpoint);
-
-    if (counter < steps) {
-      requestAnimationFrame(animate);
-    }
-    counter = counter + 1;
-  }
   function handleAnimation() {
-    //start animation only
+    //start animation only for now
     animate();
   }
   useEffect(() => {
-    setDrivers(driver);
-    console.log("check driverslist", drivers);
     const map = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/mapbox/streets-v11",
       center: [lng, lat],
       zoom: zoom,
     });
-    console.log(map, "map");
-    console.log(pathGeo, "path");
 
     map.on("load", function () {
       // Add an image to use as a custom marker
@@ -143,24 +192,21 @@ export default function Map() {
         function (error, image) {
           if (error) throw error;
           map.addImage("custom-marker", image);
-          map.addSource("route", {
+
+          //show all driverpaths
+          map.addSource("routes", {
             type: "geojson",
-            data: pathGeo,
+            data: driverPaths,
           });
           //driver
-          map.addSource("driverpoint", {
-            type: "geojson",
-            data: driverpoint,
-          });
-          //passenger
-          map.addSource("passengerpoint", {
-            type: "geojson",
-            data: passengerpoint,
-          });
+          // map.addSource("driverpoint", {
+          //   type: "geojson",
+          //   data: driverpoint,
+          // });
 
           map.addLayer({
-            id: "route",
-            source: "route",
+            id: "routes",
+            source: "routes",
             type: "line",
             paint: {
               "line-width": 2,
@@ -168,9 +214,21 @@ export default function Map() {
             },
           });
 
+          //show all driver current locations
+          map.addSource("drivers", {
+            type: "geojson",
+            data: driverPoints,
+          });
+
+          //show one driver location
+          map.addSource("driver", {
+            type: "geojson",
+            data: driverPoint,
+          });
+
           map.addLayer({
-            id: "driverpoint",
-            source: "driverpoint",
+            id: "drivers",
+            source: "drivers",
             type: "symbol",
             layout: {
               // This icon is a part of the Mapbox Streets style.
@@ -186,6 +244,13 @@ export default function Map() {
               "icon-ignore-placement": true,
             },
           });
+
+          //show all passengers current location
+          map.addSource("passengerpoint", {
+            type: "geojson",
+            data: passengerpoint,
+          });
+
           map.loadImage(
             "https://docs.mapbox.com/mapbox-gl-js/assets/cat.png",
             (error, image) => {
@@ -225,8 +290,8 @@ export default function Map() {
   return (
     <>
       <div>
-        <Button onClick={handleAnimation}>Start/Stop</Button>
         <div className="map-container" ref={mapContainer} />
+        <Button onClick={handleAnimation}>Start animation only lol</Button>
       </div>
     </>
   );

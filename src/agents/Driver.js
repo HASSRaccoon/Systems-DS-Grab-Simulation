@@ -11,7 +11,7 @@ export default class Driver {
     this.id = props.id;
     this.state = "searching";
     this.currentLocation = props.currentLocation;
-    this.destination = null;
+    this.destination = props.destination;
     this.waitingTime = 0;
     this.distanceWillingToTravel = 0;
     this.completedJobs = 0;
@@ -20,6 +20,7 @@ export default class Driver {
     this.earnings = 0;
     this.rating = 0;
     this.ref = props.ref;
+    this.path = 0;
     // add a parameter to change how the driver slows down when raining?? //TODO:
   }
   updateSpeed(raining) {
