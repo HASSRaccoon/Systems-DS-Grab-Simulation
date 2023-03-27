@@ -8,6 +8,8 @@ import PathFinder, { pathToGeoJSON } from "geojson-path-finder";
 import mapboxgl from "mapbox-gl";
 import caricon from "../public/grabcar.png";
 import { Button } from "@mantine/core";
+import Driver from "../agents/Driver.js";
+import Passenger from "../agents/Passenger.js";
 // --- ---------------------------------- ---
 
 let startPos =
@@ -22,6 +24,22 @@ mapboxgl.accessToken =
   "pk.eyJ1IjoieWVva2V3ZWkiLCJhIjoiY2xlcG5wZ3ZmMGUweTNxdGt4ZG1ldGhsYyJ9.HHNGnKUPolWAo5_UYwzCZg";
 
 export default function Map() {
+  function generateRandomCoord() {
+    let Pos =
+      sgJSON.features[Math.floor(Math.random() * sgJSON.features.length)]
+        .geometry.coordinates[0];
+    return Pos;
+  }
+  let driver = new Driver(0);
+  //what is numPassenger
+  let numPassenger = 1;
+  let passenger = new Passenger(3 * numPassenger, 10 * numPassenger);
+
+  const [drivers, setDrivers] = useState([driver]);
+  console.log(drivers, "driver list");
+  const [passengers, setPassengers] = useState([passenger]);
+  console.log(passengers, "passenger list");
+
   const pathBuilder = new PathFinder(sgJSON, { tolerance: 1e-4 });
   var pathGeo = pathToGeoJSON(
     pathBuilder.findPath(turf.point(startPos), turf.point(endPos))
@@ -32,7 +50,7 @@ export default function Map() {
   const [lat, setLat] = useState(1.406741);
   const [zoom, setZoom] = useState(13);
   const markerstartPos = startPos;
-  const point = {
+  const driverpoint = {
     type: "FeatureCollection",
     features: [
       {
@@ -45,7 +63,21 @@ export default function Map() {
       },
     ],
   };
-  console.log(point.features[0].geometry.coordinates, "coordinates");
+
+  const passengerpoint = {
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "Point",
+          coordinates: generateRandomCoord(),
+        },
+      },
+    ],
+  };
+  console.log(driverpoint.features[0].geometry.coordinates, "coordinates");
   const lineDistance = turf.length(pathGeo);
   const arc = [];
   const steps = 500;
@@ -68,17 +100,20 @@ export default function Map() {
       running = false;
       return;
     }
-    point.features[0].geometry.coordinates =
+    driverpoint.features[0].geometry.coordinates =
       pathGeo.geometry.coordinates[counter];
-    console.log(point.features[0].geometry.coordinates, "new coordinates");
+    console.log(
+      driverpoint.features[0].geometry.coordinates,
+      "new coordinates"
+    );
 
-    point.features[0].properties.bearing = turf.bearing(
+    driverpoint.features[0].properties.bearing = turf.bearing(
       turf.point(start),
       turf.point(end)
     );
-    console.log(point.features[0].geometry.coordinates, "new bearing");
+    console.log(driverpoint.features[0].geometry.coordinates, "new bearing");
 
-    map.getSource("point").setData(point);
+    map.getSource("point").setData(driverpoint);
 
     if (counter < steps) {
       requestAnimationFrame(animate);
@@ -90,6 +125,8 @@ export default function Map() {
     animate();
   }
   useEffect(() => {
+    setDrivers(driver);
+    console.log("check driverslist", drivers);
     const map = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/mapbox/streets-v11",
@@ -110,9 +147,15 @@ export default function Map() {
             type: "geojson",
             data: pathGeo,
           });
-          map.addSource("point", {
+          //driver
+          map.addSource("driverpoint", {
             type: "geojson",
-            data: point,
+            data: driverpoint,
+          });
+          //passenger
+          map.addSource("passengerpoint", {
+            type: "geojson",
+            data: passengerpoint,
           });
 
           map.addLayer({
@@ -126,8 +169,8 @@ export default function Map() {
           });
 
           map.addLayer({
-            id: "point",
-            source: "point",
+            id: "driverpoint",
+            source: "driverpoint",
             type: "symbol",
             layout: {
               // This icon is a part of the Mapbox Streets style.
@@ -137,6 +180,33 @@ export default function Map() {
               // https://docs.mapbox.com/mapbox-gl-js/example/add-image/
               "icon-image": "custom-marker",
               "icon-size": 0.5,
+              "icon-rotate": ["get", "bearing"],
+              "icon-rotation-alignment": "map",
+              "icon-allow-overlap": true,
+              "icon-ignore-placement": true,
+            },
+          });
+          map.loadImage(
+            "https://docs.mapbox.com/mapbox-gl-js/assets/cat.png",
+            (error, image) => {
+              if (error) throw error;
+
+              // Add the image to the map style.
+              map.addImage("cat", image);
+            }
+          );
+          map.addLayer({
+            id: "passengerpoint",
+            source: "passengerpoint",
+            type: "symbol",
+            layout: {
+              // This icon is a part of the Mapbox Streets style.
+              // To view all images available in a Mapbox style, open
+              // the style in Mapbox Studio and click the "Images" tab.
+              // To add a new image to the style at runtime see
+              // https://docs.mapbox.com/mapbox-gl-js/example/add-image/
+              "icon-image": "cat",
+              "icon-size": 0.08,
               "icon-rotate": ["get", "bearing"],
               "icon-rotation-alignment": "map",
               "icon-allow-overlap": true,
