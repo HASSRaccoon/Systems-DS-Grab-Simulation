@@ -40,7 +40,6 @@ export default class Globals{
     // FUNCTIONS
     set raining(value) {
       if (this._raining !== value) {
-        console.log('weather changed')
         this._raining = value;
         this._drivers.forEach(driver => driver.updateSpeed(this._raining));
       }

@@ -31,7 +31,6 @@ export default class Driver {
             this.speed[0] /= 0.8;
             this.speed[1] /= 0.8;
         }
-        console.log(`driver speed: ${this.speed}`)
     }
     search(passenger){
         if (this.passenger){ 
@@ -41,10 +40,12 @@ export default class Driver {
         }
         else{
             // console.log('searching')
-            this.passenger = passenger;
             this.currentLocation[0] += this.speed[0];
             this.currentLocation[1] += this.speed[1];
             this.waitingTime += 1; //FIXME: need to add the correct timestamp
+            this.destination = [Math.random()*200,Math.random()*200];
+            moveTo(this.ref.current, this.currentLocation, this.destination, this.ref, this.speed)
+            this.passenger = passenger;
         }
     }
     pickUp(){
@@ -76,7 +77,7 @@ export default class Driver {
         this.state = 'searching';
         this.completedJobs += 1;
         this.passenger = null;
-        this.destination = [Math.random()*200,Math.random()*200];
+        // this.destination = [Math.random()*200,Math.random()*200];
 
         moveTo(this.ref.current, this.currentLocation, this.destination, this.ref, this.speed)
     }
