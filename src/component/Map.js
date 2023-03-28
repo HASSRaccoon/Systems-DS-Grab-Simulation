@@ -53,19 +53,20 @@ export default function Maptest2() {
 
   let passenger1 = new Passenger({
     id: 1,
+    ref: null,
+    destination: generateRandomCoord(),
+    currentLocation: generateRandomCoord(),
   });
 
   let passenger2 = new Passenger({
     id: 2,
+    ref: null,
+    destination: generateRandomCoord(),
+    currentLocation: generateRandomCoord(),
   });
   const [drivers, setDrivers] = useState([driver1, driver2]);
   // console.log(drivers, "driver list");
   const [passengers, setPassengers] = useState([passenger1, passenger2]);
-  //do passenger later
-  // let numPassenger = 1;
-  // let passenger = new Passenger(3 * numPassenger, 10 * numPassenger);
-  // const [passengers, setPassengers] = useState([passenger]);
-  // console.log(passengers, "passenger list");
 
   const pathBuilder = new PathFinder(sgJSON, { tolerance: 1e-4 });
   var pathGeo = pathToGeoJSON(
@@ -145,6 +146,22 @@ export default function Maptest2() {
     ],
   };
 
+  let passengerPoints = {
+    type: "FeatureCollection",
+    features: passengers.map((passenger) => {
+      return {
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: passenger.currentLocation,
+        },
+        properties: {
+          id: passenger.id,
+        },
+      };
+    }),
+  };
+
   let driverPaths = {
     type: "FeatureCollection",
     features: drivers.map((driver) => {
@@ -163,23 +180,6 @@ export default function Maptest2() {
     }),
   };
 
-  let driverPath = {
-    type: "FeatureCollection",
-    features: [
-      {
-        type: "Feature",
-        geometry: {
-          type: "LineString",
-          coordinates: drivers[0].path.geometry.coordinates,
-        },
-        properties: {
-          id: drivers[0].id,
-          weight: drivers[0].path.properties.weight,
-          edgeDatas: drivers[0].path.properties.edgeDatas,
-        },
-      },
-    ],
-  };
   // let counter = 0;
   //driverPoints should be a mapping of driverPoint for each driver
   let running = false;
@@ -325,9 +325,9 @@ export default function Maptest2() {
           });
 
           //show all passengers current location
-          map.addSource("passengerpoint", {
+          map.addSource("passengers", {
             type: "geojson",
-            data: passengerpoint,
+            data: passengerPoints,
           });
 
           map.loadImage(
@@ -340,8 +340,8 @@ export default function Maptest2() {
             }
           );
           map.addLayer({
-            id: "passengerpoint",
-            source: "passengerpoint",
+            id: "passengers",
+            source: "passengers",
             type: "symbol",
             layout: {
               // This icon is a part of the Mapbox Streets style.
