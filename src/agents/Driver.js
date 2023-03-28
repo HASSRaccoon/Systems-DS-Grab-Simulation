@@ -21,6 +21,7 @@ export default class Driver {
     this.rating = 0;
     this.ref = props.ref;
     this.path = 0;
+    this.counter = 0;
     // add a parameter to change how the driver slows down when raining?? //TODO:
   }
   updateSpeed(raining) {

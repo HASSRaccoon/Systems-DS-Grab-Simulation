@@ -23,34 +23,44 @@ let endPos =
 mapboxgl.accessToken =
   "pk.eyJ1IjoieWVva2V3ZWkiLCJhIjoiY2xlcG5wZ3ZmMGUweTNxdGt4ZG1ldGhsYyJ9.HHNGnKUPolWAo5_UYwzCZg";
 
-export default function Map() {
+export default function Maptest2() {
   function generateRandomCoord() {
     let Pos =
       sgJSON.features[Math.floor(Math.random() * sgJSON.features.length)]
         .geometry.coordinates[0];
     return Pos;
   }
-  let driver1;
-  driver1 = new Driver({
+
+  let driver1 = new Driver({
     id: 1,
     currentLocation: generateRandomCoord(),
     speed: 70,
     destination: generateRandomCoord(),
-    path: 0,
+    path: null,
+    counter: 0,
+    ref: null,
   });
 
-  let driver2;
-  driver2 = new Driver({
-    id: 1,
+  let driver2 = new Driver({
+    id: 2,
     currentLocation: generateRandomCoord(),
     speed: 70,
     destination: generateRandomCoord(),
-    path: 0,
+    path: null,
+    counter: 0,
+    ref: null,
   });
 
+  let passenger1 = new Passenger({
+    id: 1,
+  });
+
+  let passenger2 = new Passenger({
+    id: 2,
+  });
   const [drivers, setDrivers] = useState([driver1, driver2]);
   // console.log(drivers, "driver list");
-
+  const [passengers, setPassengers] = useState([passenger1, passenger2]);
   //do passenger later
   // let numPassenger = 1;
   // let passenger = new Passenger(3 * numPassenger, 10 * numPassenger);
@@ -70,7 +80,7 @@ export default function Map() {
     return path;
   }
 
-  //can put into a function
+  // can put into a function
   for (let i = 0; i < drivers.length; i++) {
     const driver = drivers[i];
     driver.path = buildPath(driver.currentLocation, driver.destination);
@@ -91,19 +101,19 @@ export default function Map() {
   const [lat, setLat] = useState(1.406741);
   const [zoom, setZoom] = useState(13);
 
-  // const driverpoint = {
-  //   type: "FeatureCollection",
-  //   features: [
-  //     {
-  //       type: "Feature",
-  //       properties: {},
-  //       geometry: {
-  //         type: "Point",
-  //         coordinates: markerstartPos,
-  //       },
-  //     },
-  //   ],
-  // };
+  let driverpoint = {
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "Point",
+          coordinates: startPos,
+        },
+      },
+    ],
+  };
 
   let driverPoints = {
     type: "FeatureCollection",
@@ -121,7 +131,7 @@ export default function Map() {
     }),
   };
 
-  const passengerpoint = {
+  let passengerpoint = {
     type: "FeatureCollection",
     features: [
       {
@@ -153,29 +163,105 @@ export default function Map() {
     }),
   };
 
-  //debug
-  let driverPoint = {
+  let driverPath = {
     type: "FeatureCollection",
     features: [
       {
         type: "Feature",
         geometry: {
-          type: "Point",
-          coordinates: driver1.currentLocation,
+          type: "LineString",
+          coordinates: drivers[0].path.geometry.coordinates,
         },
         properties: {
-          id: driver1.id,
+          id: drivers[0].id,
+          weight: drivers[0].path.properties.weight,
+          edgeDatas: drivers[0].path.properties.edgeDatas,
         },
       },
     ],
   };
-
+  // let counter = 0;
+  //driverPoints should be a mapping of driverPoint for each driver
   let running = false;
-  function animate() {}
+
+  function animatedriver() {
+    // const driver = drivers[driverid - 1];
+    // console.log(driver, "is this a driver!");
+    // console.log(driverPoints.features[driver.id - 1], "is this a point");
+    // console.log(driver, "hello");
+    const driver = drivers[0];
+    const steps = 500;
+    const start =
+      driver.path.geometry.coordinates[
+        driver.counter >= steps ? driver.counter - 1 : driver.counter
+      ];
+    const end =
+      driver.path.geometry.coordinates[
+        driver.counter >= steps ? driver.counter : driver.counter + 1
+      ];
+    if (start === end) {
+      return;
+    }
+
+    driverPoints.features[driver.id - 1].geometry.coordinates =
+      driver.path.geometry.coordinates[driver.counter];
+
+    driverPoints.features[driver.id - 1].properties.bearing = turf.bearing(
+      turf.point(start),
+      turf.point(end)
+    );
+
+    map.getSource("drivers").setData(driverPoints);
+    if (driver.counter < steps) {
+      console.log(driver.counter < steps);
+      requestAnimationFrame(animatedriver);
+    }
+    driver.counter = driver.counter + 1;
+  }
+
+  function animatedriver1() {
+    // const driver = drivers[driverid - 1];
+    // console.log(driver, "is this a driver!");
+    // console.log(driverPoints.features[driver.id - 1], "is this a point");
+    // console.log(driver, "hello");
+    const driver = drivers[1];
+    const steps = 500;
+    const start =
+      driver.path.geometry.coordinates[
+        driver.counter >= steps ? driver.counter - 1 : driver.counter
+      ];
+    const end =
+      driver.path.geometry.coordinates[
+        driver.counter >= steps ? driver.counter : driver.counter + 1
+      ];
+    if (start === end) {
+      return;
+    }
+    driverPoints.features[driver.id - 1].geometry.coordinates =
+      driver.path.geometry.coordinates[driver.counter];
+
+    driverPoints.features[driver.id - 1].properties.bearing = turf.bearing(
+      turf.point(start),
+      turf.point(end)
+    );
+
+    map.getSource("drivers").setData(driverPoints);
+    if (driver.counter < steps) {
+      requestAnimationFrame(animatedriver1);
+    }
+    driver.counter = driver.counter + 1;
+  }
 
   function handleAnimation() {
     //start animation only for now
-    animate();
+    // for (let i = 0; i < drivers.length; i++) {
+    //   const driver = drivers[i];
+    //   // animatedriver(driver);
+    //   animatedriver({ ...driver });
+    // }
+    // animatedriver(drivers[0]);
+    animatedriver();
+    animatedriver1();
   }
   useEffect(() => {
     const map = new mapboxgl.Map({
@@ -209,8 +295,8 @@ export default function Map() {
             source: "routes",
             type: "line",
             paint: {
-              "line-width": 2,
-              "line-color": "#007cbf",
+              "line-width": 4,
+              "line-color": "#F1295B",
             },
           });
 
@@ -219,13 +305,6 @@ export default function Map() {
             type: "geojson",
             data: driverPoints,
           });
-
-          //show one driver location
-          map.addSource("driver", {
-            type: "geojson",
-            data: driverPoint,
-          });
-
           map.addLayer({
             id: "drivers",
             source: "drivers",
