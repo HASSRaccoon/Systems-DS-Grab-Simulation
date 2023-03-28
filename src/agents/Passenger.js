@@ -13,7 +13,7 @@ export default class Passenger {
     this.id = props.id;
 
     this.appearTime = (Date.now() / 1000) | 0;
-    console.log(`Passenger appear at ${this.appearTime}`);
+    // console.log(`Passenger appear at ${this.appearTime}`);
   }
 
   // do we need a state for car not arrived yet?

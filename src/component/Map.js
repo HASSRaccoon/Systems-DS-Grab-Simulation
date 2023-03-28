@@ -23,7 +23,7 @@ let endPos =
 mapboxgl.accessToken =
   "pk.eyJ1IjoieWVva2V3ZWkiLCJhIjoiY2xlcG5wZ3ZmMGUweTNxdGt4ZG1ldGhsYyJ9.HHNGnKUPolWAo5_UYwzCZg";
 
-export default function Maptest2() {
+export default function Map() {
   function generateRandomCoord() {
     let Pos =
       sgJSON.features[Math.floor(Math.random() * sgJSON.features.length)]
@@ -39,6 +39,7 @@ export default function Maptest2() {
     path: null,
     counter: 0,
     ref: null,
+    // search = {search},
   });
 
   let driver2 = new Driver({
@@ -64,9 +65,20 @@ export default function Maptest2() {
     destination: generateRandomCoord(),
     currentLocation: generateRandomCoord(),
   });
+
+  let passenger3 = new Passenger({
+    id: 3,
+    ref: null,
+    destination: generateRandomCoord(),
+    currentLocation: generateRandomCoord(),
+  });
+
   const [drivers, setDrivers] = useState([driver1, driver2]);
-  // console.log(drivers, "driver list");
-  const [passengers, setPassengers] = useState([passenger1, passenger2]);
+  const [passengers, setPassengers] = useState([
+    passenger1,
+    passenger2,
+    passenger3,
+  ]);
 
   const pathBuilder = new PathFinder(sgJSON, { tolerance: 1e-4 });
   var pathGeo = pathToGeoJSON(
@@ -100,7 +112,7 @@ export default function Maptest2() {
   const [map, setMap] = useState(null);
   const [lng, setLng] = useState(103.908009);
   const [lat, setLat] = useState(1.406741);
-  const [zoom, setZoom] = useState(13);
+  const [zoom, setZoom] = useState(14);
 
   let driverpoint = {
     type: "FeatureCollection",
@@ -184,6 +196,12 @@ export default function Maptest2() {
   //driverPoints should be a mapping of driverPoint for each driver
   let running = false;
 
+  function driverSearch() {
+    for (let i = 0; i < drivers.length; i++) {
+      // driver.search()
+    }
+  }
+
   function animatedriver() {
     // const driver = drivers[driverid - 1];
     // console.log(driver, "is this a driver!");
@@ -263,6 +281,34 @@ export default function Maptest2() {
     animatedriver();
     animatedriver1();
   }
+  //temp assign passengers through a function
+  function handlePassengers() {
+    for (let i = 0; i < drivers.length; i++) {
+      let driver = drivers[i];
+      if (passengers.length > 0 && driver.state === "searching") {
+        driver.passenger = passengers.pop();
+        console.log(driver.id, driver.passenger, "passenger assigned");
+        driver.state = "searching";
+      }
+    }
+  }
+  function handleSearch() {
+    for (let i = 0; i < drivers.length; i++) {
+      let driver = drivers[i];
+      driver.search();
+      console.log(driver.destination, driver.passenger.currentLocation);
+      console.log(driver.state);
+      console.log(driver.id, driver.path, "old path");
+      driver.path = buildPath(driver.currentLocation, driver.destination);
+      console.log(driver.id, driver.path, "new path");
+      console.log(driverPaths.features[driver.id - 1], "diff");
+      //add process path
+      driverPaths.features[driver.id - 1] = driver.path;
+      console.log(driverPaths.features[driver.id - 1], "same");
+      map.getSource("routes").setData(driverPaths);
+    }
+  }
+
   useEffect(() => {
     const map = new mapboxgl.Map({
       container: mapContainer.current,
@@ -366,11 +412,28 @@ export default function Maptest2() {
     return () => map.remove();
   }, []);
 
+  // useEffect(() => {
+  //   setInterval(() => {
+  //     for (let i = 0; i < drivers.length; i++) {
+  //       let driver = drivers[i];
+  //       if (passengers.length > 0 && drivers.state === "searching") {
+  //         driver.passenger = passengers.pop();
+  //         console.log(driver.passenger, "passenger assigned");
+  //         driver.state = "searching";
+  //       }
+  //     }
+  //   }, 1500);
+  // }, []);
+
   return (
     <>
       <div>
         <div className="map-container" ref={mapContainer} />
         <Button onClick={handleAnimation}>Start animation only lol</Button>
+        <Button onClick={handlePassengers}>Assign Passenger</Button>
+        <Button onClick={handleSearch}>Drivers Search</Button>
+        <div> No. of drivers : {drivers.length}</div>
+        <div> No. of passengers : {passengers.length}</div>
       </div>
     </>
   );
