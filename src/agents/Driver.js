@@ -48,41 +48,44 @@ export default class Driver {
     }
   }
   pickUp() {
-    if (this.currentLocation <= this.destination - this.speed) {
-      this.currentLocation[0] += this.speed[0];
-      this.currentLocation[1] += this.speed[1];
-      // console.log(`driver current location when picking up: ${this.currentLocation}`)
-    } else {
-      //FIXME:
-      this.state = "transit";
-    }
-    moveTo(
-      this.ref.current,
-      this.currentLocation,
-      this.destination,
-      this.ref,
-      this.speed
-    );
+    // if (this.currentLocation <= this.destination - this.speed) {
+    //   this.currentLocation[0] += this.speed[0];
+    //   this.currentLocation[1] += this.speed[1];
+    //   // console.log(`driver current location when picking up: ${this.currentLocation}`)
+    // } else {
+    //   //FIXME:
+    //   this.state = "transit";
+    // }
+    // moveTo(
+    //   this.ref.current,
+    //   this.currentLocation,
+    //   this.destination,
+    //   this.ref,
+    //   this.speed
+    // );
     // this.passenger.carArrived(Date.now() / 1000 | 0, this);
+    this.state = "transit";
   }
   transit() {
     this.destination = this.passenger.destination;
-    if (this.currentLocation < this.destination - this.speed) {
-      this.currentLocation[0] += this.speed[0];
-      this.currentLocation[1] += this.speed[1];
-      console.log(
-        `driver current location when transit: ${this.currentLocation}`
-      );
-    } else {
-      this.state = "completed";
-    }
-    moveTo(
-      this.ref.current,
-      this.currentLocation,
-      this.destination,
-      this.ref,
-      this.speed
-    );
+    // if (this.currentLocation < this.destination - this.speed) {
+    //   this.currentLocation[0] += this.speed[0];
+    //   this.currentLocation[1] += this.speed[1];
+    //   console.log(
+    //     `driver current location when transit: ${this.currentLocation}`
+    //   );
+    // } else {
+    //   this.state = "completed";
+    // }
+    // moveTo(
+    //   this.ref.current,
+    //   this.currentLocation,
+    //   this.destination,
+    //   this.ref,
+    //   this.speed
+    // );
+    // driver current Location == driver destination
+    this.state = "completed";
   }
   completed() {
     console.log("completed");
