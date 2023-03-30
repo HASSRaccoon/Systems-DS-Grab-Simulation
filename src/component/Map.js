@@ -13,14 +13,6 @@ import Passenger from "../agents/Passenger.js";
 import Globals from "../agents/Globals.js";
 // --- ---------------------------------- ---
 
-let startPos =
-  sgJSON.features[Math.floor(Math.random() * sgJSON.features.length)].geometry
-    .coordinates[0];
-let endPos =
-  sgJSON.features[Math.floor(Math.random() * sgJSON.features.length)].geometry
-    .coordinates[0];
-// let markerstartPos = [startPos[1], startPos[0]];
-// let markerendPos = [endPos[1], endPos[0]];
 mapboxgl.accessToken =
   "pk.eyJ1IjoieWVva2V3ZWkiLCJhIjoiY2xlcG5wZ3ZmMGUweTNxdGt4ZG1ldGhsYyJ9.HHNGnKUPolWAo5_UYwzCZg";
 
@@ -81,11 +73,7 @@ export default function Map() {
   ]);
 
   const pathBuilder = new PathFinder(sgJSON, { tolerance: 1e-4 });
-  var pathGeo = pathToGeoJSON(
-    pathBuilder.findPath(turf.point(startPos), turf.point(endPos))
-  );
 
-  //make pathGeo a function
   function buildPath(start, end) {
     const path = pathToGeoJSON(
       pathBuilder.findPath(turf.point(start), turf.point(end))
@@ -167,15 +155,9 @@ export default function Map() {
     }),
   };
 
-  // let counter = 0;
-  //driverPoints should be a mapping of driverPoint for each driver
   let running = false;
-  // let requestId;
+
   function animatedriver1() {
-    // const driver = drivers[driverid - 1];
-    // console.log(driver, "is this a driver!");
-    // console.log(driverPoints.features[driver.id - 1], "is this a point");
-    // console.log(driver, "hello");
     const driver = drivers[0];
     const steps = 500;
     const start =
@@ -207,16 +189,9 @@ export default function Map() {
       requestAnimationFrame(animatedriver1);
     }
     driver.counter = driver.counter + 1;
-    // console.log(driver.counter, "check");
-    // console.log(driver.currentLocation, "update currentLocation");
-    // drivers[0].currentLocation = driver.currentLocation;
   }
 
   function animatedriver2() {
-    // const driver = drivers[driverid - 1];
-    // console.log(driver, "is this a driver!");
-    // console.log(driverPoints.features[driver.id - 1], "is this a point");
-    // console.log(driver, "hello");
     const driver = drivers[1];
     const steps = 500;
     const start =
@@ -246,11 +221,8 @@ export default function Map() {
     if (driver.counter < steps) {
       requestAnimationFrame(animatedriver2);
     }
-    // drivers[1].currentLocation = driver.currentLocation;
-    driver.counter = driver.counter + 1;
-    // requestId = requestAnimationFrame(animatedriver); // store the requestId
 
-    // console.log(driver.counter, "hello");
+    driver.counter = driver.counter + 1;
   }
 
   function animatedriver2passenger() {
@@ -333,28 +305,17 @@ export default function Map() {
     animatedriver2passenger();
   }
 
-  function startstopAnimation() {
-    if (!running) {
-      // if animation is not running, start it
-      running = true;
-      handleAnimation();
-    } else {
-      // if animation is running, stop it
-      running = false;
-      // cancelAnimationFrame(requestId); // cancel the animation using the requestId
-    }
-  }
   //temp assign passengers through a function
 
   function startAnimation() {
     for (let i = 0; i < drivers.length; i++) {
       let driver = drivers[i];
-      handleSearchProper(driver);
+      handleSearch(driver);
       console.log("call search");
     }
   }
 
-  function handleSearchProper(driver) {
+  function handleSearch(driver) {
     // handleAnimation();
     //assign passenger
     driver.counter = 0;
@@ -373,7 +334,7 @@ export default function Map() {
     driverPaths.features[driver.id - 1] = driver.path;
 
     if (driver.state === "picking up") {
-      handlePickupProper(driver);
+      handlePickup(driver);
       console.log("call pickup");
     }
 
@@ -382,7 +343,7 @@ export default function Map() {
     // drivers[driver.id - 1].currentLocation = driver.destination;
   }
 
-  function handlePickupProper(driver) {
+  function handlePickup(driver) {
     //animate pickingup passenger by setting new route
     console.log(driver);
 
@@ -403,21 +364,14 @@ export default function Map() {
       processPath(driver.path);
       driverPaths.features[driver.id - 1] = driver.path;
       if (driver.state === "transit") {
-        handleTransitProper(driver);
+        handleTransit(driver);
         console.log("call transit");
         // }
       }
     }, 10000);
   }
 
-  console.log(passengerPoints.features[0].properties.id);
-  // console.log(passengerPoints.featuresindexOf(properties=);
-  //if passengerPoints.feature
-  //for feature in features, if feature.properties.id = driver.passenger.id
-  //index = features.indexOf(feature)
-  //features.splice(index, 1)
-
-  function handleTransitProper(driver) {
+  function handleTransit(driver) {
     map.getSource("routes").setData(driverPaths);
     driver.counter = 0;
     if (driver.id === 1) {
@@ -453,74 +407,8 @@ export default function Map() {
       processPath(driver.path);
       driverPaths.features[driver.id - 1] = driver.path;
       map.getSource("routes").setData(driverPaths);
-      handleSearchProper(driver);
+      handleSearch(driver);
     }, 10000);
-  }
-
-  function handleSearch(driver) {
-    // for (let i = 0; i < drivers.length; i++) {
-    // let driver = drivers[i];
-    driver.search(driver.passenger);
-
-    driver.path = buildPath(driver.currentLocation, driver.destination);
-    console.log(driver.path);
-    processPath(driver.path);
-    console.log(driver.path);
-    //add process path
-    driverPaths.features[driver.id - 1] = driver.path;
-    map.getSource("routes").setData(driverPaths);
-    // }
-  }
-
-  function handlePassengers() {
-    for (let i = 0; i < drivers.length; i++) {
-      let driver = drivers[i];
-
-      if (passengers.length > 0 && driver.state === "searching") {
-        driver.passenger = passengers.pop();
-        console.log(driver.id, driver.passenger, "passenger assigned");
-        driver.state = "searching";
-        console.log(passengers, "list");
-      }
-    }
-  }
-
-  function handlePickup() {}
-
-  function handleTransit() {
-    for (let i = 0; i < drivers.length; i++) {
-      let driver = drivers[i];
-      driverPoints.features[driver.id - 1].geometry.coordinates =
-        driver.currentLocation;
-      driver.transit();
-      // let passenger = driver.passenger;
-      driver.path = buildPath(driver.currentLocation, driver.destination);
-      processPath(driver.path);
-      driverPaths.features[driver.id - 1] = driver.path;
-      map.getSource("routes").setData(driverPaths);
-      driver.counter = 0;
-      driver.passenger.counter = 0;
-      console.log(driver.counter, driver.passenger.counter, "counter");
-      console.log(
-        driver.currentLocation,
-        driver.passenger.currentLocation,
-        "this should be the same"
-      );
-      console.log(
-        driver.destination,
-        driver.passenger.destination,
-        "same dest"
-      );
-    }
-    handleAnimation();
-    handlePassengerAnimation();
-  }
-
-  function handleDeliver() {
-    for (let i = 0; i < drivers.length; i++) {
-      let driver = drivers[i];
-      console.log(driver);
-    }
   }
 
   useEffect(() => {
@@ -626,31 +514,11 @@ export default function Map() {
     return () => map.remove();
   }, []);
 
-  // useEffect(() => {
-  //   setInterval(() => {
-  //     for (let i = 0; i < drivers.length; i++) {
-  //       let driver = drivers[i];
-  //       if (passengers.length > 0 && drivers.state === "searching") {
-  //         driver.passenger = passengers.pop();
-  //         console.log(driver.passenger, "passenger assigned");
-  //         driver.state = "searching";
-  //       }
-  //     }
-  //   }, 1500);
-  // }, []);
-
   return (
     <>
       <div>
         <div className="map-container" ref={mapContainer} />
         <Button onClick={startAnimation}>Start Animation Loop</Button>
-        <Button onClick={startstopAnimation}>Start animation only lol</Button>
-        {/* Assign passenger */}
-        <Button onClick={handlePassengers}>Search</Button>
-        <Button onClick={handleSearch}>Pickup</Button>
-        {/* <Button onClick={handlePickup}>ignore</Button> */}
-        <Button onClick={handleTransit}>Deliver</Button>
-        <Button onClick={handleDeliver}>Complete</Button>
         <div> No. of drivers : {drivers.length}</div>
         <div> No. of passengers : {passengers.length}</div>
       </div>
