@@ -22,6 +22,8 @@ export default class Driver {
     this.ref = props.ref;
     this.path = 0;
     this.counter = 0;
+    this.distanceTravelled = 0;
+
     // add a parameter to change how the driver slows down when raining?? //TODO:
   }
   updateSpeed(raining) {
@@ -35,19 +37,22 @@ export default class Driver {
     console.log(`driver speed: ${this.speed}`);
   }
   search(passenger) {
+    // if (this.passenger === null && this.state === "searching") {
+    // }
     if (this.passenger) {
       // console.log('picking up')
       this.destination = this.passenger.currentLocation;
       this.state = "picking up";
     } else {
       // console.log('searching')
-      this.passenger = passenger;
-      this.currentLocation[0] += this.speed[0];
-      this.currentLocation[1] += this.speed[1];
-      this.waitingTime += 1; //FIXME: need to add the correct timestamp
+      // this.passenger = passenger;
+      // this.currentLocation[0] += this.speed[0];
+      // this.currentLocation[1] += this.speed[1];
+      // this.waitingTime += 1; //FIXME: need to add the correct timestamp
     }
   }
   pickUp() {
+    this.destination = this.passenger.destination;
     // if (this.currentLocation <= this.destination - this.speed) {
     //   this.currentLocation[0] += this.speed[0];
     //   this.currentLocation[1] += this.speed[1];
@@ -67,7 +72,7 @@ export default class Driver {
     this.state = "transit";
   }
   transit() {
-    this.destination = this.passenger.destination;
+    // this.destination = this.passenger.destination;
     // if (this.currentLocation < this.destination - this.speed) {
     //   this.currentLocation[0] += this.speed[0];
     //   this.currentLocation[1] += this.speed[1];
@@ -92,15 +97,15 @@ export default class Driver {
     this.state = "searching";
     this.completedJobs += 1;
     this.passenger = null;
-    this.destination = [Math.random() * 200, Math.random() * 200];
+    // this.destination = [Math.random() * 200, Math.random() * 200];
 
-    moveTo(
-      this.ref.current,
-      this.currentLocation,
-      this.destination,
-      this.ref,
-      this.speed
-    );
+    // moveTo(
+    //   this.ref.current,
+    //   this.currentLocation,
+    //   this.destination,
+    //   this.ref,
+    //   this.speed
+    // );
   }
 
   changeLocation = () => {

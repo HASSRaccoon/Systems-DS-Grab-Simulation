@@ -207,6 +207,7 @@ export default function Map() {
       requestAnimationFrame(animatedriver1);
     }
     driver.counter = driver.counter + 1;
+    // console.log(driver.counter, "check");
     // console.log(driver.currentLocation, "update currentLocation");
     // drivers[0].currentLocation = driver.currentLocation;
   }
@@ -344,30 +345,143 @@ export default function Map() {
     }
   }
   //temp assign passengers through a function
+
+  function startAnimation() {
+    for (let i = 0; i < drivers.length; i++) {
+      let driver = drivers[i];
+      handleSearchProper(driver);
+      console.log("call search");
+    }
+  }
+
+  function handleSearchProper(driver) {
+    // handleAnimation();
+    //assign passenger
+    driver.counter = 0;
+    if (driver.id === 1) {
+      animatedriver1();
+    } else if (driver.id === 2) {
+      animatedriver2();
+    }
+    if (passengers.length > 0 && driver.state === "searching") {
+      driver.passenger = passengers.pop();
+    }
+    //pathfinding to passenger
+    driver.search(driver.passenger);
+    driver.path = buildPath(driver.currentLocation, driver.destination);
+    processPath(driver.path);
+    driverPaths.features[driver.id - 1] = driver.path;
+
+    if (driver.state === "picking up") {
+      handlePickupProper(driver);
+      console.log("call pickup");
+    }
+
+    //this is pickup alr
+    // map.getSource("routes").setData(driverPaths);
+    // drivers[driver.id - 1].currentLocation = driver.destination;
+  }
+
+  function handlePickupProper(driver) {
+    //animate pickingup passenger by setting new route
+    console.log(driver);
+
+    map.getSource("routes").setData(driverPaths);
+
+    setTimeout(() => {
+      // if (driver.counter === 501) {
+      console.log(driver.counter, "counter");
+      console.log("complete journey");
+      // }
+      // if (driver.counter === 501) {
+      driver.currentLocation = driver.destination;
+      console.log(driver.destination, "old dest");
+      driver.pickUp();
+      console.log(driver.currentLocation, "loc");
+      console.log(driver.destination, "new dest");
+      driver.path = buildPath(driver.currentLocation, driver.destination);
+      processPath(driver.path);
+      driverPaths.features[driver.id - 1] = driver.path;
+      if (driver.state === "transit") {
+        handleTransitProper(driver);
+        console.log("call transit");
+        // }
+      }
+    }, 10000);
+  }
+
+  console.log(passengerPoints.features[0].properties.id);
+  // console.log(passengerPoints.featuresindexOf(properties=);
+  //if passengerPoints.feature
+  //for feature in features, if feature.properties.id = driver.passenger.id
+  //index = features.indexOf(feature)
+  //features.splice(index, 1)
+
+  function handleTransitProper(driver) {
+    map.getSource("routes").setData(driverPaths);
+    driver.counter = 0;
+    if (driver.id === 1) {
+      animatedriver1();
+      animatedriver1passenger();
+    } else if (driver.id === 2) {
+      animatedriver2();
+      animatedriver2passenger();
+    }
+    setTimeout(() => {
+      // if (driver.counter === 501) {
+      console.log(driver.counter, "counter");
+      console.log("complete journey");
+      //need to debug passenger exit
+      driver.currentLocation = driver.destination;
+      console.log(passengerPoints, "before remove image");
+      for (let i = 0; i < passengerPoints.features.length; i++) {
+        if (passengerPoints.features[i].properties.id === driver.passenger.id) {
+          let index = passengerPoints.features.indexOf(
+            passengerPoints.features[i]
+          );
+          passengerPoints.features.splice(index, 1);
+          break;
+        }
+      }
+      console.log(passengerPoints, "after remove image");
+
+      map.getSource("passengers").setData(passengerPoints);
+
+      driver.completed();
+      driver.destination = generateRandomCoord();
+      driver.path = buildPath(driver.currentLocation, driver.destination);
+      processPath(driver.path);
+      driverPaths.features[driver.id - 1] = driver.path;
+      map.getSource("routes").setData(driverPaths);
+      handleSearchProper(driver);
+    }, 10000);
+  }
+
+  function handleSearch(driver) {
+    // for (let i = 0; i < drivers.length; i++) {
+    // let driver = drivers[i];
+    driver.search(driver.passenger);
+
+    driver.path = buildPath(driver.currentLocation, driver.destination);
+    console.log(driver.path);
+    processPath(driver.path);
+    console.log(driver.path);
+    //add process path
+    driverPaths.features[driver.id - 1] = driver.path;
+    map.getSource("routes").setData(driverPaths);
+    // }
+  }
+
   function handlePassengers() {
     for (let i = 0; i < drivers.length; i++) {
       let driver = drivers[i];
+
       if (passengers.length > 0 && driver.state === "searching") {
         driver.passenger = passengers.pop();
         console.log(driver.id, driver.passenger, "passenger assigned");
         driver.state = "searching";
         console.log(passengers, "list");
       }
-    }
-  }
-  function handleSearch() {
-    for (let i = 0; i < drivers.length; i++) {
-      let driver = drivers[i];
-      driver.search(driver.passenger);
-
-      driver.path = buildPath(driver.currentLocation, driver.destination);
-      console.log(driver.path);
-      processPath(driver.path);
-      console.log(driver.path);
-      //add process path
-      driverPaths.features[driver.id - 1] = driver.path;
-      map.getSource("routes").setData(driverPaths);
-      drivers[driver.id - 1].currentLocation = driver.destination;
     }
   }
 
@@ -397,75 +511,17 @@ export default function Map() {
         driver.passenger.destination,
         "same dest"
       );
-
-      // if (driver.id === 1) {
-
-      //   animatedriver1();
-      //   animatedriver1passenger();
-      // }
-      // if (driver.id === 2) {
-      //   animatedriver2();
-      //   animatedriver2passenger();
-      // }
     }
     handleAnimation();
     handlePassengerAnimation();
   }
 
-  // useEffect(() => {
-  //   setInterval(() => {
-  //     // using probability to set is it raining
-  //     let rainProb = Math.random();
-  //     // console.log(rainProb)
-  //     if (rainProb < 0.5) {
-  //       god.raining = true;
-  //     } else {
-  //       god.raining = false;
-  //     }
-  //     for (let i = 0; i < drivers.length; i++) {
-  //       let driver = drivers[i];
-  //       if (passengerLs.length > 0 && currentDriver.state === "searching") {
-  //         currentPassenger = passengerLs.pop();
-  //         currentDriver.passenger = currentPassenger;
-  //         console.log(currentPassenger.id);
-  //         currentDriver.state = "searching";
-  //       }
-  //       switch (currentDriver.state) {
-  //         case "searching":
-  //           // setTimeout(() => {
-  //           currentDriver.search(currentDriver.passenger);
-  //           // }, 1000);
-  //           break;
-  //         case "picking up":
-  //           // setTimeout(() => {
-  //           currentDriver.pickUp();
-  //           currentDriver.passenger.carArrived(
-  //             (Date.now() / 1000) | 0,
-  //             currentDriver
-  //           );
-  //           // }, 1000);
-  //           break;
-  //         case "transit":
-  //           // setTimeout(() => {
-  //           currentDriver.transit();
-  //           currentDriver.passenger.transit();
-  //           // }, 1000);
-  //           break;
-  //         case "completed":
-  //           // setTimeout(() => {
-  //           currentDriver.passenger.arrived();
-  //           currentDriver.completed();
-  //           // }, 1000);
-  //           break;
-  //         default:
-  //           // setTimeout(() => {
-  //           currentDriver.search(currentDriver.passenger);
-  //           // }, 1000);
-  //           break;
-  //       }
-  //     }
-  //   }, 1500);
-  // }, []);
+  function handleDeliver() {
+    for (let i = 0; i < drivers.length; i++) {
+      let driver = drivers[i];
+      console.log(driver);
+    }
+  }
 
   useEffect(() => {
     const map = new mapboxgl.Map({
@@ -587,12 +643,14 @@ export default function Map() {
     <>
       <div>
         <div className="map-container" ref={mapContainer} />
+        <Button onClick={startAnimation}>Start Animation Loop</Button>
         <Button onClick={startstopAnimation}>Start animation only lol</Button>
         {/* Assign passenger */}
         <Button onClick={handlePassengers}>Search</Button>
         <Button onClick={handleSearch}>Pickup</Button>
         {/* <Button onClick={handlePickup}>ignore</Button> */}
         <Button onClick={handleTransit}>Deliver</Button>
+        <Button onClick={handleDeliver}>Complete</Button>
         <div> No. of drivers : {drivers.length}</div>
         <div> No. of passengers : {passengers.length}</div>
       </div>
