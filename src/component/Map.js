@@ -45,6 +45,7 @@ export default function Map() {
     }
     path.geometry.coordinates = arc;
   }
+  const spawnProbability = 0.5;
 
   let god = new Globals();
 
@@ -96,6 +97,29 @@ export default function Map() {
     passenger2,
     passenger3,
   ]);
+
+  console.log(passengers);
+
+  function spawnPassengerWithProbability(spawnProbability) {
+    setInterval(() => {
+      const random = Math.random();
+      if (random < spawnProbability) {
+        spawnPassenger();
+      }
+    }, 1000);
+  }
+
+  function spawnPassenger() {
+    let p = new Passenger({
+      id: passengers.length + 1,
+      ref: null,
+      destination: generateRandomCoord(),
+      currentLocation: generateRandomCoord(),
+    });
+    setPassengers([...passengers, p]);
+    map.getSource("passengers").setData(passengerPoints);
+    console.log(passengers);
+  }
 
   const pathBuilder = new PathFinder(sgJSON, { tolerance: 1e-4 });
 
@@ -256,6 +280,7 @@ export default function Map() {
   }
 
   function startAnimation() {
+    // spawnPassengerWithProbability(spawnProbability);
     for (let i = 0; i < drivers.length; i++) {
       let driver = drivers[i];
       handleSearch(driver);
@@ -269,7 +294,7 @@ export default function Map() {
     animatedriver(driver, steps);
 
     if (passengers.length > 0 && driver.state === "searching") {
-      driver.passenger = passengers.pop();
+      driver.passenger = passengers[driver.id];
     }
     console.log(driver.passenger, "no passenger");
     //pathfinding to passenger
@@ -470,6 +495,7 @@ export default function Map() {
       <div>
         <div className="map-container" ref={mapContainer} />
         {/* <Button onClick={handledebug}>DeBUG</Button> */}
+        <Button onClick={spawnPassenger}>Spawn Passenger</Button>
         <Button onClick={startAnimation}>Start Animation Loop</Button>
         <div> No. of drivers : {drivers.length}</div>
         <div> No. of passengers : {passengers.length}</div>
