@@ -23,6 +23,7 @@ export default class Driver {
     this.path = 0;
     this.counter = 0;
     this.distanceTravelled = 0;
+    this.agentType = "driver";
 
     // add a parameter to change how the driver slows down when raining?? //TODO:
   }

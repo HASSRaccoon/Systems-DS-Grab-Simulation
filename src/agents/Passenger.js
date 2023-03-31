@@ -12,6 +12,7 @@ export default class Passenger {
     this.ref = props.ref;
     this.id = props.id;
     this.counter = 0;
+    this.agentType = "passenger";
 
     this.appearTime = (Date.now() / 1000) | 0;
     // console.log(`Passenger appear at ${this.appearTime}`);

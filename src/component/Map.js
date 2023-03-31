@@ -23,6 +23,29 @@ export default function Map() {
         .geometry.coordinates[0];
     return Pos;
   }
+
+  function buildPath(start, end) {
+    // console.log(start, end);
+    const path = pathToGeoJSON(
+      pathBuilder.findPath(turf.point(start), turf.point(end))
+    );
+    return path;
+  }
+
+  function processPath(path, steps) {
+    //line Distance is number like 1.512343151
+    const lineDistance = turf.length(path);
+
+    // console.log(lineDistance, "lineDistance");
+    const arc = [];
+
+    for (let i = 0; i < lineDistance; i += lineDistance / steps) {
+      const segment = turf.along(path, i);
+      arc.push(segment.geometry.coordinates);
+    }
+    path.geometry.coordinates = arc;
+  }
+
   let god = new Globals();
 
   let driver1 = new Driver({
@@ -32,7 +55,6 @@ export default function Map() {
     destination: generateRandomCoord(),
     path: null,
     ref: null,
-    // search = {search},
   });
 
   let driver2 = new Driver({
@@ -65,7 +87,10 @@ export default function Map() {
     currentLocation: generateRandomCoord(),
   });
 
+  let running = false;
+
   const [drivers, setDrivers] = useState([driver1, driver2]);
+
   const [passengers, setPassengers] = useState([
     passenger1,
     passenger2,
@@ -74,36 +99,22 @@ export default function Map() {
 
   const pathBuilder = new PathFinder(sgJSON, { tolerance: 1e-4 });
 
-  function buildPath(start, end) {
-    const path = pathToGeoJSON(
-      pathBuilder.findPath(turf.point(start), turf.point(end))
-    );
-    return path;
-  }
-
-  function processPath(path) {
-    const lineDistance = turf.length(path);
-    const arc = [];
-    const steps = 500;
-    for (let i = 0; i < lineDistance; i += lineDistance / steps) {
-      const segment = turf.along(path, i);
-      arc.push(segment.geometry.coordinates);
-    }
-    path.geometry.coordinates = arc;
-  }
-
-  // can put into a function
-  for (let i = 0; i < drivers.length; i++) {
-    const driver = drivers[i];
-    driver.path = buildPath(driver.currentLocation, driver.destination);
-    processPath(driver.path);
-  }
-
   const mapContainer = useRef(null);
   const [map, setMap] = useState(null);
   const [lng, setLng] = useState(103.908009);
   const [lat, setLat] = useState(1.406741);
   const [zoom, setZoom] = useState(14);
+
+  //default paths on init
+  for (let i = 0; i < drivers.length; i++) {
+    const driver = drivers[i];
+    // console.log(driver.id);
+    driver.path = buildPath(driver.currentLocation, driver.destination);
+    const steps = 500;
+    //replace steps with speed next time
+    processPath(driver.path, steps);
+    // console.log(drivers[driver.id - 1], "got path?");
+  }
 
   let driverPoints = {
     type: "FeatureCollection",
@@ -155,11 +166,27 @@ export default function Map() {
     }),
   };
 
-  let running = false;
+  function dateToTicks(date) {
+    const epochOffset = 621355968000000000;
+    const ticksPerMillisecond = 10000;
 
-  function animatedriver1() {
-    const driver = drivers[0];
-    const steps = 500;
+    const ticks = date.getTime() * ticksPerMillisecond + epochOffset;
+
+    return ticks;
+  }
+
+  // function handledebug() {
+  //   const steps = 500;
+  //   for (let i = 0; i < drivers.length; i++) {
+  //     const driver = drivers[i];
+  //     driver.counter = 0;
+
+  //     animatedriver(driver, steps);
+  //   }
+  // }
+
+  function animatedriver(driver, steps) {
+    // console.log(driver);
     const start =
       driver.path.geometry.coordinates[
         driver.counter >= steps ? driver.counter - 1 : driver.counter
@@ -168,9 +195,7 @@ export default function Map() {
       driver.path.geometry.coordinates[
         driver.counter >= steps ? driver.counter : driver.counter + 1
       ];
-    // if (start === end) {
-    //   return;
-    // }
+
     if (!start || !end) {
       running = false;
       return;
@@ -185,67 +210,35 @@ export default function Map() {
     );
 
     map.getSource("drivers").setData(driverPoints);
+
     if (driver.counter < steps) {
-      requestAnimationFrame(animatedriver1);
-    }
-    driver.counter = driver.counter + 1;
-  }
-
-  function animatedriver2() {
-    const driver = drivers[1];
-    const steps = 500;
-    const start =
-      driver.path.geometry.coordinates[
-        driver.counter >= steps ? driver.counter - 1 : driver.counter
-      ];
-    const end =
-      driver.path.geometry.coordinates[
-        driver.counter >= steps ? driver.counter : driver.counter + 1
-      ];
-    // if (start === end) {
-    //   return;
-    // }
-    if (!start || !end) {
-      running = false;
-      return;
-    }
-    driverPoints.features[driver.id - 1].geometry.coordinates =
-      driver.path.geometry.coordinates[driver.counter];
-
-    driverPoints.features[driver.id - 1].properties.bearing = turf.bearing(
-      turf.point(start),
-      turf.point(end)
-    );
-
-    map.getSource("drivers").setData(driverPoints);
-    if (driver.counter < steps) {
-      requestAnimationFrame(animatedriver2);
+      requestAnimationFrame(() => animatedriver(driver, steps));
     }
 
     driver.counter = driver.counter + 1;
   }
 
-  function animatedriver2passenger() {
-    const driver = drivers[1];
-    const steps = 500;
-    const passenger = driver.passenger;
+  function animatepassenger(driver, steps) {
     const start =
       driver.path.geometry.coordinates[
-        passenger.counter >= steps ? passenger.counter - 1 : passenger.counter
+        driver.passenger.counter >= steps
+          ? driver.passenger.counter - 1
+          : driver.passenger.counter
       ];
     const end =
       driver.path.geometry.coordinates[
-        passenger.counter >= steps ? passenger.counter : passenger.counter + 1
+        driver.passenger.counter >= steps
+          ? driver.passenger.counter
+          : driver.passenger.counter + 1
       ];
-    // if (start === end) {
-    //   return;
-    // }
+
     if (!start || !end) {
       running = false;
       return;
     }
+
     passengerPoints.features[driver.id - 1].geometry.coordinates =
-      driver.path.geometry.coordinates[passenger.counter];
+      driver.path.geometry.coordinates[driver.passenger.counter];
 
     passengerPoints.features[driver.id - 1].properties.bearing = turf.bearing(
       turf.point(start),
@@ -253,94 +246,41 @@ export default function Map() {
     );
 
     map.getSource("passengers").setData(passengerPoints);
-    if (driver.counter < steps) {
-      requestAnimationFrame(animatedriver2passenger);
+
+    if (driver.passenger.counter < steps) {
+      requestAnimationFrame(() => animatepassenger(driver, steps));
     }
-    passenger.counter = passenger.counter + 1;
+
+    driver.passenger.counter = driver.passenger.counter + 1;
   }
-
-  function animatedriver1passenger() {
-    const driver = drivers[0];
-    const steps = 500;
-    const passenger = driver.passenger;
-    const start =
-      driver.path.geometry.coordinates[
-        passenger.counter >= steps ? passenger.counter - 1 : passenger.counter
-      ];
-    const end =
-      driver.path.geometry.coordinates[
-        passenger.counter >= steps ? passenger.counter : passenger.counter + 1
-      ];
-    // if (start === end) {
-    //   return;
-    // }
-    if (!start || !end) {
-      running = false;
-      return;
-    }
-    passengerPoints.features[driver.id - 1].geometry.coordinates =
-      driver.path.geometry.coordinates[passenger.counter];
-
-    passengerPoints.features[driver.id - 1].properties.bearing = turf.bearing(
-      turf.point(start),
-      turf.point(end)
-    );
-
-    map.getSource("passengers").setData(passengerPoints);
-    if (driver.counter < steps) {
-      requestAnimationFrame(animatedriver1passenger);
-    }
-    passenger.counter = passenger.counter + 1;
-  }
-
-  function handleAnimation() {
-    animatedriver1();
-    animatedriver2();
-  }
-
-  function handlePassengerAnimation() {
-    //animatedriver1passenger is ok
-    //second one got problem
-    animatedriver1passenger();
-    animatedriver2passenger();
-  }
-
-  //temp assign passengers through a function
 
   function startAnimation() {
     for (let i = 0; i < drivers.length; i++) {
       let driver = drivers[i];
       handleSearch(driver);
-      console.log("call search");
     }
   }
 
   function handleSearch(driver) {
-    // handleAnimation();
-    //assign passenger
+    console.log("called search");
     driver.counter = 0;
-    if (driver.id === 1) {
-      animatedriver1();
-    } else if (driver.id === 2) {
-      animatedriver2();
-    }
+    const steps = 500;
+    animatedriver(driver, steps);
+
     if (passengers.length > 0 && driver.state === "searching") {
       driver.passenger = passengers.pop();
     }
+    console.log(driver.passenger, "no passenger");
     //pathfinding to passenger
     driver.search(driver.passenger);
     driver.path = buildPath(driver.currentLocation, driver.destination);
-    processPath(driver.path);
+    processPath(driver.path, steps);
     driverPaths.features[driver.id - 1] = driver.path;
 
-    if (driver.state === "picking up") {
+    if (driver.state === "picking up" && driver.passenger != null) {
       handlePickup(driver);
       console.log("call pickup");
     }
-
-    //this is pickup alr
-    // map.getSource("routes").setData(driverPaths);
-    // drivers[driver.id - 1].currentLocation = driver.destination;
   }
 
   function handlePickup(driver) {
@@ -356,12 +296,10 @@ export default function Map() {
       // }
       // if (driver.counter === 501) {
       driver.currentLocation = driver.destination;
-      console.log(driver.destination, "old dest");
       driver.pickUp();
-      console.log(driver.currentLocation, "loc");
-      console.log(driver.destination, "new dest");
       driver.path = buildPath(driver.currentLocation, driver.destination);
-      processPath(driver.path);
+      const steps = 500;
+      processPath(driver.path, steps);
       driverPaths.features[driver.id - 1] = driver.path;
       if (driver.state === "transit") {
         handleTransit(driver);
@@ -374,13 +312,10 @@ export default function Map() {
   function handleTransit(driver) {
     map.getSource("routes").setData(driverPaths);
     driver.counter = 0;
-    if (driver.id === 1) {
-      animatedriver1();
-      animatedriver1passenger();
-    } else if (driver.id === 2) {
-      animatedriver2();
-      animatedriver2passenger();
-    }
+    const steps = 500;
+    animatedriver(driver, steps);
+    animatepassenger(driver, steps);
+
     setTimeout(() => {
       // if (driver.counter === 501) {
       console.log(driver.counter, "counter");
@@ -518,6 +453,7 @@ export default function Map() {
     <>
       <div>
         <div className="map-container" ref={mapContainer} />
+        {/* <Button onClick={handledebug}>DeBUG</Button> */}
         <Button onClick={startAnimation}>Start Animation Loop</Button>
         <div> No. of drivers : {drivers.length}</div>
         <div> No. of passengers : {passengers.length}</div>
