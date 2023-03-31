@@ -51,7 +51,7 @@ export default function Map() {
   let driver1 = new Driver({
     id: 1,
     currentLocation: generateRandomCoord(),
-    speed: 70,
+    speed: 50,
     destination: generateRandomCoord(),
     path: null,
     ref: null,
@@ -60,7 +60,7 @@ export default function Map() {
   let driver2 = new Driver({
     id: 2,
     currentLocation: generateRandomCoord(),
-    speed: 70,
+    speed: 80,
     destination: generateRandomCoord(),
     path: null,
     ref: null,
@@ -110,7 +110,7 @@ export default function Map() {
     const driver = drivers[i];
     // console.log(driver.id);
     driver.path = buildPath(driver.currentLocation, driver.destination);
-    const steps = 500;
+    const steps = driver.speed * 5;
     //replace steps with speed next time
     processPath(driver.path, steps);
     // console.log(drivers[driver.id - 1], "got path?");
@@ -203,7 +203,7 @@ export default function Map() {
 
     driverPoints.features[driver.id - 1].geometry.coordinates =
       driver.path.geometry.coordinates[driver.counter];
-
+    driver.currentLocation = driver.path.geometry.coordinates[driver.counter];
     driverPoints.features[driver.id - 1].properties.bearing = turf.bearing(
       turf.point(start),
       turf.point(end)
@@ -216,6 +216,7 @@ export default function Map() {
     }
 
     driver.counter = driver.counter + 1;
+    // console.log(driver.currentLocation, driver.counter);
   }
 
   function animatepassenger(driver, steps) {
@@ -264,7 +265,7 @@ export default function Map() {
   function handleSearch(driver) {
     console.log("called search");
     driver.counter = 0;
-    const steps = 500;
+    const steps = driver.speed * 5;
     animatedriver(driver, steps);
 
     if (passengers.length > 0 && driver.state === "searching") {
@@ -285,20 +286,35 @@ export default function Map() {
 
   function handlePickup(driver) {
     //animate pickingup passenger by setting new route
-    console.log(driver);
 
     map.getSource("routes").setData(driverPaths);
 
     setTimeout(() => {
-      // if (driver.counter === 501) {
-      console.log(driver.counter, "counter");
-      console.log("complete journey");
-      // }
-      // if (driver.counter === 501) {
-      driver.currentLocation = driver.destination;
+      console.log(
+        driver.currentLocation[0].toFixed(4),
+        driver.currentLocation[1].toFixed(4)
+      );
+      console.log(
+        driver.id,
+        driver.currentLocation,
+        driver.destination,
+        "check this"
+      );
+
+      if (
+        driver.currentLocation[0].toFixed(4) ===
+          driver.destination[0].toFixed(4) &&
+        driver.currentLocation[1].toFixed(4) ===
+          driver.destination[1].toFixed(4)
+      ) {
+        console.log("WE ARRIVED??");
+      } else {
+        driver.currentLocation = driver.destination;
+      }
+
       driver.pickUp();
       driver.path = buildPath(driver.currentLocation, driver.destination);
-      const steps = 500;
+      const steps = driver.speed * 5;
       processPath(driver.path, steps);
       driverPaths.features[driver.id - 1] = driver.path;
       if (driver.state === "transit") {
@@ -306,13 +322,13 @@ export default function Map() {
         console.log("call transit");
         // }
       }
-    }, 10000);
+    }, 8000);
   }
 
   function handleTransit(driver) {
     map.getSource("routes").setData(driverPaths);
     driver.counter = 0;
-    const steps = 500;
+    const steps = driver.speed * 5;
     animatedriver(driver, steps);
     animatepassenger(driver, steps);
 
@@ -322,19 +338,19 @@ export default function Map() {
       console.log("complete journey");
       //need to debug passenger exit
       driver.currentLocation = driver.destination;
-      console.log(passengerPoints, "before remove image");
+
       for (let i = 0; i < passengerPoints.features.length; i++) {
         if (passengerPoints.features[i].properties.id === driver.passenger.id) {
-          let index = passengerPoints.features.indexOf(
-            passengerPoints.features[i]
-          );
-          passengerPoints.features.splice(index, 1);
-          break;
+          console.log(driver.passenger.id);
+          console.log(passengerPoints.features[i].properties.id);
+          console.log(passengerPoints.features.length, "before");
+          passengerPoints.features.splice(i, 1);
+          console.log(passengerPoints.features.length, "after");
+          map.getSource("passengers").setData(passengerPoints);
         }
+        // break;
       }
       console.log(passengerPoints, "after remove image");
-
-      map.getSource("passengers").setData(passengerPoints);
 
       driver.completed();
       driver.destination = generateRandomCoord();
