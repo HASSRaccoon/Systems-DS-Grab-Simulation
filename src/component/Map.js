@@ -52,7 +52,7 @@ export default function Map() {
   let driver1 = new Driver({
     id: 1,
     currentLocation: generateRandomCoord(),
-    speed: 50,
+    speed: 60,
     destination: generateRandomCoord(),
     path: null,
     ref: null,
@@ -61,7 +61,7 @@ export default function Map() {
   let driver2 = new Driver({
     id: 2,
     currentLocation: generateRandomCoord(),
-    speed: 80,
+    speed: 70,
     destination: generateRandomCoord(),
     path: null,
     ref: null,
@@ -134,7 +134,7 @@ export default function Map() {
     const driver = drivers[i];
     // console.log(driver.id);
     driver.path = buildPath(driver.currentLocation, driver.destination);
-    const steps = driver.speed * 5;
+    const steps = (100 - driver.speed) * 5;
     //replace steps with speed next time
     processPath(driver.path, steps);
     // console.log(drivers[driver.id - 1], "got path?");
@@ -189,25 +189,6 @@ export default function Map() {
       };
     }),
   };
-
-  function dateToTicks(date) {
-    const epochOffset = 621355968000000000;
-    const ticksPerMillisecond = 10000;
-
-    const ticks = date.getTime() * ticksPerMillisecond + epochOffset;
-
-    return ticks;
-  }
-
-  // function handledebug() {
-  //   const steps = 500;
-  //   for (let i = 0; i < drivers.length; i++) {
-  //     const driver = drivers[i];
-  //     driver.counter = 0;
-
-  //     animatedriver(driver, steps);
-  //   }
-  // }
 
   function animatedriver(driver, steps) {
     // console.log(driver);
@@ -279,6 +260,35 @@ export default function Map() {
     driver.passenger.counter = driver.passenger.counter + 1;
   }
 
+  function getDistance(path) {
+    const lineDistance = turf.length(path);
+    const distance = lineDistance.toFixed(2);
+    return distance;
+  }
+  const distance = 1.7;
+  const speed = 70;
+  esttimeTaken(distance, speed);
+  function esttimeTaken(distance, speed) {
+    const estimatedTimeMin = (distance / speed) * 60;
+    console.log(estimatedTimeMin);
+    return;
+    //time = distance/speed
+  }
+
+  function getFares(distance, speed) {
+    const time = esttimeTaken(distance, speed);
+    //time = distance/speed
+  }
+
+  function dateToTicks(date) {
+    const epochOffset = 621355968000000000;
+    const ticksPerMillisecond = 10000;
+
+    const ticks = date.getTime() * ticksPerMillisecond + epochOffset;
+
+    return ticks;
+  }
+
   function startAnimation() {
     // spawnPassengerWithProbability(spawnProbability);
     for (let i = 0; i < drivers.length; i++) {
@@ -290,7 +300,7 @@ export default function Map() {
   function handleSearch(driver) {
     console.log("called search");
     driver.counter = 0;
-    const steps = driver.speed * 5;
+    const steps = (100 - driver.speed) * 5;
     animatedriver(driver, steps);
 
     if (passengers.length > 0 && driver.state === "searching") {
@@ -339,7 +349,7 @@ export default function Map() {
 
       driver.pickUp();
       driver.path = buildPath(driver.currentLocation, driver.destination);
-      const steps = driver.speed * 5;
+      const steps = (100 - driver.speed) * 5;
       processPath(driver.path, steps);
       driverPaths.features[driver.id - 1] = driver.path;
       if (driver.state === "transit") {
@@ -353,7 +363,7 @@ export default function Map() {
   function handleTransit(driver) {
     map.getSource("routes").setData(driverPaths);
     driver.counter = 0;
-    const steps = driver.speed * 5;
+    const steps = (100 - driver.speed) * 5;
     animatedriver(driver, steps);
     animatepassenger(driver, steps);
 
