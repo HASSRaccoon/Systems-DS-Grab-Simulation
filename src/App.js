@@ -12,6 +12,7 @@ function App() {
       speed: [10,5],
       state: 'searching',
       ref: useRef(null),
+      moveTendency: 0.3,
     },
     {
       id: "driver2",
@@ -19,33 +20,38 @@ function App() {
       speed: [10,5],
       state: 'searching',
       ref: useRef(null),
+      moveTendency: 0.8,
     },
   ]);
 
   const [passengers, setPassengers] = useState([
     {
       id: "passenger1",
-      // currentLocation: [Math.random()*200,Math.random()*200],
-      // destination: [Math.random()*200,Math.random()*200],
-      currentLocation: [30,30],
-      destination: [100,100],
+      currentLocation: [Math.random()*200,Math.random()*200],
+      destination: [Math.random()*200,Math.random()*200],
       ref: useRef(null),
+      cancelTendency: 0.05,
     },
     {
       id: "passenger2",
-      // currentLocation: [Math.random()*200,Math.random()*200],
-      // destination: [Math.random()*200,Math.random()*200],
-      currentLocation: [70,90],
-      destination: [10,130],
+      currentLocation: [Math.random()*200,Math.random()*200],
+      destination: [Math.random()*200,Math.random()*200],
       ref: useRef(null),
+      cancelTendency: 1,
     },
     {
       id: "passenger3",
-      // currentLocation: [Math.random()*200,Math.random()*200],
-      // destination: [Math.random()*200,Math.random()*200],
-      currentLocation: [170,80],
-      destination: [110,30],
+      currentLocation: [Math.random()*200,Math.random()*200],
+      destination: [Math.random()*200,Math.random()*200],
       ref: useRef(null),
+      cancelTendency: 0.01,
+    },
+    {
+      id: "passenger4",
+      currentLocation: [Math.random()*200,Math.random()*200],
+      destination: [Math.random()*200,Math.random()*200],
+      ref: useRef(null),
+      cancelTendency: 1,
     },
   ]);
 
@@ -90,6 +96,29 @@ function App() {
     }
   }
 
+  function assignPassenger(driver) {
+    console.log(passengerLs)
+    if (passengerLs.length > 0 && driver.state === "searching") {
+      let passengerIndex = Math.floor(Math.random() * passengerLs.length);
+      currentPassenger = passengerLs[passengerIndex];
+      
+      if (currentPassenger.driver === null){
+        driver.passenger = currentPassenger;
+        currentPassenger.driver = driver;
+        passengerLs = passengerLs.filter(passenger => passenger.id !== currentPassenger.id)
+      }
+      else {
+        console.log('passenger already has driver')
+      }
+      
+      if (currentPassenger.driver === null || driver.passenger === null){
+        console.log(passengerLs)
+        console.log('bug');
+        assignPassenger(driver)
+      }
+    }
+  }
+
   useEffect(() => {
     spawnDriver();
   }, []);
@@ -107,42 +136,43 @@ function App() {
       }
       for (let i = 0; i < driverLs.length; i++) {
         let currentDriver = driverLs[i];
-          if (passengerLs.length > 0 && currentDriver.state === "searching") {
-            currentPassenger = passengerLs.pop();
-            currentDriver.passenger = currentPassenger;
-            console.log(currentPassenger.id)
-            currentDriver.state = "searching"
+        assignPassenger(currentDriver)
+        for (let i = 0; i < passengerLs.length; i++){
+          let passengerRandom = Math.random();
+          if (passengerRandom < passengerLs[i].cancelTendency && passengerLs[i].state === 'waiting'){
+            console.log('passenger cancelling')
+            passengerLs[i].cancel()
+            if (passengerLs[i].driver !== null){
+              passengerLs[i].driver.passenger = null;
+              passengerLs[i].driver.state = "searching"
+              passengerLs[i].driver.search(null)
+            }
+            passengerLs = passengerLs.filter(passenger => passenger.id !== passengerLs[i].id)
           }
-        switch (currentDriver.state) {
-          case "searching":
-              // setTimeout(() => {
-                currentDriver.search(currentDriver.passenger)
-              // }, 1000);
-            break;
-          case "picking up":
-            // setTimeout(() => {
-              currentDriver.pickUp()
-              currentDriver.passenger.carArrived(Date.now() / 1000 | 0, currentDriver)
-            // }, 1000);
-            break;
-          case "transit":
-            // setTimeout(() => {
-              currentDriver.transit()
-              currentDriver.passenger.transit()
-            // }, 1000);
-            break;
-          case 'completed':
-            // setTimeout(() => {
-              currentDriver.passenger.arrived()
-              currentDriver.completed()
-            // }, 1000);
-            break;
-          default:
-            // setTimeout(() => {
-              currentDriver.search(currentDriver.passenger)
-            // }, 1000);
-            break;
         }
+          switch (currentDriver.state) {
+            case "searching":
+                  currentDriver.search(currentDriver.passenger)
+                  console.log('searching')
+              break;
+            case "picking up":
+                currentDriver.pickUp()
+                currentDriver.passenger.carArrived(Date.now() / 1000 | 0)
+              break;
+            case "transit":
+                currentDriver.transit()
+                currentDriver.passenger.transit()
+              break;
+            case 'completed':
+                currentDriver.passenger.arrived()
+                currentDriver.completed()
+                
+              break;
+            default:
+                currentDriver.search(currentDriver.passenger)
+              break;
+          }
+          
       }
     }, 1500);
   }, [])

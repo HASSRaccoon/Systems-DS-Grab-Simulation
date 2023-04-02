@@ -20,6 +20,7 @@ export default class Driver {
         this.earnings = 0;
         this.rating = 0;
         this.ref = props.ref;
+        this.moveTendency = props.moveTendency;
         // add a parameter to change how the driver slows down when raining?? //TODO:
     }
     updateSpeed(raining) {
@@ -36,22 +37,28 @@ export default class Driver {
         if (this.passenger){ 
             // console.log('picking up')
             this.destination = this.passenger.currentLocation;
+            console.log(`driver destination after searching: ${this.destination}`)
             this.state = 'picking up';
         }
         else{
             // console.log('searching')
-            this.currentLocation[0] += this.speed[0];
-            this.currentLocation[1] += this.speed[1];
+            // this.currentLocation[0] += this.speed[0];
+            // this.currentLocation[1] += this.speed[1];
             this.waitingTime += 1; //FIXME: need to add the correct timestamp
-            this.destination = [Math.random()*200,Math.random()*200];
-            moveTo(this.ref.current, this.currentLocation, this.destination, this.ref, this.speed)
+            console.log(`current: ${this.currentLocation}, dest: ${this.destination}`)
+            let random = Math.random();
+            console.log(random)
+            if (random < this.moveTendency) {
+                this.destination = [Math.random()*200,Math.random()*200];
+                moveTo(this.ref.current, this.currentLocation, this.destination, this.ref, this.speed)
+            }
             this.passenger = passenger;
         }
     }
     pickUp(){
         if (this.currentLocation <= this.destination - this.speed){
-            this.currentLocation[0] += this.speed[0];
-            this.currentLocation[1] += this.speed[1];
+            // this.currentLocation[0] += this.speed[0];
+            // this.currentLocation[1] += this.speed[1];
             // console.log(`driver current location when picking up: ${this.currentLocation}`)
         }
         else{ //FIXME:
@@ -62,9 +69,10 @@ export default class Driver {
     }
     transit(){
         this.destination = this.passenger.destination;
+        console.log(`driver destination after transit: ${this.destination}`)
         if (this.currentLocation < this.destination - this.speed){
-            this.currentLocation[0] += this.speed[0];
-            this.currentLocation[1] += this.speed[1];
+            // this.currentLocation[0] += this.speed[0];
+            // this.currentLocation[1] += this.speed[1];
             console.log(`driver current location when transit: ${this.currentLocation}`)
         }
         else{
