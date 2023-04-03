@@ -7,6 +7,14 @@ export default class Globals {
     this.timeofday = "day";
     this.companyProfitShare = 0.1;
 
+    // INPUTS - FARES
+    this._isPeakHour = false;
+    this.fuelPrice = 22.54; //$ per 100km
+    this.peakFareMultiplier = 1.5;
+    this.pricePerKm = 0.5;
+    this.pricePerMinute = 0.16;
+  
+
     // OUTPUTS
     this.companyProfit = 0;
     this.driverProfit = 0;
@@ -19,6 +27,7 @@ export default class Globals {
       this.totalDriverWaitingTime / this.jobsCompleted;
 
     // FORMULAS
+    this.fares = 
     this.passengerSatisfactionIndex = 0; //insert formula
     this.driverSatisfactionIndex = 0; //insert formula
     this.overallSatisfactionIndex =
@@ -52,6 +61,41 @@ export default class Globals {
     return this._raining;
   }
 
+
+  checkPeak(datetime) {
+  // check if it is peak hour (7am to 10am and 5pm to 8pm)
+  // takes in datetime object as input
+  // Returns true if it is peak hour, false otherwise
+
+    // Get the current hour (in 24-hour format)
+    const currentHour = datetime.getHours();
+    // Check if the current time falls within the first time range (7am to 10am)
+    const isMorning = currentHour >= 7 && currentHour <= 10;
+    // Check if the current time falls within the second time range (5pm to 8pm)
+    const isEvening = currentHour >= 17 && currentHour <= 20;
+    // Print the result
+    if (isMorning || isEvening) {
+      this._isPeakHour = true;
+      // console.log("The current time is within the specified range.");
+    } else {
+      this._isPeakHour = false;
+      // console.log("The current time is outside the specified range.");
+    }
+    return this._isPeakHour;
+  }
+
+  fareCalculation(distance, minutes, datetime) {
+    // uses checkPeak to determine if it is peak hour
+    // distance in km
+    // minutes in minutes
+    // datetime in datetime object for checkPeak
+    // returns fare in dollars
+
+    // calculate the fare
+    const fare = 3.5 + (this.pricePerKm*distance) + (this.pricePerMinute*minutes);
+    const finalfare = this.checkPeak(datetime) == false ? (fare*this.peakFareMultiplier): fare;
+    return finalfare;
+  } 
   registerDriver(driver) {
     this._drivers.push(driver);
     console.log(`registered driver ${driver}`);
@@ -77,4 +121,5 @@ export default class Globals {
     this.jobsCompleted = [];
     this.jobsCancelled = [];
   }
+
 }

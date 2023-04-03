@@ -48,6 +48,9 @@ export default function Map() {
   const spawnProbability = 0.5;
 
   let god = new Globals();
+  console.log(god.checkPeak(new Date())); //check peak hour
+  console.log("fares",god.fareCalculation(0.5,4,new Date())); //check raining
+
 
   let driver1 = new Driver({
     id: 1,
@@ -294,6 +297,10 @@ export default function Map() {
     const ticks = date.getTime() * ticksPerMillisecond + epochOffset;
 
     return ticks;
+  }
+
+  function calculateEarning(driver) {
+
   }
 
   function startGlobalTime() {}
