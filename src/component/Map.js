@@ -98,7 +98,7 @@ export default function Map() {
     passenger3,
   ]);
 
-  console.log(passengers);
+  // console.log(passengers);
 
   function spawnPassengerWithProbability(spawnProbability) {
     setInterval(() => {
@@ -265,9 +265,12 @@ export default function Map() {
     const distance = lineDistance.toFixed(2);
     return distance;
   }
-  const distance = 1.7;
+  const distance = 2;
+  const irldistance = 40;
   const speed = 70;
-  esttimeTaken(distance, speed);
+  const computertimetaken = 5;
+
+  esttimeTaken(irldistance, speed);
   function esttimeTaken(distance, speed) {
     const estimatedTimeMin = (distance / speed) * 60;
     console.log(estimatedTimeMin);
@@ -277,9 +280,13 @@ export default function Map() {
 
   function getFares(distance, speed) {
     const time = esttimeTaken(distance, speed);
+
     //time = distance/speed
   }
 
+  // const d = new Date();
+
+  // console.log(d, "Date when load");
   function dateToTicks(date) {
     const epochOffset = 621355968000000000;
     const ticksPerMillisecond = 10000;
@@ -289,15 +296,23 @@ export default function Map() {
     return ticks;
   }
 
+  function startGlobalTime() {}
+
   function startAnimation() {
-    // spawnPassengerWithProbability(spawnProbability);
+    startGlobalTime();
     for (let i = 0; i < drivers.length; i++) {
       let driver = drivers[i];
+      console.log(driver.totalTime, "total time now");
       handleSearch(driver);
     }
   }
 
   function handleSearch(driver) {
+    const startDate = new Date();
+    const startDateTicks = dateToTicks(startDate);
+    console.log(startDateTicks, "Ticks now!");
+    driver.totalTicks = startDateTicks;
+    console.log(driver.totalTicks, "Should be the same");
     console.log("called search");
     driver.counter = 0;
     const steps = (100 - driver.speed) * 5;
@@ -321,7 +336,11 @@ export default function Map() {
 
   function handlePickup(driver) {
     //animate pickingup passenger by setting new route
-
+    console.log(driver.totalTicks, "Should be the same");
+    const startDate = new Date();
+    const startDateTicks = dateToTicks(startDate);
+    driver.totalTicks = startDateTicks - driver.totalTicks;
+    console.log(driver.totalTicks, "Should be diff");
     map.getSource("routes").setData(driverPaths);
 
     setTimeout(() => {

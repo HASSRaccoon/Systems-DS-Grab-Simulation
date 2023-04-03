@@ -22,7 +22,26 @@ export default class Driver {
     this.ref = props.ref;
     this.path = 0;
     this.counter = 0;
-    this.distanceTravelled = 0;
+    this.workingPeriod = []; //nested list
+    this.isWorking = true;
+    this.Log = {
+      // 0: {
+      //   searching: [distance, fuel,  duration, timeFound],
+      //   pickingup: [distance, fuel, duration],
+      //   transit: [distance, fuel, duration, earning],
+      // },
+      // 1: {
+      //   searching: [distance, duration, timeFound],
+      //   pickingup: [distance, duration],
+      //   transit: [distance, duration, earning],
+      // },
+    };
+    this.totalTime = 0;
+    this.totalTicks = 0;
+    this.totaldistSearch = 0;
+    this.totaldistPickup = 0;
+    this.totaldistTransit = 0;
+    this.totalDistanceTravelled = 0;
     this.agentType = "driver";
 
     // add a parameter to change how the driver slows down when raining?? //TODO:
