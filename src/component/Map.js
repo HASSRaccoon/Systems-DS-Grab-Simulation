@@ -48,9 +48,8 @@ export default function Map() {
   const spawnProbability = 0.5;
 
   let god = new Globals();
-  console.log(god.checkPeak(new Date())); //check peak hour
-  console.log("fares",god.fareCalculation(0.5,4,new Date())); //check raining
-
+  // console.log(god.checkPeak(new Date())); //check peak hour
+  // console.log("fares",god.fareCalculation(0.5,4,new Date())); //check raining
 
   let driver1 = new Driver({
     id: 1,
@@ -268,22 +267,22 @@ export default function Map() {
     const distance = lineDistance.toFixed(2);
     return distance;
   }
-  const distance = 2;
-  const irldistance = 40;
-  const speed = 70;
-  const computertimetaken = 5;
 
-  esttimeTaken(irldistance, speed);
-  function esttimeTaken(distance, speed) {
-    const estimatedTimeMin = (distance / speed) * 60;
-    console.log(estimatedTimeMin);
-    return;
-    //time = distance/speed
-  }
+  // const distance = 2;
+  // const irldistance = 40;
+  // const speed = 70;
+  // const computertimetaken = 5;
+
+  // esttimeTaken(irldistance, speed);
+  // function esttimeTaken(distance, speed) {
+  //   const estimatedTimeMin = (distance / speed) * 60;
+  //   console.log(estimatedTimeMin);
+  //   return;
+  //   //time = distance/speed
+  // }
 
   function getFares(distance, speed) {
-    const time = esttimeTaken(distance, speed);
-
+    // const time = esttimeTaken(distance, speed);
     //time = distance/speed
   }
 
@@ -299,14 +298,11 @@ export default function Map() {
     return ticks;
   }
 
-  function calculateEarning(driver) {
+  // function calculateEarning(driver) {}
 
-  }
-
-  function startGlobalTime() {}
+  // function startGlobalTime() {}
 
   function startAnimation() {
-    startGlobalTime();
     for (let i = 0; i < drivers.length; i++) {
       let driver = drivers[i];
       console.log(driver.totalTime, "total time now");
@@ -314,40 +310,86 @@ export default function Map() {
     }
   }
 
+  //reference for driver.Log
+  // const driver = drivers[0];
+  // driver.Log[0] = {};
+  // driver.Log[0]["searching"] = {};
+  // driver.Log[0]["searching"]["timeFound"] = 5;
+  // driver.Log[0]["searching"]["distance"] = 10;
+  // console.log(driver.Log);
+
+  function getFuelCost(distance) {
+    const rateperkm = 22.54 / 100;
+    const fuelcostperdist = distance * rateperkm;
+    //22.54 per 100km
+    //22.54/100 per km
+    return fuelcostperdist;
+  }
+
   function handleSearch(driver) {
+    driver.Log[driver.completedJobs] = {};
+    driver.Log[driver.completedJobs]["searching"] = {};
+    const initialLocation = driver.currentLocation;
     const startDate = new Date();
     const startDateTicks = dateToTicks(startDate);
-    console.log(startDateTicks, "Ticks now!");
-    driver.totalTicks = startDateTicks;
-    console.log(driver.totalTicks, "Should be the same");
-    console.log("called search");
     driver.counter = 0;
     const steps = (100 - driver.speed) * 5;
     animatedriver(driver, steps);
 
     if (passengers.length > 0 && driver.state === "searching") {
       driver.passenger = passengers[driver.id];
+      const foundDate = new Date();
+      const foundDateTicks = dateToTicks(foundDate);
+
+      driver.Log[driver.completedJobs]["searching"]["timeFound"] =
+        foundDateTicks - startDateTicks;
+      // console.log(driver.Log, "check timeFound");
     }
-    console.log(driver.passenger, "no passenger");
+
     //pathfinding to passenger
     driver.search(driver.passenger);
-    driver.path = buildPath(driver.currentLocation, driver.destination);
-    processPath(driver.path, steps);
-    driverPaths.features[driver.id - 1] = driver.path;
 
     if (driver.state === "picking up" && driver.passenger != null) {
+      let searchDistance = 0;
+      //need to fix
+      // console.log(driverstartLocation);
+      // console.log(driver.currentLocation);
+      // console.log(
+      //   Array.from(driverstartLocation) === Array.from(driver.currentLocation),
+      //   "true?"
+      // );
+      // if (driverstartLocation != driver.currentLocation) {
+      //   const searchDistPath = buildPath(
+      //     driverstartLocation,
+      //     driver.currentLocation
+      //   );
+      //   searchDistance = getDistance(searchDistPath);
+      // } else {
+      //   searchDistance = 0;
+      //   console.log("no dist");
+      // }
+      driver.Log[driver.completedJobs]["searching"]["distance"] =
+        searchDistance;
+      driver.Log[driver.completedJobs]["searching"]["fuel cost"] =
+        getFuelCost(searchDistance);
+      const endDate = new Date();
+      const endDateTicks = dateToTicks(endDate);
+      driver.Log[driver.completedJobs]["searching"]["duration"] =
+        endDateTicks - startDateTicks;
+      console.log(driver.Log);
+      // driver.totalTicks = startDateTicks;
+      driver.path = buildPath(driver.currentLocation, driver.destination);
+      processPath(driver.path, steps);
+      driverPaths.features[driver.id - 1] = driver.path;
       handlePickup(driver);
-      console.log("call pickup");
     }
   }
 
   function handlePickup(driver) {
-    //animate pickingup passenger by setting new route
-    console.log(driver.totalTicks, "Should be the same");
+    driver.Log[driver.completedJobs]["pickingup"] = {};
     const startDate = new Date();
     const startDateTicks = dateToTicks(startDate);
-    driver.totalTicks = startDateTicks - driver.totalTicks;
-    console.log(driver.totalTicks, "Should be diff");
+    // driver.totalTicks = startDateTicks - driver.totalTicks;
     map.getSource("routes").setData(driverPaths);
 
     setTimeout(() => {
@@ -374,19 +416,32 @@ export default function Map() {
       }
 
       driver.pickUp();
-      driver.path = buildPath(driver.currentLocation, driver.destination);
-      const steps = (100 - driver.speed) * 5;
-      processPath(driver.path, steps);
-      driverPaths.features[driver.id - 1] = driver.path;
+      const endDate = new Date();
+      const endDateTicks = dateToTicks(endDate);
+
+      driver.Log[driver.completedJobs]["pickingup"]["duration"] =
+        endDateTicks - startDateTicks;
+      const pickupDistance = getDistance(driver.path);
+      driver.Log[driver.completedJobs]["pickingup"]["distance"] =
+        pickupDistance;
+      driver.Log[driver.completedJobs]["pickingup"]["fuel cost"] =
+        getFuelCost(pickupDistance);
+      console.log(driver.id, driver.Log, "Log");
       if (driver.state === "transit") {
+        // driver.totalTicks = startDateTicks;
+        driver.path = buildPath(driver.currentLocation, driver.destination);
+        const steps = (100 - driver.speed) * 5;
+        processPath(driver.path, steps);
+        driverPaths.features[driver.id - 1] = driver.path;
         handleTransit(driver);
-        console.log("call transit");
-        // }
       }
     }, 8000);
   }
 
   function handleTransit(driver) {
+    driver.Log[driver.completedJobs]["transit"] = {};
+    const startDate = new Date();
+    const startDateTicks = dateToTicks(startDate);
     map.getSource("routes").setData(driverPaths);
     driver.counter = 0;
     const steps = (100 - driver.speed) * 5;
@@ -413,6 +468,15 @@ export default function Map() {
       }
       console.log(passengerPoints, "after remove image");
 
+      const endDate = new Date();
+      const endDateTicks = dateToTicks(endDate);
+      driver.Log[driver.completedJobs]["transit"]["duration"] =
+        endDateTicks - startDateTicks;
+      const transitDistance = getDistance(driver.path);
+      driver.Log[driver.completedJobs]["transit"]["distance"] = transitDistance;
+      driver.Log[driver.completedJobs]["transit"]["fuel cost"] =
+        getFuelCost(transitDistance);
+      console.log(driver.id, driver.Log, "Log");
       driver.completed();
       driver.destination = generateRandomCoord();
       driver.path = buildPath(driver.currentLocation, driver.destination);

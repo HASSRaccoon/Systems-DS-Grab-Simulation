@@ -25,15 +25,16 @@ export default class Driver {
     this.workingPeriod = []; //nested list
     this.isWorking = true;
     this.Log = {
+      //for reference
       // 0: {
-      //   searching: [distance, fuel,  duration, timeFound],
-      //   pickingup: [distance, fuel, duration],
-      //   transit: [distance, fuel, duration, earning],
+      //   searching: {distance: 0 , fuelcost: 0,  duration: 0, timeFound: 0},
+      //   pickingup: {distance: 0 , fuelcost: 0,  duration: 0},
+      //   transit: {distance: 0 , fuelcost: 0,  duration: 0, earning: 0},
       // },
       // 1: {
-      //   searching: [distance, duration, timeFound],
-      //   pickingup: [distance, duration],
-      //   transit: [distance, duration, earning],
+      //   searching: {distance: 0 , fuel: 0,  duration: 0, timeFound: 0},
+      //   pickingup: {distance: 0 , fuel: 0,  duration: 0},
+      //   transit: {distance: 0 , fuel: 0,  duration: 0, earning: 0},
       // },
     };
     this.totalTime = 0;
