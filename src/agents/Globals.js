@@ -27,7 +27,6 @@ export default class Globals {
       this.totalDriverWaitingTime / this.jobsCompleted;
 
     // FORMULAS
-    this.fares = 
     this.passengerSatisfactionIndex = 0; //insert formula
     this.driverSatisfactionIndex = 0; //insert formula
     this.overallSatisfactionIndex =

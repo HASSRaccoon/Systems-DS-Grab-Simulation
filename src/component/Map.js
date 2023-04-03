@@ -1,8 +1,8 @@
 // --- (1), (2) & (3): install and import ---
 import React, { useEffect, useRef, useState } from "react";
 // import ReactDOM  from 'react-dom';
-import sgJSON from "../data/punngol_road_line_new.json";
-// import sgJSON from "./../data/road-network.json";
+// import sgJSON from "../data/punngol_road_line_new.json";
+import sgJSON from "./../data/road-network.json";
 import * as turf from "@turf/turf";
 import PathFinder, { pathToGeoJSON } from "geojson-path-finder";
 import mapboxgl from "mapbox-gl";
@@ -128,9 +128,9 @@ export default function Map() {
 
   const mapContainer = useRef(null);
   const [map, setMap] = useState(null);
-  const [lng, setLng] = useState(103.908009);
-  const [lat, setLat] = useState(1.406741);
-  const [zoom, setZoom] = useState(14);
+  const [lng, setLng] = useState(103.807);
+  const [lat, setLat] = useState(1.37);
+  const [zoom, setZoom] = useState(10.5);
 
   //default paths on init
   for (let i = 0; i < drivers.length; i++) {
