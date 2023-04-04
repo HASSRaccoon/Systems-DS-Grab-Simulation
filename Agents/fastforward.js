@@ -7,14 +7,12 @@ let days = 30; //DEBUG:
 let drivers = [
     {
         id: "driver1",
-        currentLocation: [Math.random()*200,Math.random()*200], //DEBUG: json location
         speed: 70,
         state: 'searching',
         moveTendency: 0.3,
     },
     {
         id: "driver2",
-        currentLocation: [Math.random()*200,Math.random()*200], //DEBUG: json location
         speed: 50,
         state: 'searching',
         moveTendency: 0.8,
@@ -24,26 +22,18 @@ let drivers = [
 let passengers = [
     {
         id: "passenger1",
-        currentLocation: [Math.random()*200,Math.random()*200], //DEBUG: json location
-        destination: [Math.random()*200,Math.random()*200], //DEBUG: json location
         cancelTendency: 0,
     },
     {
         id: "passenger2",
-        currentLocation: [Math.random()*200,Math.random()*200], //DEBUG: json location
-        destination: [Math.random()*200,Math.random()*200], //DEBUG: json location
         cancelTendency: 0,
     },
     {
         id: "passenger3",
-        currentLocation: [Math.random()*200,Math.random()*200], //DEBUG: json location
-        destination: [Math.random()*200,Math.random()*200], //DEBUG: json location
         cancelTendency: 0,
     },
     {
         id: "passenger4",
-        currentLocation: [Math.random()*200,Math.random()*200], //DEBUG: json location
-        destination: [Math.random()*200,Math.random()*200], //DEBUG: json location
         cancelTendency: 0,
     },
 ];

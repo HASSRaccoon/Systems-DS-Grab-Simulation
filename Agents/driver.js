@@ -1,3 +1,9 @@
+import sgJSON from "./road-network.json" assert { type: "json" };
+import * as turf from "@turf/turf";
+import PathFinder, { pathToGeoJSON } from "geojson-path-finder";
+
+const pathFinder = new PathFinder(sgJSON);
+
 export default class Driver {
     constructor(props) {
         //// Global affecting ////
@@ -6,7 +12,7 @@ export default class Driver {
 
         this.id = props.id;
         this.state = 'searching';
-        this.currentLocation = props.currentLocation;
+        this.currentLocation = this.generateRandomCoord();
         this.destination = null;
         this.time = 0;
         this.distanceWillingToTravel = 0;
@@ -47,7 +53,7 @@ export default class Driver {
             this.time += 1; //NOTE: time is in tick, waiting time of searching passenger
             let random = Math.random();
             if (random < this.moveTendency) {
-                this.destination = [Math.random()*200,Math.random()*200]; //FIXME: feels like sth wrong here
+                this.destination = this.generateRandomCoord();
             }
             this.distance += this.distancePerTick(this.speed);
             this.passenger = passenger;
@@ -100,11 +106,27 @@ export default class Driver {
         // console.log(this.log)
     }
 
+    buildPath(start, end) {
+        const pathBuilder = new PathFinder(sgJSON, { tolerance: 1e-4 });
+        const path = pathToGeoJSON(
+          pathBuilder.findPath(turf.point(start), turf.point(end))
+        );
+        return path;
+    }
+
     distanceCalculation(location, destination){
-        return Math.sqrt(Math.pow(location[0] - destination[0], 2) + Math.pow(location[1] - destination[1], 2));
+        let path = this.buildPath(location, destination);
+        return turf.length(path)
     }
 
     distancePerTick(speed){
         return speed / 60;
+    }
+
+    generateRandomCoord() {
+        let Pos =
+          sgJSON.features[Math.floor(Math.random() * sgJSON.features.length)]
+            .geometry.coordinates;
+        return Pos;
     }
 }

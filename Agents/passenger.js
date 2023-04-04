@@ -1,9 +1,11 @@
+import sgJSON from "./road-network.json" assert { type: "json" };
+
 export default class Passenger{
     constructor(props) {
         this.id = props.id;
         this.state = 'waiting';
-        this.currentLocation = props.currentLocation;
-        this.destination = props.destination;
+        this.currentLocation = this.generateRandomCoord();
+        this.destination = this.generateRandomCoord();
         this.waitingTime = 0;
         this.driver = null;
         this.ref = props.ref;
@@ -31,5 +33,11 @@ export default class Passenger{
     cancel(){
         console.log('passenger cancelled')
         // this.driver.passenger = null;
+    }
+    generateRandomCoord() {
+        let Pos =
+          sgJSON.features[Math.floor(Math.random() * sgJSON.features.length)]
+            .geometry.coordinates;
+        return Pos;
     }
 }
