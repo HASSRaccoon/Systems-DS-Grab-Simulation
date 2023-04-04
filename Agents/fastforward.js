@@ -1,14 +1,13 @@
 import Driver from './driver.js';
 import Passenger from './passenger.js';
+import Globals from './globals.js';
 
-let days = 1; //DEBUG:
+let days = 30; //DEBUG:
 
 let drivers = [
     {
         id: "driver1",
-        // currentLocation: [Math.random()*200,Math.random()*200], //DEBUG: json location
-        currentLocation: [20,30], //DEBUG: json location
-
+        currentLocation: [Math.random()*200,Math.random()*200], //DEBUG: json location
         speed: 70,
         state: 'searching',
         moveTendency: 0.3,
@@ -49,6 +48,8 @@ let passengers = [
     },
 ];
 
+let god = new Globals();
+
 let driverLs = []
 let passengerLs = []
 
@@ -59,7 +60,7 @@ function assignPassenger(driver) { //DEBUG: need to assign nearest passenger ins
     if (passengerLs.length > 0 && driver.state === "searching") {
         let passengerIndex = Math.floor(Math.random() * passengerLs.length); //DEBUG: assigning random passenger part
         let currentPassenger = passengerLs[passengerIndex];
-        if (currentPassenger.driver === null){
+        if (currentPassenger.driver === null){ //NOTE: to avoid reassigning passenger to another driver
             driver.passenger = currentPassenger;
             currentPassenger.driver = driver;
             passengerLs = passengerLs.filter(passenger => passenger.id !== currentPassenger.id) //DEBUG: remove passenger from list
@@ -71,22 +72,48 @@ function assignPassenger(driver) { //DEBUG: need to assign nearest passenger ins
     }
 }
 
-for (let ticks = 0; ticks < 1000 * days; ticks++) {
+function newPassenger(){
+    let passenger = new Passenger({
+        id: "passenger" + passengerLs.length,
+        currentLocation: [Math.random()*200,Math.random()*200], //DEBUG: json location
+        destination: [Math.random()*200,Math.random()*200], //DEBUG: json location
+        cancelTendency: 0,
+    })
+    passengerLs.push(passenger)
+}
+
+for (let ticks = 0; ticks < 1440 * days; ticks++) {
+    // FIXME: how to add new passenger, current is to add new passenger every ticks
+    newPassenger(); 
+    if (ticks % 60 == 0){ //NOTE: each hour
+        if (Math.random() < 0.5){ //NOTE: rain probability
+            god.raining = true;
+        }
+        else{
+            god.raining = false;
+        }
+    }
+    for (let i = 0; i < passengerLs.length; i++){ //NOTE: passenger cancelling
+        let passengerRandom = Math.random();
+        if (passengerRandom < passengerLs[i].cancelTendency && passengerLs[i].state === 'waiting'){
+            console.log('passenger cancelling')
+            passengerLs[i].cancel()
+            if (passengerLs[i].driver !== null){
+                passengerLs[i].driver.passenger = null;
+                passengerLs[i].driver.state = "searching"
+                passengerLs[i].driver.search(null)
+            }
+            passengerLs = passengerLs.filter(passenger => passenger.id !== passengerLs[i].id)
+        }
+    }
     for (let i = 0; i < driverLs.length; i++) { //NOTE: loop for each driver
         let currentDriver = driverLs[i];
-        assignPassenger(currentDriver);
-        for (let i = 0; i < passengerLs.length; i++){ //NOTE: passenger cancelling
-            let passengerRandom = Math.random();
-            if (passengerRandom < passengerLs[i].cancelTendency && passengerLs[i].state === 'waiting'){
-                console.log('passenger cancelling')
-                passengerLs[i].cancel()
-                if (passengerLs[i].driver !== null){
-                    passengerLs[i].driver.passenger = null;
-                    passengerLs[i].driver.state = "searching"
-                    passengerLs[i].driver.search(null)
-                }
-                passengerLs = passengerLs.filter(passenger => passenger.id !== passengerLs[i].id)
-            }
+        if (ticks % 1440 >= currentDriver.startTime && ticks % 1440 <= currentDriver.endTime){ //NOTE: if driver on duty, assign passenger
+            assignPassenger(currentDriver);
+        }
+        else{
+            currentDriver.time = 0;
+            currentDriver.distance = 0;
         }
         switch (currentDriver.state) {
             case "searching":
@@ -114,3 +141,9 @@ for (let ticks = 0; ticks < 1000 * days; ticks++) {
         }
     }
 }
+
+// print log for each driver after end of simulation, can be log every day etc
+driverLs.forEach(driver => {
+    console.log(`${driver.id}'s log`)
+    console.log(driver.log)
+});

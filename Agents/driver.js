@@ -21,6 +21,8 @@ export default class Driver {
         this.jobLog = {};
         this.distance = 0;
         this.distanceToTravel = 0;
+        this.startTime = 420; //NOTE: 7am
+        this.endTime = 1020; //NOTE: 5pm
     }
     updateSpeed(raining) {
         if (raining) {
@@ -52,8 +54,8 @@ export default class Driver {
         }
     }
     pickUp(){
-        this.time += 1; //NOTE: time is in tick, time spent to travel to passenger location
         let speed = this.distancePerTick(this.speed);
+        this.time += Math.min(1, this.distanceToTravel / speed); //NOTE: time is in tick, time spent to travel to passenger location
         if (Math.floor(this.distanceToTravel / speed) != 0){ //NOTE: like 4km -> 2.66km etc (no remainder)
             this.distance += speed
             this.distanceToTravel -= speed
@@ -71,8 +73,8 @@ export default class Driver {
         }
     }
     transit(){
-        this.time += 1; //NOTE: time is in tick, time spent to travel to passenger location
         let speed = this.distancePerTick(this.speed);
+        this.time += Math.min(1, this.distanceToTravel / speed); //NOTE: time is in tick, time spent to travel to passenger location
         if (Math.floor(this.distanceToTravel / speed) != 0){ //NOTE: like 4km -> 2.66km etc (no remainder)
             this.distance += speed
             this.distanceToTravel -= speed
@@ -94,8 +96,8 @@ export default class Driver {
         this.distance = 0
         this.time = 0
         this.log[`${this.completedJobs}`] = {...this.jobLog}
-        console.log(`${this.id}'s log`)
-        console.log(this.log)
+        // console.log(`${this.id}'s log`)
+        // console.log(this.log)
     }
 
     distanceCalculation(location, destination){
