@@ -43,6 +43,10 @@ export default function Map() {
       const segment = turf.along(path, i);
       arc.push(segment.geometry.coordinates);
     }
+
+    arc.push(turf.along(path, lineDistance).geometry.coordinates);
+    // console.log(turf.along(path, lineDistance).geometry.coordinates, "ending of line path")
+
     path.geometry.coordinates = arc;
   }
   const spawnProbability = 0.5;
@@ -92,15 +96,29 @@ export default function Map() {
     currentLocation: generateRandomCoord(),
   });
 
+  var passengerListo = [];
+
+  for (let i = 0; i < 20; i++) {
+    passengerListo[i] = new Passenger({
+      id: i,
+      ref: null,
+      destination: generateRandomCoord(),
+      currentLocation: generateRandomCoord(),
+    });
+  }
+
   let running = false;
 
   const [drivers, setDrivers] = useState([driver1, driver2]);
 
-  const [passengers, setPassengers] = useState([
-    passenger1,
-    passenger2,
-    passenger3,
-  ]);
+  const [passengers, setPassengers] = useState(
+  //   [
+  //   passenger1,
+  //   passenger2,
+  //   passenger3,
+  // ]
+  passengerListo
+  );
 
   // console.log(passengers);
 
