@@ -24,6 +24,10 @@ export default class Driver {
     this.counter = 0;
     this.workingPeriod = []; //nested list
     this.isWorking = true;
+    this.currentLeftoverDist = 0;
+    this.currentSteps = 0;
+    this.currentLeftoverTime = 0;
+    this.distancePerStep = 0;
     this.Log = {
       //for reference
       // 0: {
