@@ -122,18 +122,18 @@ export default function Map() {
     destination: generateRandomCoord(),
     currentLocation: generateRandomCoord(),
   });
-  // let running = false;
+  let running = false;
 
-  // const [drivers, setDrivers] = useState([driver1, driver2, driver3]);
+  const [drivers, setDrivers] = useState([driver1, driver2, driver3]);
 
-  // const [passengers, setPassengers] = useState([
-  //   passenger1,
-  //   passenger2,
-  //   passenger3,
-  //   passenger4,
-  //   passenger5,
-  //   passenger6,
-  // ]);
+  const [passengers, setPassengers] = useState([
+    passenger1,
+    passenger2,
+    passenger3,
+    passenger4,
+    passenger5,
+    passenger6,
+  ]);
   // let passengerListo = [];
 
   // for (let i = 0; i < 20; i++) {
@@ -195,12 +195,7 @@ export default function Map() {
   //default paths on init
   for (let i = 0; i < drivers.length; i++) {
     const driver = drivers[i];
-    // console.log(driver.id);
     driver.path = buildPath(driver.currentLocation, driver.destination);
-    // const steps = (100 - driver.speed) * 5;
-    //replace steps with speed next time
-    // processPath(driver.path, steps);
-    // console.log(drivers[driver.id - 1], "got path?");
   }
 
   let driverPoints = {
@@ -309,17 +304,12 @@ export default function Map() {
     driver.timeLog[driver.timeCounter]["distance travelled"] =
       driver.distancePerStep;
     driver.timeLog[driver.timeCounter]["time passed"] = 1;
-    // driver.timeLog[driver.timeCounter]["leftover time"] = 0;
     driver.timeLog[driver.timeCounter]["speed"] = driver.speed;
     if (driver.counter === driver.currentSteps + 1) {
       driver.timeLog[driver.timeCounter]["distance travelled"] =
         driver.currentLeftoverDistance;
       driver.timeLog[driver.timeCounter]["time passed"] =
         driver.currentLeftoverTime;
-      // driver.timeLog[driver.timeCounter]["leftover distance"] =
-      //   driver.currentLeftoverDistance;
-      // driver.timeLog[driver.timeCounter]["leftover time"] =
-      //   driver.currentLeftoverTime;
     }
 
     console.log(driver.id, driver.timeLog, "time log per frame");
@@ -379,25 +369,15 @@ export default function Map() {
 
   function getDistance(path) {
     const lineDistance = turf.length(path);
-    const distance = lineDistance.toFixed(2); //eugene: might take out? unless better to have 2dp
-    return distance;
+    // const distance = lineDistance.toFixed(2); //eugene: might take out? unless better to have 2dp
+    return lineDistance;
   }
-
-  // const distance = 2;
-  // const irldistance = 40;
-  // const speed = 70;
-  // const computertimetaken = 5;
-
-  // esttimeTaken(irldistance, speed);
 
   function getFares(distance, speed) {
     // const time = esttimeTaken(distance, speed);
     //time = distance/speed
   }
 
-  // const d = new Date();
-
-  // console.log(d, "Date when load");
   function dateToTicks(date) {
     const epochOffset = 621355968000000000;
     const ticksPerMillisecond = 10000;
@@ -407,33 +387,7 @@ export default function Map() {
     return ticks;
   }
 
-  // function calculateEarning(driver) {}
-
-  // function startGlobalTime() {}
-  // let animationId;
   let isRunning = false;
-  // function debugStart() {
-  //   const driver = drivers[1];
-  //   const steps = (100 - driver.speed) * 5;
-  //   animatedriver(driver, steps);
-  //   isRunning = true;
-  // }
-  // function debugPause() {
-  //   if (animationId) {
-  //     // const driver = drivers[1];
-  //     // const steps = (100 - driver.speed) * 5;
-  //     cancelAnimationFrame(animationId);
-  //     isRunning = false;
-  //   }
-  // }
-  // function debugContinue() {
-  //   // if (isPaused) {
-  //   isRunning = true;
-  //   const driver = drivers[1];
-  //   const steps = (100 - driver.speed) * 5;
-  //   animatedriver(driver, steps);
-  //   // }
-  // }
 
   function getFuelCost(distance) {
     const rateperkm = 22.54 / 100;
@@ -537,28 +491,16 @@ export default function Map() {
     animatedriver(driver);
     let getPassengerTime = 0;
     if (passengers.length > 0 && driver.state === "searching") {
-      driver.passenger = passengers[driver.id]; // eugene: currently driver will be assigned with the same passenger every time? passengers[driver.id==2] == 2nd passenger in the array always
-      console.log("this is the passengers array: ", passengers);
-      console.log(
-        "driver id you are checking: ",
-        driver.id,
-        ", which translates to the passenger he is carrying by his id: ",
-        driver.passenger
-      );
-      // stopAnimation();
-
+      driver.passenger = passengers[driver.id];
       getPassengerTime = driver.timeCounter;
       driver.Log[driver.completedJobs]["searching"]["timeFound"] =
         getPassengerTime;
-      // stopDriver(driver);
-      // console.log("driver stopped");
     }
 
     driver.search(driver.passenger);
     //may need to update
     driver.Log[driver.completedJobs]["searching"]["distance"] =
       driver.timeLog[driver.timeCounter]["distance travelled"];
-    // console.log("checking");
     driver.Log[driver.completedJobs]["searching"]["fuel cost"] = getFuelCost(
       driver.timeLog[driver.timeCounter]["distance travelled"]
     );
@@ -566,7 +508,6 @@ export default function Map() {
     driver.Log[driver.completedJobs]["searching"]["duration"] =
       getPassengerTime - initialTime;
     console.log(driver.id, driver.Log, "Searching Log");
-    // driver.totalTicks = startDateTicks;
     driver.path = buildPath(driver.currentLocation, driver.destination);
     const newdistance = getDistance(driver.path);
     const newestTimeMin = esttimeTaken(newdistance, driver.speed);
@@ -580,11 +521,7 @@ export default function Map() {
     );
     driverPaths.features[driver.id - 1] = driver.path;
 
-    if (
-      driver.state === "picking up" &&
-      driver.passenger != null
-      // isRunning === true
-    ) {
+    if (driver.state === "picking up" && driver.passenger != null) {
       handlePickup(driver);
     }
   }
@@ -596,28 +533,6 @@ export default function Map() {
     map.getSource("routes").setData(driverPaths);
 
     setTimeout(() => {
-      // while (
-      //   driver.currentLocation[0] !== driver.destination[0] &&
-      //   driver.currentLocation[1] !== driver.destination[1]
-      // ) {
-      //   console.log(driver.currentLocation, "driver current location");
-      //   console.log(driver.destination, "driver destination");
-      //   console.log("it failed so here i am ");
-
-      //   // break;
-      // }
-      if (
-        driver.currentLocation[0] !== driver.destination[0] &&
-        driver.currentLocation[1] !== driver.destination[1]
-      ) {
-        console.log("it works!!!");
-      }
-      console.log(driver.currentLocation, "driver current location");
-      console.log(driver.destination, "driver destination");
-      console.log("wait here");
-      console.log(driver.currentLocation === driver.destination, "pls be true");
-      // if (driver.currentLocation === driver.destination) {
-      console.log("CHECK PASSED");
       // let whilepickupcheckcounter = 0
       // while (
       //   driver.currentLocation[0].toFixed(4) !==
