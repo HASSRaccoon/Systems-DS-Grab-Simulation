@@ -1,5 +1,5 @@
 # Large asset files, to keep local
-systems-ds-assets/
+archived_data/
 
 # venv folder
 sdsgvenv/
