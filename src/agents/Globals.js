@@ -95,6 +95,12 @@ export default class Globals {
       this.checkPeak(datetime) == false ? fare * this.peakFareMultiplier : fare;
     return finalfare;
   }
+
+  profitCalculation(fare, fuelcost) {
+    const profit = 0.8 * fare - fuelcost;
+    return profit;
+  }
+
   registerDriver(driver) {
     this._drivers.push(driver);
     console.log(`registered driver ${driver}`);
