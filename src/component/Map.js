@@ -614,7 +614,10 @@ export default function Map() {
     map.on("load", function () {
       // Add an image to use as a custom marker
       map.loadImage(
+        // "https://freesvg.org/img/165649513901300-transport-car-sedan-green.png",
         "https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png",
+        // "https://docs.mapbox.com/mapbox-gl-js/assets/car-15.png",
+        // "mapbox://sprites/mapbox/streets-v11?access_token=pk.eyJ1IjoieWVva2V3ZWkiLCJhIjoiY2xlcG5wZ3ZmMGUweTNxdGt4ZG1ldGhsYyJ9.HHNGnKUPolWAo5_UYwzCZg",
         function (error, image) {
           if (error) throw error;
           map.addImage("custom-marker", image);
