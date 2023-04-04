@@ -74,20 +74,16 @@
     display: flex;
     justify-content: left;
     align-items: center;
-    margin-bottom: 5px;
+
     margin-left: 20px;
     font-weight: bold;
     font-size: 25px;
     color:rgb(117, 189, 217)
 }
 
-.nav-button{
-    display: flex;
-    justify-content: left;
-    align-items: center;
+.details-button{
     margin-top: 30px;
-    margin-left: 30px;
-
+    margin-left: 35px;
 }
 /* .nav-button .MuiButton-containedPrimary {
     background-color: rgb(81, 111, 136);

@@ -2,6 +2,7 @@ import React from 'react'
 import * as IoIcons from "react-icons/io5";
 // import Button from '@mui/material/Button';
 import { Button } from '@mantine/core'; 
+import './Sidebar.css';
 
 
 
@@ -13,9 +14,9 @@ export function SummarizedSidebar() {
                     <span> STATUS </span>
                 </div>
 
-                <div className='nav-subheader'>
-                    <span> Globals: </span>
-                </div>
+                    {/* <div className='nav-subheader'>
+                        <span> Globals: </span>
+                    </div> */}
             
                 <div className='nav-text'>
                     <div>
@@ -41,43 +42,54 @@ export function SummarizedSidebar() {
                         <span>Weather:</span>
                     </div>
                 </div>
+                <div className='nav-text'>
+                    <div>
+                        <IoIcons.IoPerson />
+                        <span>Your state:</span>
+                    </div>
+                </div>
+
+                <div className='nav-text'>
+                ______________________ 
+            </div>
 
                 <div className='padding-subheader'>
                     <span> </span>
                 </div>
 
-                <div className='nav-subheader'>
-                    <span> Drivers' States: </span>
+                <div className='nav-header'>
+                    <span> INPUTS </span>
                 </div>
+                
                 <div className='nav-text'>
                     <div>
-                        <IoIcons.IoPerson />
-                        <span>You:</span>
+                        <IoIcons.IoCarOutline />
+                        <span>Work period:</span>
                     </div>
                 </div>
                 <div className='nav-text'>
                     <div>
-                        <IoIcons.IoCarOutline />
-                        <span>Type A:</span>
+                        <IoIcons.IoRestaurantOutline />
+                        <span>Rest period:</span>
                     </div>
                 </div>
                 <div className='nav-text'>
                     <div>
-                        <IoIcons.IoCarOutline />
-                        <span>Type B:</span>
+                        <IoIcons.IoFlashOutline/>
+                        <span>Speed:</span>
                     </div>
                 </div>
                 <div className='nav-text'>
                     <div>
-                        <IoIcons.IoCarOutline />
-                        <span>Type C:</span>
+                        <IoIcons.IoHourglassOutline />
+                        <span>Wait behavior:</span>
                     </div>
                 </div>
                 {/* <div className='nav-button'>
                 <Button variant="contained" color='primary'>see details</Button>
                 </div> */}
             <div className='nav-text'>
-                <span> __________________ </span>
+                 ______________________ 
             </div>
             
             
@@ -87,7 +99,7 @@ export function SummarizedSidebar() {
 
 
             <div className='nav-header'>
-                <span> STATISTICS </span>
+                <span> OUTPUTS </span>
             </div>
 
             <div className='nav-subheader'>
@@ -138,9 +150,13 @@ export function SummarizedSidebar() {
                         <span>Total Distance:</span>
                     </div>
                 </div>
-                <div className='nav-button'>
-                <Button variant="contained" color='primary'>see details</Button>
+                <div className='details-button'>
+                <Button color='cyan' >
+                    SEE DETAILS<span></span></Button>
                 </div>
+                {/* <div className='nav-button'>
+                <Button variant="contained" color='primary'>see details</Button>
+                </div> */}
             </ul>
         </div>
     )
