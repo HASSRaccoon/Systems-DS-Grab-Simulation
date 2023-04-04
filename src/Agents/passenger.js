@@ -8,19 +8,11 @@ export default class Passenger{
         this.destination = this.generateRandomCoord();
         this.waitingTime = 0;
         this.driver = null;
-        this.ref = props.ref;
         this.cancelTendency = props.cancelTendency;
-
-        this.appearTime = Date.now() / 1000 | 0;
     }    
-
-    wait(){
-        console.log('wait')
-    }
-    carArrived(timestamp){ 
+    carArrived(){ 
         this.state = 'transit';
         if (this.driver.currentLocation == this.currentLocation){
-            this.waitingTime = timestamp - this.appearTime;
             this.state = 'transit';
         }
     }
