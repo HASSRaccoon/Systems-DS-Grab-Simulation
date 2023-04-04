@@ -13,5 +13,8 @@ code {
 }
 
 .map-container {
-  height: 600px;
+  height: 1000px;
+  width: 100%;
+  position: relative;
+  display: flex;
 }

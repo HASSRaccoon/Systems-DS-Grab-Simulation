@@ -5,6 +5,7 @@ import Screen from "./pages/Screen";
 import Map from "./component/Map";
 import Grabies from "./agents/Grabies";
 import Sidebar from "./component/Sidebar";
+import * as IoIcons from "react-icons/io5";
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
@@ -23,8 +24,14 @@ function App() {
     // </div>
     <>
       <div>
-        <Sidebar />
+        
+      <div className='topbar'>
+            <IoIcons.IoCarSportOutline className='topbar-icon' />
+            <h1>Simulation</h1>
+        </div>
         <Map />
+        <Sidebar />
+    
 
         {/* <Routes>
           <Route path="/" element={<Map></Map>} />

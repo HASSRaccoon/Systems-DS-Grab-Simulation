@@ -19,10 +19,7 @@ function Sidebar() {
     return (
     <>
         <IconContext.Provider value={{color: '#fff'}}>
-        <div className='topbar'>
-            <IoIcons.IoCarSportOutline className='topbar-icon' />
-            <h1>Simulation</h1>
-        </div>
+
 
         <nav className= 'nav-menu active'>
             <div>
@@ -31,10 +28,10 @@ function Sidebar() {
 
             </div>
         </nav>
-        <div className='simulation'>
+        {/* <div className='simulation'>
         <img src={process.env.PUBLIC_URL + '/map.png'} alt="map" />
         </div>
-        
+         */}
 
         <div className='ffw-button'>
                 <Button variant="contained" color='primary'>
