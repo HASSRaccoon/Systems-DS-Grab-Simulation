@@ -13,7 +13,6 @@ export default class Globals {
     this.peakFareMultiplier = 1.5;
     this.pricePerKm = 0.5;
     this.pricePerMinute = 0.16;
-  
 
     // OUTPUTS
     this.companyProfit = 0;
@@ -27,7 +26,7 @@ export default class Globals {
       this.totalDriverWaitingTime / this.jobsCompleted;
 
     // FORMULAS
-    this.passengerSatisfactionIndex = 0; //insert formula
+    this.fares = this.passengerSatisfactionIndex = 0; //insert formula
     this.driverSatisfactionIndex = 0; //insert formula
     this.overallSatisfactionIndex =
       (this.passengerSatisfactionIndex + this.driverSatisfactionIndex) / 2;
@@ -60,11 +59,10 @@ export default class Globals {
     return this._raining;
   }
 
-
   checkPeak(datetime) {
-  // check if it is peak hour (7am to 10am and 5pm to 8pm)
-  // takes in datetime object as input
-  // Returns true if it is peak hour, false otherwise
+    // check if it is peak hour (7am to 10am and 5pm to 8pm)
+    // takes in datetime object as input
+    // Returns true if it is peak hour, false otherwise
 
     // Get the current hour (in 24-hour format)
     const currentHour = datetime.getHours();
@@ -91,10 +89,18 @@ export default class Globals {
     // returns fare in dollars
 
     // calculate the fare
-    const fare = 3.5 + (this.pricePerKm*distance) + (this.pricePerMinute*minutes);
-    const finalfare = this.checkPeak(datetime) == false ? (fare*this.peakFareMultiplier): fare;
+    const fare =
+      3.5 + this.pricePerKm * distance + this.pricePerMinute * minutes;
+    const finalfare =
+      this.checkPeak(datetime) == false ? fare * this.peakFareMultiplier : fare;
     return finalfare;
-  } 
+  }
+
+  profitCalculation(fare, fuelcost) {
+    const profit = 0.8 * fare - fuelcost;
+    return profit;
+  }
+
   registerDriver(driver) {
     this._drivers.push(driver);
     console.log(`registered driver ${driver}`);
@@ -120,5 +126,4 @@ export default class Globals {
     this.jobsCompleted = [];
     this.jobsCancelled = [];
   }
-
 }
