@@ -82,83 +82,22 @@ export default function Map() {
     ref: null,
   });
 
-  let passenger1 = new Passenger({
-    id: 1,
-    ref: null,
-    destination: generateRandomCoord(),
-    currentLocation: generateRandomCoord(),
-  });
-
-  let passenger2 = new Passenger({
-    id: 2,
-    ref: null,
-    destination: generateRandomCoord(),
-    currentLocation: generateRandomCoord(),
-  });
-
-  let passenger3 = new Passenger({
-    id: 3,
-    ref: null,
-    destination: generateRandomCoord(),
-    currentLocation: generateRandomCoord(),
-  });
-
-  let passenger4 = new Passenger({
-    id: 3,
-    ref: null,
-    destination: generateRandomCoord(),
-    currentLocation: generateRandomCoord(),
-  });
-
-  let passenger5 = new Passenger({
-    id: 3,
-    ref: null,
-    destination: generateRandomCoord(),
-    currentLocation: generateRandomCoord(),
-  });
-  let passenger6 = new Passenger({
-    id: 3,
-    ref: null,
-    destination: generateRandomCoord(),
-    currentLocation: generateRandomCoord(),
-  });
   let running = false;
 
   const [drivers, setDrivers] = useState([driver1, driver2, driver3]);
 
-  const [passengers, setPassengers] = useState([
-    passenger1,
-    passenger2,
-    passenger3,
-    passenger4,
-    passenger5,
-    passenger6,
-  ]);
-  // let passengerListo = [];
+  let passengerListo = [];
 
-  // for (let i = 0; i < 20; i++) {
-  //   passengerListo[i] = new Passenger({
-  //     id: i,
-  //     ref: null,
-  //     destination: generateRandomCoord(),
-  //     currentLocation: generateRandomCoord(),
-  //   });
-  // }
+  for (let i = 0; i < 20; i++) {
+    passengerListo[i] = new Passenger({
+      id: i,
+      ref: null,
+      destination: generateRandomCoord(),
+      currentLocation: generateRandomCoord(),
+    });
+  }
 
-  // let running = false;
-
-  // let [drivers, setDrivers] = useState([driver1, driver2]);
-
-  // let [passengers, setPassengers] = useState(
-  // //   [
-  // //   passenger1,
-  // //   passenger2,
-  // //   passenger3,
-  // // ]
-  // passengerListo
-  // );
-
-  // console.log(passengers);
+  const [passengers, setPassengers] = useState(passengerListo);
 
   function spawnPassengerWithProbability(spawnProbability) {
     setInterval(() => {
@@ -491,7 +430,16 @@ export default function Map() {
     animatedriver(driver);
     let getPassengerTime = 0;
     if (passengers.length > 0 && driver.state === "searching") {
-      driver.passenger = passengers[driver.id];
+      driver.passenger = passengers[driver.id]; // eugene: currently driver will be assigned with the same passenger every time? passengers[driver.id==2] == 2nd passenger in the array always
+      console.log("this is the passengers array: ", passengers);
+      console.log(
+        "driver id you are checking: ",
+        driver.id,
+        ", which translates to the passenger he is carrying by his id: ",
+        driver.passenger.id
+      );
+      // stopAnimation();
+
       getPassengerTime = driver.timeCounter;
       driver.Log[driver.completedJobs]["searching"]["timeFound"] =
         getPassengerTime;
@@ -591,38 +539,39 @@ export default function Map() {
 
     setTimeout(() => {
       //need to debug passenger exit
-      // driver.currentLocation = driver.destination;
-      console.log(driver.state, "FINISHED DELIVER");
-      for (let i = 0; i < passengers.length; i++) {
-        const passenger = passengers[i];
 
-        if (driver.passenger === passenger) {
-          console.log("true");
-          passengers.splice(i, 1);
+      for (let i = 0; i < passengerPoints.features.length; i++) {
+        if (passengerPoints.features[i].properties.id === driver.passenger.id) {
+          console.log(
+            "before removal, remaining passengers: ",
+            passengerPoints.features.length
+          );
+          const victimSoul = passengers.splice(i, 1); //remove passenger from computation first? but this is still in transit?
+          console.log(
+            "passenger " + victimSoul[0].id + " removed from computation"
+          );
+          const victimFace = passengerPoints.features.splice(i, 1); //remove passenger from map first? but this is still in transit?
+          console.log(
+            "passenger " + victimFace[0].properties.id + " removed from map"
+          );
+          console.log(
+            "after removal, remaining passengers: ",
+            passengerPoints.features.length
+          );
+          console.log(
+            "passenger points (list of psng noted on map): ",
+            passengerPoints.features
+          );
+          console.log(
+            "passenger list (list of psng in computation): ",
+            passengers
+          );
+          map.getSource("passengers").setData(passengerPoints);
+          // console.log("how many times have i been looped through? ", i);
         }
+        // break;
       }
-      // animatedriver(driver, steps);
-      // animatepassenger(driver, steps);
-      // console.log("IF ANIMATION FINISHED HERE, MEANING ANIMATION IS ONLY ON animatedriver and animatepassenger, outside of timeout 8s")
 
-      // setTimeout(() => {
-      //   //need to debug passenger exit
-      //   driver.currentLocation = driver.destination; // might not need this anymore? why impose again when processpath should have secured this?
-      //   // eugene: but why the driver would go back to the passenger's original location as it's new destination? checking phenomenon looping
-      //   for (let i = 0; i < passengerPoints.features.length; i++) {
-      //     if (passengerPoints.features[i].properties.id === driver.passenger.id) {
-      //       passengerPoints.features.splice(i, 1); //remove passenger from map first? but this is still in transit?
-      //       map.getSource("passengers").setData(passengerPoints);
-      //     }
-      //   }
-      // for (let i = 0; i < passengerPoints.features.length; i++) {
-      //   if (passengerPoints.features[i].properties.id === driver.passenger.id) {
-      //     passengerPoints.features.splice(i, 1);
-      //     map.getSource("passengers").setData(passengerPoints);
-      //   }
-      //   // break;
-      // }
-      // console.log(passengerPoints, "after remove image");
       const finishTime = driver.timeCounter;
       driver.Log[driver.completedJobs]["transit"]["duration"] =
         finishTime - initialTime;
