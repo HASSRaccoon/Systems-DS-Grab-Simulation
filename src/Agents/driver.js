@@ -19,8 +19,8 @@ export default class Driver {
         this.jobLog = {};
         this.distance = 0;
         this.distanceToTravel = 0;
-        this.startTime = 420; //NOTE: 7am
-        this.endTime = 1020; //NOTE: 5pm
+        this.startTime = 0; //NOTE: 7am
+        this.endTime = 500; //NOTE: 5pm
         this.path = null;
         this.speedLs = [];
     }
@@ -45,9 +45,12 @@ export default class Driver {
         }
         else{
             this.time += 1; //NOTE: time is in tick, waiting time of searching passenger
-            let random = Math.random();
-            if (random < this.moveTendency) {
+            let moveRandom = Math.random();
+            if (this.time > this.moveTendency && moveRandom > 0.8) {
                 this.destination = this.generateRandomCoord();
+            }
+            else{
+                this.destination = this.currentLocation;
             }
             let speed = this.distancePerTick(this.speed);
             this.speedLs.push(speed);

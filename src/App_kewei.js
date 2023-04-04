@@ -42,13 +42,13 @@ function App() {
             id: "driver1",
             speed: 70,
             state: 'searching',
-            moveTendency: 0.3,
+            moveTendency: 3,
         },
         {
             id: "driver2",
             speed: 50,
             state: 'searching',
-            moveTendency: 0.8,
+            moveTendency: 5,
         },
     ];
 
@@ -104,12 +104,7 @@ function App() {
     }
 
     function pathGenerator(driver, location, destination){
-        if (!location){
-            location = generateRandomCoord();
-        }
-        if (!destination){
-            destination = location;
-        }
+        if (location === destination)return;
         let path = buildPath(location, destination)
         driver.path = path;
         if (driver.distanceToTravel === 0){
@@ -121,11 +116,11 @@ function App() {
     for (let ticks = 0; ticks < 1000 * days; ticks++) {
         try{
             let toGenerate = 1000 - passengerLs.length 
-            if (passengerLs.length < 1000){
-                for (let i = 0; i < toGenerate; i++){
-                    newPassenger();
-                }
-            }
+            // if (passengerLs.length < 1000){
+            //     for (let i = 0; i < toGenerate; i++){
+            //         newPassenger();
+            //     }
+            // }
             if (ticks % 60 == 0){ //NOTE: each hour
                 if (Math.random() < 0.5){ //NOTE: rain probability
                     god.raining = true;
