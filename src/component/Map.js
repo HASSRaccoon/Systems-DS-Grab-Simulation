@@ -18,7 +18,7 @@ mapboxgl.accessToken =
 
 export default function Map() {
   function generateRandomCoord() {
-    let Pos =
+    const Pos =
       sgJSON.features[Math.floor(Math.random() * sgJSON.features.length)]
         .geometry.coordinates[0];
     return Pos;
@@ -31,6 +31,8 @@ export default function Map() {
     );
     return path;
   }
+
+
 
   function processPath(path, steps) {
     //line Distance is number like 1.512343151
@@ -96,7 +98,7 @@ export default function Map() {
     currentLocation: generateRandomCoord(),
   });
 
-  var passengerListo = [];
+  let passengerListo = [];
 
   for (let i = 0; i < 20; i++) {
     passengerListo[i] = new Passenger({
@@ -109,9 +111,9 @@ export default function Map() {
 
   let running = false;
 
-  const [drivers, setDrivers] = useState([driver1, driver2]);
+  let [drivers, setDrivers] = useState([driver1, driver2]);
 
-  const [passengers, setPassengers] = useState(
+  let [passengers, setPassengers] = useState(
   //   [
   //   passenger1,
   //   passenger2,
@@ -213,9 +215,8 @@ export default function Map() {
   };
 
   function animatedriver(driver, steps) {
-    // console.log(driver);
     if (driver.counter === 0) {
-      console.log(driver.currentLocation, "first");
+      console.log( "driver starting from ", driver.currentLocation);
     }
     const start =
       driver.path.geometry.coordinates[
@@ -252,7 +253,7 @@ export default function Map() {
 
     driver.counter = driver.counter + 1;
     if (driver.counter === steps) {
-      console.log(driver.currentLocation, "last");
+      console.log("driver reached destination at ", driver.currentLocation);
     }
     // console.log(driver.currentLocation, driver.counter);
   }
@@ -300,7 +301,7 @@ export default function Map() {
 
   function getDistance(path) {
     const lineDistance = turf.length(path);
-    const distance = lineDistance.toFixed(2);
+    const distance = lineDistance.toFixed(2); //eugene: might take out? unless better to have 2dp
     return distance;
   }
 
@@ -388,7 +389,9 @@ export default function Map() {
       for (let i = 0; i < drivers.length; i++) {
         let driver = drivers[i];
         const steps = (100 - driver.speed) * 5;
-        animatedriver(driver, steps);
+        animatedriver(driver, steps); // eugene: this func might be a deeper call, might be more similar to startAnimation instead, where you call handle<state> for each driver instead
+
+        //eugene: might be better for continueAnimation to just toggle a boolean that the main loop is listening to, so continueAnimation is just a toggle, and it does not have any logic on its own
       }
     }
   }
@@ -404,8 +407,9 @@ export default function Map() {
     const steps = (100 - driver.speed) * 5;
     animatedriver(driver, steps);
     if (passengers.length > 0 && driver.state === "searching") {
-      driver.passenger = passengers[driver.id];
-      console.log(driver.id, driver.passenger);
+      driver.passenger = passengers[driver.id]; //eugene: currently driver will be assigned with the same passenger every time? passengers[driver.id==2] == 2nd passenger in the array always
+      console.log("this is the passengers array: ", passengers);
+      console.log("driver id you are checking: ", driver.id, ", which translates to the passenger he is carrying by his id: ", driver.passenger);
       const foundDate = new Date();
       const foundDateTicks = dateToTicks(foundDate);
       driver.Log[driver.completedJobs]["searching"]["timeFound"] =
@@ -484,6 +488,7 @@ export default function Map() {
       // } else {
       //   driver.currentLocation = driver.destination;
       // }
+      let whilepickupcheckcounter = 0
       while (
         driver.currentLocation[0].toFixed(4) !==
           driver.destination[0].toFixed(4) &&
@@ -491,10 +496,12 @@ export default function Map() {
           driver.destination[1].toFixed(4)
       ) {
         //Do nothing, just keep checking
-        console.log("checking");
+        // console.log("checking");
+        whilepickupcheckcounter++;
+        console.log("while pickup, check number of times current location and destination don't match: ", whilepickupcheckcounter);
         break;
       }
-      console.log("will this print?");
+      
       driver.pickUp();
       const endDate = new Date();
       const endDateTicks = dateToTicks(endDate);
@@ -527,13 +534,15 @@ export default function Map() {
     driver.counter = 0;
     animatedriver(driver, steps);
     animatepassenger(driver, steps);
+    console.log("IF ANIMATION FINISHED HERE, MEANING ANIMATION IS ONLY ON animatedriver and animatepassenger, outside of timeout 8s")
 
     setTimeout(() => {
       //need to debug passenger exit
-      driver.currentLocation = driver.destination;
+      driver.currentLocation = driver.destination; // might not need this anymore? why impose again when processpath should have secured this?
+      // eugene: but why the driver would go back to the passenger's original location as it's new destination? checking phenomenon looping
       for (let i = 0; i < passengerPoints.features.length; i++) {
         if (passengerPoints.features[i].properties.id === driver.passenger.id) {
-          passengerPoints.features.splice(i, 1);
+          passengerPoints.features.splice(i, 1); //remove passenger from map first? but this is still in transit?
           map.getSource("passengers").setData(passengerPoints);
         }
         // break;
@@ -550,14 +559,14 @@ export default function Map() {
         getFuelCost(transitDistance);
       // const fare = god.fareCalculation(transitDistance, )
       //  const profit = god.profitCalculation(fare, fuel)
-      console.log(driver.id, driver.Log, "Transit Log");
+      console.log("Transit Log for driver", driver.id, driver.Log);
       driver.completed();
-      driver.destination = generateRandomCoord();
-      driver.path = buildPath(driver.currentLocation, driver.destination);
+      driver.destination = generateRandomCoord(); // currentlocation was set to prior destination that driver finished servicing passenger, but how come with new random destination set it is not driving into the random coord? check bottom 
+      driver.path = buildPath(driver.currentLocation, driver.destination); // new path draw from prior passenger destination to new random destination
       processPath(driver.path);
       driverPaths.features[driver.id - 1] = driver.path;
       map.getSource("routes").setData(driverPaths);
-      handleSearch(driver);
+      handleSearch(driver); //earlier set path for new search direction
     }, 8000);
   }
 

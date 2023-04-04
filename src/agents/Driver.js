@@ -60,10 +60,13 @@ export default class Driver {
   search(passenger) {
     // if (this.passenger === null && this.state === "searching") {
     // }
+    console.log("the passenger this driver received is: " + passenger);
+    console.log("the passenger this driver registered within constructor is: " + this.passenger);
     if (this.passenger) {
       // console.log('picking up')
       this.destination = this.passenger.currentLocation;
-      this.state = "picking up";
+      this.state = "picking up"
+      console.log("from Driver class, Driver " + this.id + " has been appointed passenger" + this.passenger + " thus moving into the picking up state. Checking state: " + this.state + " and going to passenger current location now: " + this.destination);
     } else {
       // console.log('searching')
       // this.passenger = passenger;
@@ -91,6 +94,7 @@ export default class Driver {
     // );
     // this.passenger.carArrived(Date.now() / 1000 | 0, this);
     this.state = "transit";
+    console.log("from Driver class, Driver " + this.id + " has reached this passenger: " + this.passenger + " thus moving into the transit state. Checking state: " + this.state + " and going to passenger destination now: " + this.destination);
   }
   transit() {
     // this.destination = this.passenger.destination;
@@ -111,11 +115,13 @@ export default class Driver {
     //   this.speed
     // );
     // driver current Location == driver destination
-    this.state = "completed";
+    this.state = "completed"; // eugene: abit sus, might have been neglected for awhile, decide if need to change
+    console.log("from Driver class, Driver " + this.id + " is going on a trip with passenger " + this.passenger + "'s journey, waiting to mark complete trip... Checking state: " + this.state + " but currently still holding this destination: " + this.destination);
   }
   completed() {
-    console.log("completed");
+    console.log("from Driver class, Driver " + this.id + " has completed this " + this.passenger + "'s journey, thus demarcated as completed state. Checking state: " + this.state + " but currently still holding this destination: " + this.destination);
     this.state = "searching";
+    console.log("was in the completed state, already changed state to searching. Checking state: " + this.state);
     this.completedJobs += 1;
     this.passenger = null;
     // this.destination = [Math.random() * 200, Math.random() * 200];
