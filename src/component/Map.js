@@ -9,8 +9,8 @@ import mapboxgl from "mapbox-gl";
 import caricon from "../public/grabcar.png";
 import { Button } from "@mantine/core";
 // import { Center } from "@mantine/core";
-import Driver from "../agents/Driver.js";
-import Passenger from "../agents/Passenger.js";
+import AnimationDriver from "../agents/AnimationDriver.js";
+import AnimationPassenger from "../agents/AnimationPassenger.js";
 import Globals from "../agents/Globals.js";
 // --- ---------------------------------- ---
 
@@ -54,7 +54,7 @@ export default function Map() {
   // console.log("fares",god.fareCalculation(0.5,4,new Date())); //check raining
   // console.log("profit", god.profitCalculation(70, 44.5));
 
-  let driver1 = new Driver({
+  let driver1 = new AnimationDriver({
     id: 1,
     currentLocation: generateRandomCoord(),
     speed: 50,
@@ -63,7 +63,7 @@ export default function Map() {
     ref: null,
   });
 
-  let driver2 = new Driver({
+  let driver2 = new AnimationDriver({
     id: 2,
     currentLocation: generateRandomCoord(),
     speed: 70,
@@ -72,7 +72,7 @@ export default function Map() {
     ref: null,
   });
 
-  let driver3 = new Driver({
+  let driver3 = new AnimationDriver({
     id: 3,
     currentLocation: generateRandomCoord(),
     speed: 80,
@@ -88,7 +88,7 @@ export default function Map() {
   let passengerListo = [];
 
   for (let i = 0; i < 20; i++) {
-    passengerListo[i] = new Passenger({
+    passengerListo[i] = new AnimationPassenger({
       id: i,
       ref: null,
       destination: generateRandomCoord(),
@@ -108,7 +108,7 @@ export default function Map() {
   }
 
   function spawnPassenger() {
-    let p = new Passenger({
+    let p = new AnimationPassenger({
       id: passengers.length + 1,
       ref: null,
       destination: generateRandomCoord(),
