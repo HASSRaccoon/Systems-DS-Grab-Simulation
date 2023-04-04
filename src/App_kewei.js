@@ -1,13 +1,19 @@
 import Driver from './Agents/driver.js';
 import Passenger from './Agents/passenger.js';
 import Globals from './Agents/globals.js';
+
 import sgJSON from "./road-network.json";
 import * as turf from "@turf/turf";
-
 import PathFinder, { pathToGeoJSON } from "geojson-path-finder";
 
+import exportFromJSON from 'export-from-json';
+
 function App() {
-    let days = 1;
+    const DAYS = 0.5;
+    const TICKRATE = 1440; //NOTE: 1 tick = 1 minute
+    const TICKS = TICKRATE * DAYS;
+
+    const EXPORT = true;
 
     const pathBuilder = new PathFinder(sgJSON, { tolerance: 1e-4 });
 
@@ -113,7 +119,7 @@ function App() {
         console.log(driver.state, driver.distanceToTravel)
     }
 
-    for (let ticks = 0; ticks < 1000 * days; ticks++) {
+    for (let ticks = 0; ticks < TICKS ; ticks++) {
         try{
             let toGenerate = 1000 - passengerLs.length 
             // if (passengerLs.length < 1000){
@@ -186,14 +192,37 @@ function App() {
         }
     }
 
-    driverLs.forEach(driver => {
-        console.log(`${driver.id}'s log`)
-        console.log(driver.log)
-    });
-    console.log(`cancelled: ${cancelled}`)
+  let driverlogs = []
+  driverLs.forEach(driver => {
+    console.log(`${driver.id}'s log`)
+    console.log(driver.log)
+    driverlogs.push({
+        key: driver.id,
+        log: driver.log
+    })
+  });
+
+  console.log('driverlogs:',driverlogs)
+  // ------------------------------- EXPORT JSON CODE -------------------------------
+    if (EXPORT == true){
+
+        let exportType = exportFromJSON.types.json; // set output type
+        console.log(`JSONing driverLs logs`);
+        let fileName = 'driverLs'; // set file name
+        // console.log("driverls:",driverLs);
+        let data = Object.values(driverlogs); // extract value from array object https://github.com/zheeeng/export-from-json/issues/110
+        // console.log("data:",data); 
+        try{
+            exportFromJSON({ data, fileName, exportType });
+        }
+        catch(err){
+            console.log(err);
+        }
+    }
+
 }
+
 
 export default App;
 
-//TODO: output to usable data -> json (KW)
 //TODO: tendency: number of ticks willing to wait, driver waiting (KW)
