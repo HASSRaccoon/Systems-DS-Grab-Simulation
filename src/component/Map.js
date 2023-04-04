@@ -19,7 +19,7 @@ mapboxgl.accessToken =
 
 export default function Map() {
   function generateRandomCoord() {
-    let Pos =
+    const Pos =
       sgJSON.features[Math.floor(Math.random() * sgJSON.features.length)]
         .geometry.coordinates[0];
     return Pos;
@@ -122,18 +122,41 @@ export default function Map() {
     destination: generateRandomCoord(),
     currentLocation: generateRandomCoord(),
   });
-  let running = false;
+  // let running = false;
 
-  const [drivers, setDrivers] = useState([driver1, driver2, driver3]);
+  // const [drivers, setDrivers] = useState([driver1, driver2, driver3]);
 
-  const [passengers, setPassengers] = useState([
-    passenger1,
-    passenger2,
-    passenger3,
-    passenger4,
-    passenger5,
-    passenger6,
-  ]);
+  // const [passengers, setPassengers] = useState([
+  //   passenger1,
+  //   passenger2,
+  //   passenger3,
+  //   passenger4,
+  //   passenger5,
+  //   passenger6,
+  // ]);
+  // let passengerListo = [];
+
+  // for (let i = 0; i < 20; i++) {
+  //   passengerListo[i] = new Passenger({
+  //     id: i,
+  //     ref: null,
+  //     destination: generateRandomCoord(),
+  //     currentLocation: generateRandomCoord(),
+  //   });
+  // }
+
+  // let running = false;
+
+  // let [drivers, setDrivers] = useState([driver1, driver2]);
+
+  // let [passengers, setPassengers] = useState(
+  // //   [
+  // //   passenger1,
+  // //   passenger2,
+  // //   passenger3,
+  // // ]
+  // passengerListo
+  // );
 
   // console.log(passengers);
 
@@ -234,7 +257,7 @@ export default function Map() {
     console.log(driver.currentSteps, "steps in animate");
     if (driver.timeCounter === 0) {
       console.log("start of the day");
-      // console.log(driver.currentLocation, "first");
+      console.log("driver starting from ", driver.currentLocation);
     }
 
     // console.log(driver.timeLog, "hello");
@@ -278,6 +301,7 @@ export default function Map() {
     }
     console.log(driver.counter, driver.currentLocation);
     driver.counter = driver.counter + 1;
+
     driver.timeCounter = driver.timeCounter + 1;
 
     driver.timeLog[driver.timeCounter] = {};
@@ -301,7 +325,7 @@ export default function Map() {
     console.log(driver.id, driver.timeLog, "time log per frame");
     if (driver.timeCounter === 1440) {
       console.log("end of the day");
-      // console.log(driver.currentLocation, "first");
+      console.log("driver reached destination at ", driver.currentLocation);
     }
 
     // if (driver.counter === steps) {
@@ -355,7 +379,7 @@ export default function Map() {
 
   function getDistance(path) {
     const lineDistance = turf.length(path);
-    const distance = lineDistance.toFixed(2);
+    const distance = lineDistance.toFixed(2); //eugene: might take out? unless better to have 2dp
     return distance;
   }
 
@@ -454,7 +478,9 @@ export default function Map() {
     if (isRunning === false) {
       for (let i = 0; i < drivers.length; i++) {
         let driver = drivers[i];
-        animatedriver(driver);
+        animatedriver(driver); // eugene: this func might be a deeper call, might be more similar to startAnimation instead, where you call handle<state> for each driver instead
+
+        //eugene: might be better for continueAnimation to just toggle a boolean that the main loop is listening to, so continueAnimation is just a toggle, and it does not have any logic on its own
       }
     }
   }
@@ -511,9 +537,16 @@ export default function Map() {
     animatedriver(driver);
     let getPassengerTime = 0;
     if (passengers.length > 0 && driver.state === "searching") {
-      driver.passenger = passengers[driver.id];
+      driver.passenger = passengers[driver.id]; // eugene: currently driver will be assigned with the same passenger every time? passengers[driver.id==2] == 2nd passenger in the array always
+      console.log("this is the passengers array: ", passengers);
+      console.log(
+        "driver id you are checking: ",
+        driver.id,
+        ", which translates to the passenger he is carrying by his id: ",
+        driver.passenger
+      );
       // stopAnimation();
-      // console.log(driver.id, driver.passenger);
+
       getPassengerTime = driver.timeCounter;
       driver.Log[driver.completedJobs]["searching"]["timeFound"] =
         getPassengerTime;
@@ -585,7 +618,22 @@ export default function Map() {
       console.log(driver.currentLocation === driver.destination, "pls be true");
       // if (driver.currentLocation === driver.destination) {
       console.log("CHECK PASSED");
+      // let whilepickupcheckcounter = 0
+      // while (
+      //   driver.currentLocation[0].toFixed(4) !==
+      //     driver.destination[0].toFixed(4) &&
+      //   driver.currentLocation[1].toFixed(4) !==
+      //     driver.destination[1].toFixed(4)
+      // ) {
+      //   //Do nothing, just keep checking
+      //   // console.log("checking");
+      //   whilepickupcheckcounter++;
+      //   console.log("while pickup, check number of times current location and destination don't match: ", whilepickupcheckcounter);
+      //   break;
+      // }
+
       driver.currentLocation = driver.destination;
+
       driver.pickUp();
       const finishTime = driver.timeCounter;
       driver.Log[driver.completedJobs]["pickingup"]["duration"] =
@@ -638,6 +686,20 @@ export default function Map() {
           passengers.splice(i, 1);
         }
       }
+      // animatedriver(driver, steps);
+      // animatepassenger(driver, steps);
+      // console.log("IF ANIMATION FINISHED HERE, MEANING ANIMATION IS ONLY ON animatedriver and animatepassenger, outside of timeout 8s")
+
+      // setTimeout(() => {
+      //   //need to debug passenger exit
+      //   driver.currentLocation = driver.destination; // might not need this anymore? why impose again when processpath should have secured this?
+      //   // eugene: but why the driver would go back to the passenger's original location as it's new destination? checking phenomenon looping
+      //   for (let i = 0; i < passengerPoints.features.length; i++) {
+      //     if (passengerPoints.features[i].properties.id === driver.passenger.id) {
+      //       passengerPoints.features.splice(i, 1); //remove passenger from map first? but this is still in transit?
+      //       map.getSource("passengers").setData(passengerPoints);
+      //     }
+      //   }
       // for (let i = 0; i < passengerPoints.features.length; i++) {
       //   if (passengerPoints.features[i].properties.id === driver.passenger.id) {
       //     passengerPoints.features.splice(i, 1);
@@ -655,7 +717,7 @@ export default function Map() {
         getFuelCost(transitDistance);
       // const fare = god.fareCalculation(transitDistance, )
       //  const profit = god.profitCalculation(fare, fuel)
-      console.log(driver.id, driver.Log, "Transit Log");
+      console.log("Transit Log for driver", driver.id, driver.Log);
       driver.completed();
       console.log(driver.destination, "before");
       driver.destination = generateRandomCoord();
@@ -666,6 +728,13 @@ export default function Map() {
       map.getSource("routes").setData(driverPaths);
       handleSearch(driver);
     }, 3000);
+    //   driver.destination = generateRandomCoord(); // currentlocation was set to prior destination that driver finished servicing passenger, but how come with new random destination set it is not driving into the random coord? check bottom
+    //   driver.path = buildPath(driver.currentLocation, driver.destination); // new path draw from prior passenger destination to new random destination
+    //   processPath(driver.path);
+    //   driverPaths.features[driver.id - 1] = driver.path;
+    //   map.getSource("routes").setData(driverPaths);
+    //   handleSearch(driver); //earlier set path for new search direction
+    // }, 8000);
   }
 
   useEffect(() => {
