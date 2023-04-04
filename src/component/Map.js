@@ -45,10 +45,7 @@ export default function Map() {
       const segment = turf.along(path, i);
       arc.push(segment.geometry.coordinates);
     }
-
     arc.push(turf.along(path, lineDistance).geometry.coordinates);
-    // console.log(turf.along(path, lineDistance).geometry.coordinates, "ending of line path")
-
     path.geometry.coordinates = arc;
   }
   const spawnProbability = 0.5;
@@ -62,7 +59,7 @@ export default function Map() {
   let driver1 = new Driver({
     id: 1,
     currentLocation: generateRandomCoord(),
-    speed: 60,
+    speed: 50,
     destination: generateRandomCoord(),
     path: null,
     ref: null,
@@ -158,9 +155,9 @@ export default function Map() {
     const driver = drivers[i];
     // console.log(driver.id);
     driver.path = buildPath(driver.currentLocation, driver.destination);
-    const steps = (100 - driver.speed) * 5;
+    // const steps = (100 - driver.speed) * 5;
     //replace steps with speed next time
-    processPath(driver.path, steps);
+    // processPath(driver.path, steps);
     // console.log(drivers[driver.id - 1], "got path?");
   }
 
@@ -214,17 +211,26 @@ export default function Map() {
     }),
   };
 
-  function animatedriver(driver, steps) {
-    if (driver.counter === 0) {
+  function animatedriver(driver) {
+    console.log(driver.currentSteps, "steps in animate");
+    if (driver.timeCounter === 0) {
+      console.log("start of the day");
       console.log( "driver starting from ", driver.currentLocation);
     }
+
+    // console.log(driver.timeLog, "hello");
+
     const start =
       driver.path.geometry.coordinates[
-        driver.counter >= steps ? driver.counter - 1 : driver.counter
+        driver.counter >= driver.currentSteps
+          ? driver.counter - 1
+          : driver.counter
       ];
     const end =
       driver.path.geometry.coordinates[
-        driver.counter >= steps ? driver.counter : driver.counter + 1
+        driver.counter >= driver.currentSteps
+          ? driver.counter
+          : driver.counter + 1
       ];
 
     if (!start || !end) {
@@ -234,6 +240,7 @@ export default function Map() {
 
     driverPoints.features[driver.id - 1].geometry.coordinates =
       driver.path.geometry.coordinates[driver.counter];
+    //update currentLocation is here
     driver.currentLocation = driver.path.geometry.coordinates[driver.counter];
     driverPoints.features[driver.id - 1].properties.bearing = turf.bearing(
       turf.point(start),
@@ -242,23 +249,50 @@ export default function Map() {
 
     map.getSource("drivers").setData(driverPoints);
 
-    if (driver.counter < steps) {
+    if (driver.counter < driver.currentSteps) {
       // requestAnimationFrame(() => animatedriver(driver, steps));
       // animationId = requestAnimationFrame(() => animatedriver(driver, steps));
-      const animationId = requestAnimationFrame(() =>
-        animatedriver(driver, steps)
-      );
-      animationIds.push(animationId);
+      // const animationId = requestAnimationFrame(() => animatedriver(driver));
+      // animationIds.push(animationId);
+      const animationId = requestAnimationFrame(() => animatedriver(driver));
+      animationIds[driver.id - 1].push(animationId);
+    }
+    console.log(driver.counter, driver.currentLocation);
+    driver.counter = driver.counter + 1;
+    
+    driver.timeCounter = driver.timeCounter + 1;
+
+    driver.timeLog[driver.timeCounter] = {};
+    driver.timeLog[driver.timeCounter]["state"] = driver.state;
+    driver.timeLog[driver.timeCounter]["distance travelled"] =
+      driver.distancePerStep;
+    driver.timeLog[driver.timeCounter]["time passed"] = 1;
+    // driver.timeLog[driver.timeCounter]["leftover time"] = 0;
+    if (driver.counter === driver.currentSteps + 1) {
+      driver.timeLog[driver.timeCounter]["distance travelled"] =
+        driver.currentLeftoverDistance;
+      driver.timeLog[driver.timeCounter]["time passed"] =
+        driver.currentLeftoverTime;
+      // driver.timeLog[driver.timeCounter]["leftover distance"] =
+      //   driver.currentLeftoverDistance;
+      // driver.timeLog[driver.timeCounter]["leftover time"] =
+      //   driver.currentLeftoverTime;
     }
 
-    driver.counter = driver.counter + 1;
-    if (driver.counter === steps) {
+    console.log(driver.id, driver.timeLog, "time log per frame");
+    if (driver.timeCounter === 1440) {
+      console.log("end of the day");
       console.log("driver reached destination at ", driver.currentLocation);
     }
+
+    // if (driver.counter === steps) {
+    // console.log(driver.currentLocation, "last");
+    // }
     // console.log(driver.currentLocation, driver.counter);
   }
 
-  let animationIds = [];
+  let animationIds = new Array(drivers.length).fill([]);
+
   function animatepassenger(driver, steps) {
     const start =
       driver.path.geometry.coordinates[
@@ -311,12 +345,6 @@ export default function Map() {
   // const computertimetaken = 5;
 
   // esttimeTaken(irldistance, speed);
-  // function esttimeTaken(distance, speed) {
-  //   const estimatedTimeMin = (distance / speed) * 60;
-  //   console.log(estimatedTimeMin);
-  //   return;
-  //   //time = distance/speed
-  // }
 
   function getFares(distance, speed) {
     // const time = esttimeTaken(distance, speed);
@@ -375,81 +403,146 @@ export default function Map() {
     isRunning = true;
     for (let i = 0; i < drivers.length; i++) {
       let driver = drivers[i];
+      driver.counter = 0;
+
       handleSearch(driver);
     }
   }
 
+  function startDriver() {
+    let driver = drivers[0];
+    driver.counter = 0;
+    handleSearch(driver);
+  }
+
   function stopAnimation() {
+    console.log(animationIds, "animation ids");
     animationIds.forEach((id) => cancelAnimationFrame(id));
     isRunning = false;
+  }
+
+  function stopDriver(driver) {
+    console.log(animationIds[driver.id - 1], "animationIds for this driver");
+    animationIds[driver.id - 1].forEach((id) => cancelAnimationFrame(id));
+  }
+
+  function continueDriver(driver) {
+    animatedriver(driver);
   }
 
   function continueAnimation() {
     if (isRunning === false) {
       for (let i = 0; i < drivers.length; i++) {
         let driver = drivers[i];
-        const steps = (100 - driver.speed) * 5;
-        animatedriver(driver, steps); // eugene: this func might be a deeper call, might be more similar to startAnimation instead, where you call handle<state> for each driver instead
+        animatedriver(driver); // eugene: this func might be a deeper call, might be more similar to startAnimation instead, where you call handle<state> for each driver instead
 
         //eugene: might be better for continueAnimation to just toggle a boolean that the main loop is listening to, so continueAnimation is just a toggle, and it does not have any logic on its own
       }
     }
   }
 
+  function timeToSteps(timeMins, driver) {
+    const integer = Math.trunc(timeMins);
+    const decimal = timeMins - integer;
+    const steps = Math.ceil(timeMins);
+    driver.currentLeftoverTime = decimal;
+    // const steps = timeMins
+    // return steps, integer, decimal;
+    return steps;
+  }
+
+  function distanceperStep(speed, steps, distance, driver) {
+    console.log(driver.state, distance, "distance");
+
+    console.log(steps, "steps");
+    const speedpermin = speed / 60;
+    console.log(speedpermin, "distanceperstep");
+    const leftoverdistance = distance - speedpermin * (steps - 1);
+    console.log(leftoverdistance, "leftoverdistance");
+    driver.currentLeftoverDistance = leftoverdistance;
+    // const distperstep = 0;
+    return speedpermin;
+  }
+
+  function esttimeTaken(distance, speed) {
+    const estimatedTimeMin = (distance / speed) * 60;
+    console.log(estimatedTimeMin, "est time taken");
+    return estimatedTimeMin;
+    //time = distance/speed
+  }
+
   function handleSearch(driver) {
+    const initialTime = driver.timeCounter;
     driver.Log[driver.completedJobs] = {};
     driver.Log[driver.completedJobs]["searching"] = {};
     const initialLocation = driver.currentLocation;
     // console.log(initialLocation, "initial location");
-    const startDate = new Date();
-    const startDateTicks = dateToTicks(startDate);
+    // const startDate = new Date();
+    // const startDateTicks = dateToTicks(startDate);
     driver.counter = 0;
-    const steps = (100 - driver.speed) * 5;
-    animatedriver(driver, steps);
+    // const steps = (100 - driver.speed) * 5;
+    const initialDistance = getDistance(driver.path);
+    const estTimeMin = esttimeTaken(initialDistance, driver.speed);
+    driver.currentSteps = timeToSteps(estTimeMin, driver);
+    processPath(driver.path, driver.currentSteps);
+    driver.distancePerStep = distanceperStep(
+      driver.speed,
+      driver.currentSteps,
+      initialDistance,
+      driver
+    );
+
+    animatedriver(driver);
+    let getPassengerTime = 0;
     if (passengers.length > 0 && driver.state === "searching") {
-      driver.passenger = passengers[driver.id]; //eugene: currently driver will be assigned with the same passenger every time? passengers[driver.id==2] == 2nd passenger in the array always
+    
+      driver.passenger = passengers[driver.id]; // eugene: currently driver will be assigned with the same passenger every time? passengers[driver.id==2] == 2nd passenger in the array always
       console.log("this is the passengers array: ", passengers);
       console.log("driver id you are checking: ", driver.id, ", which translates to the passenger he is carrying by his id: ", driver.passenger);
-      const foundDate = new Date();
-      const foundDateTicks = dateToTicks(foundDate);
+      // stopAnimation();
+      
+      getPassengerTime = driver.timeCounter;
       driver.Log[driver.completedJobs]["searching"]["timeFound"] =
-        foundDateTicks - startDateTicks;
+        getPassengerTime;
+      // stopDriver(driver);
+      console.log("driver stopped");
+      // const foundDate = new Date();
+      // const foundDateTicks = dateToTicks(foundDate);
+
+      // foundDateTicks - startDateTicks;
     }
 
     driver.search(driver.passenger);
 
-    let searchDistance = 0;
-
-    // console.log(initialLocation, "initial location");
-    // console.log(driver.currentLocation, "currentlocation");
-    // console.log(initialLocation === driver.currentLocation, "true?");
-
-    // if (
-    //   initialLocation[0].toFixed(7) === driver.destination[0].toFixed(7) &&
-    //   initialLocation[1].toFixed(7) === driver.destination[1].toFixed(7)
-    // ) {
-    //   searchDistance = 0;
-    //   console.log("did not travel for searching");
-    // } else {
-    //   const searchDistPath = buildPath(
-    //     initialLocation,
-    //     driver.currentLocation
-    //   );
-    //   searchDistance = getDistance(searchDistPath);
-    // }
-    driver.Log[driver.completedJobs]["searching"]["distance"] = searchDistance;
-    driver.Log[driver.completedJobs]["searching"]["fuel cost"] =
-      getFuelCost(searchDistance);
-    const endDate = new Date();
-    const endDateTicks = dateToTicks(endDate);
+    driver.Log[driver.completedJobs]["searching"]["distance"] =
+      driver.timeLog[driver.timeCounter]["distance travelled"];
+    console.log("checking");
+    driver.Log[driver.completedJobs]["searching"]["fuel cost"] = getFuelCost(
+      driver.timeLog[driver.timeCounter]["distance travelled"]
+    );
+    // const endDate = new Date();
+    // const endDateTicks = dateToTicks(endDate);
     driver.Log[driver.completedJobs]["searching"]["duration"] =
-      endDateTicks - startDateTicks;
+      getPassengerTime - initialTime;
     console.log(driver.id, driver.Log, "Searching Log");
     // driver.totalTicks = startDateTicks;
+    driver.path = buildPath(driver.currentLocation, driver.destination);
+    const newdistance = getDistance(driver.path);
+    const newestTimeMin = esttimeTaken(newdistance, driver.speed);
+    driver.currentSteps = timeToSteps(newestTimeMin, driver);
+    processPath(driver.path, driver.currentSteps);
+    driver.distancePerStep = distanceperStep(
+      driver.speed,
+      driver.currentSteps,
+      newdistance,
+      driver
+    );
+    driverPaths.features[driver.id - 1] = driver.path;
+
     if (
       driver.state === "picking up" &&
-      driver.passenger != null &&
-      isRunning === true
+      driver.passenger != null
+      // isRunning === true
     ) {
       handlePickup(driver);
     }
@@ -458,13 +551,13 @@ export default function Map() {
   function handlePickup(driver) {
     const startDate = new Date();
     const startDateTicks = dateToTicks(startDate);
-    const steps = (100 - driver.speed) * 5;
     driver.Log[driver.completedJobs]["pickingup"] = {};
-    driver.path = buildPath(driver.currentLocation, driver.destination);
-    processPath(driver.path, steps);
-    driverPaths.features[driver.id - 1] = driver.path;
+
     // driver.totalTicks = startDateTicks - driver.totalTicks;
     map.getSource("routes").setData(driverPaths);
+    // driver.counter = 0;
+    // continueDriver(driver);
+    console.log("driver continued");
 
     setTimeout(() => {
       // console.log(
@@ -502,6 +595,8 @@ export default function Map() {
         break;
       }
       
+      driver.currentLocation = driver.destination;
+      
       driver.pickUp();
       const endDate = new Date();
       const endDateTicks = dateToTicks(endDate);
@@ -516,7 +611,7 @@ export default function Map() {
       console.log(driver.id, driver.Log, "Pick Up Log");
       if (driver.state === "transit" && isRunning === true) {
         // driver.totalTicks = startDateTicks;
-
+        console.log("CallTransit");
         handleTransit(driver);
       }
     }, 8000);
@@ -677,9 +772,9 @@ export default function Map() {
     <>
       <div>
         <div className="map-container" ref={mapContainer} />
-        {/* <Button onClick={debugStart}> Debug start</Button>
-        <Button onClick={debugPause}> Debug pause</Button>
-        <Button onClick={debugContinue}> Debug continue</Button> */}
+        <Button onClick={startDriver}> Debug start driver</Button>
+        <Button onClick={stopDriver}> Debug stop driver </Button>
+        <Button onClick={continueDriver}> Debug continue driver</Button>
 
         <Button onClick={spawnPassenger}>Spawn Passenger</Button>
         <Button onClick={startAnimation}>Start Animation</Button>

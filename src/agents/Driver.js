@@ -7,7 +7,7 @@ export default class Driver {
     //// Global affecting ////
     this.speed = props.speed;
     /////////////////////////
-
+    this.timeCounter = 0;
     this.id = props.id;
     this.state = "searching";
     this.currentLocation = props.currentLocation;
@@ -24,6 +24,10 @@ export default class Driver {
     this.counter = 0;
     this.workingPeriod = []; //nested list
     this.isWorking = true;
+    this.currentLeftoverDist = 0;
+    this.currentSteps = 0;
+    this.currentLeftoverTime = 0;
+    this.distancePerStep = 0;
     this.Log = {
       //for reference
       // 0: {
@@ -37,6 +41,7 @@ export default class Driver {
       //   transit: {distance: 0 , fuel: 0,  duration: 0, earning: 0},
       // },
     };
+    this.timeLog = {};
     this.totalTime = 0;
     this.totalTicks = 0;
     this.totaldistSearch = 0;
