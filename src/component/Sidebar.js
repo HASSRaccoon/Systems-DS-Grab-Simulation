@@ -7,6 +7,7 @@ import { IconContext } from 'react-icons';
 import { Button } from '@mantine/core';
 // import Button from '@mui/material/Button';
 // import { StatusDetails } from './StatusDetails';
+import { PersonalityQuiz } from './PersonalityQuiz';
 
 function Sidebar() {
     const [sidebar, setSidebar] = useState(false)
@@ -21,8 +22,8 @@ function Sidebar() {
         <IconContext.Provider value={{color: '#fff'}}>
         <nav className= 'nav-menu active'>
             <div>
-                <SummarizedSidebar />
-                {/* {<StatusDetails/>} */}
+                {/* <SummarizedSidebar /> */}
+                {<PersonalityQuiz/>}
 
             </div>
         </nav>
