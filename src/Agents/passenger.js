@@ -12,19 +12,15 @@ export default class Passenger{
     }    
     carArrived(){ 
         this.state = 'transit';
-        if (this.driver.currentLocation == this.currentLocation){
-            this.state = 'transit';
-        }
     }
     transit(){
-        // this.currentLocation = this.driver.currentLocation; //FIXME: update the current location of the passenger while transiting (same as grab's location)
+        this.state = 'arrived';
     }
     arrived(){
         this.state = 'arrived';
     }
     cancel(){
         console.log('passenger cancelled')
-        // this.driver.passenger = null;
     }
     generateRandomCoord() {
         let Pos =
