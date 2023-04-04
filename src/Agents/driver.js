@@ -66,7 +66,7 @@ export default class Driver {
         let speed = this.distancePerTick(this.speed);
         this.speedLs.push(speed);
         this.time += Math.min(1, this.distanceToTravel / speed); //NOTE: time is in tick, time spent to travel to passenger location
-        if (Math.floor(this.distanceToTravel / speed) != 0){ //NOTE: like 4km -> 2.66km etc (no remainder)
+        if (Math.floor(this.distanceToTravel / speed) !== 0){ //NOTE: like 4km -> 2.66km etc (no remainder)
             this.distance += speed
             this.distanceToTravel -= speed
         }
@@ -87,7 +87,7 @@ export default class Driver {
         let speed = this.distancePerTick(this.speed);
         this.speedLs.push(speed);
         this.time += Math.min(1, this.distanceToTravel / speed); //NOTE: time is in tick, time spent to travel to passenger location
-        if (Math.floor(this.distanceToTravel / speed) != 0){ //NOTE: like 4km -> 2.66km etc (no remainder)
+        if (Math.floor(this.distanceToTravel / speed) !== 0){ //NOTE: like 4km -> 2.66km etc (no remainder)
             this.distance += speed
             this.distanceToTravel -= speed
         }
