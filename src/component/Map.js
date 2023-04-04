@@ -52,7 +52,6 @@ export default function Map() {
   let god = new Globals();
   // console.log(god.checkPeak(new Date())); //check peak hour
   // console.log("fares",god.fareCalculation(0.5,4,new Date())); //check raining
-
   // console.log("profit", god.profitCalculation(70, 44.5));
 
   let driver1 = new Driver({
@@ -134,6 +133,9 @@ export default function Map() {
   //default paths on init
   for (let i = 0; i < drivers.length; i++) {
     const driver = drivers[i];
+    // console.log(driver.currentLocation, driver.destination, "hello");
+    // driver.currentLocation = generateRandomCoord();
+    driver.destination = generateRandomCoord();
     driver.path = buildPath(driver.currentLocation, driver.destination);
   }
 

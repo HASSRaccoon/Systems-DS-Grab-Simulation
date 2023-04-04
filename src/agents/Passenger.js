@@ -1,49 +1,31 @@
-import React from "react";
-import styles from "./styles.module.css";
-import { moveTo } from "./move.js";
+import sgJSON from "./road-network.json";
 
-export default class Passenger {
-  constructor(props) {
-    this.state = "waiting";
-    this.currentLocation = props.currentLocation;
-    this.destination = props.destination;
-    this.waitingTime = 0;
-    this.driver = null;
-    this.ref = props.ref;
-    this.id = props.id;
-    this.counter = 0;
-    this.agentType = "passenger";
-
-    this.appearTime = (Date.now() / 1000) | 0;
-    // console.log(`Passenger appear at ${this.appearTime}`);
-  }
-
-  // do we need a state for car not arrived yet?
-
-  carArrived(timestamp, driver) {
-    this.driver = driver;
-    this.state = "transit";
-    if (this.driver.currentLocation == this.currentLocation) {
-      this.waitingTime = timestamp - this.appearTime;
-      console.log(`Passenger waiting time: ${this.waitingTime}`);
-      this.state = "transit";
+export default class Passenger{
+    constructor(props) {
+        this.id = props.id;
+        this.state = 'waiting';
+        this.currentLocation = this.generateRandomCoord();
+        this.destination = this.generateRandomCoord();
+        this.waitingTime = 0;
+        this.driver = null;
+        this.cancelTendency = props.cancelTendency;
+    }    
+    carArrived(){ 
+        this.state = 'transit';
     }
-  }
-  transit() {
-    // this.currentLocation = this.driver.currentLocation; //FIXME: update the current location of the passenger while transiting (same as grab's location)
-    console.log(
-      `passenger current location when transit: ${this.currentLocation}`
-    );
-    moveTo(
-      this.ref.current,
-      this.currentLocation,
-      this.destination,
-      this.ref,
-      this.driver.speed
-    );
-  }
-  arrived() {
-    this.state = "arrived";
-    this.ref.current.remove(); // remove from map
-  }
+    transit(){
+        this.state = 'arrived';
+    }
+    arrived(){
+        this.state = 'arrived';
+    }
+    cancel(){
+        console.log('passenger cancelled')
+    }
+    generateRandomCoord() {
+        let Pos =
+          sgJSON.features[Math.floor(Math.random() * sgJSON.features.length)]
+            .geometry.coordinates[0];
+        return Pos;
+    }
 }
