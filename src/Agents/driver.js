@@ -1,6 +1,4 @@
 import sgJSON from "./road-network.json";
-import * as turf from "@turf/turf";
-import PathFinder, { pathToGeoJSON } from "geojson-path-finder";
 
 export default class Driver {
     constructor(props) {
@@ -13,13 +11,9 @@ export default class Driver {
         this.currentLocation = this.generateRandomCoord();
         this.destination = null;
         this.time = 0;
-        // this.distanceWillingToTravel = 0;
         this.completedJobs = 0;
         this.cancelledJobs = 0;
         this.passenger = props.passenger;
-        // this.earnings = 0;
-        // this.rating = 0;
-        // this.ref = props.ref;
         this.moveTendency = props.moveTendency;
         this.log = {};
         this.jobLog = {};
@@ -72,7 +66,7 @@ export default class Driver {
         }
         else{
             //NOTE: add the remainder
-            this.distance += this.distanceToTravel; //DEBUG: need to check is this correct
+            this.distance += this.distanceToTravel;
             this.distanceToTravel = 0;
             this.jobLog['pick up'] = {'time spent': this.time, 'distance': this.distance, 'current time': ticks, 'speed': this.speedLs} //NOTE: log here
             //NOTE: clear logged data
@@ -93,7 +87,7 @@ export default class Driver {
         }
         else{
             //NOTE: add the remainder
-            this.distance += this.distanceToTravel; //DEBUG: need to check is this correct
+            this.distance += this.distanceToTravel;
             this.distanceToTravel = 0;
             this.jobLog['transit'] = {'time spent': this.time, 'distance': this.distance, 'current time': ticks, 'speed': this.speedLs} //NOTE: log here
             // NOTE: clear logged data
@@ -111,19 +105,6 @@ export default class Driver {
         this.log[`${this.completedJobs}`] = {...this.jobLog}
         console.log(`${this.id}'s log`)
         console.log(this.log)
-    }
-
-    buildPath(start, end) {
-        const pathBuilder = new PathFinder(sgJSON, { tolerance: 1e-4 });
-        const path = pathToGeoJSON(
-          pathBuilder.findPath(turf.point(start), turf.point(end))
-        );
-        return path;
-    }
-
-    distanceCalculation(location, destination){
-        let path = this.buildPath(location, destination);
-        return turf.length(path)
     }
 
     distancePerTick(speed){

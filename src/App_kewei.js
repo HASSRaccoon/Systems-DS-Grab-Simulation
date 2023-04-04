@@ -9,15 +9,25 @@ import PathFinder, { pathToGeoJSON } from "geojson-path-finder";
 function App() {
     let days = 1;
 
-     // Functions for map related actions
-     const pathBuilder = new PathFinder(sgJSON, { tolerance: 1e-4 });
+    const pathBuilder = new PathFinder(sgJSON, { tolerance: 1e-4 });
 
-    // function to build path from json file, start and end points
     function buildPath(start, end) {
         const path = pathToGeoJSON(
             pathBuilder.findPath(turf.point(start), turf.point(end))
         );
         return path;
+    }
+
+    const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+    function generateString(length) {
+        let result = ' ';
+        const charactersLength = characters.length;
+        for ( let i = 0; i < length; i++ ) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+
+        return result;
     }
 
     function generateRandomCoord() {
@@ -71,28 +81,24 @@ function App() {
     drivers.map((driver) => driverLs.push(new Driver(driver)))
     passengers.map((passenger) => passengerLs.push(new Passenger(passenger)))
 
-    function assignPassenger(driver) { //DEBUG: need to assign nearest passenger instead of random assignment
+    function assignPassenger(driver) { //TODO: need to assign nearest passenger instead of random assignment
         if (passengerLs.length > 0 && driver.state === "searching") {
             let passengerIndex = Math.floor(Math.random() * passengerLs.length); //DEBUG: assigning random passenger part
             let currentPassenger = passengerLs[passengerIndex];
             if (currentPassenger.driver === null){ //NOTE: to avoid reassigning passenger to another driver
                 driver.passenger = currentPassenger;
                 currentPassenger.driver = driver;
-                passengerLs = passengerLs.filter(passenger => passenger.id !== currentPassenger.id) //DEBUG: remove passenger from list
-            }
-            if (currentPassenger.driver === null || driver.passenger === null){ //DEBUG: for debug purpose
-                console.log('bug');
-                assignPassenger(driver)
+                passengerLs = passengerLs.filter(passenger => passenger.id !== currentPassenger.id)
             }
         }
     }
 
     function newPassenger(){
         let passenger = new Passenger({
-            id: "passenger" + passengerLs.length, //FIXME: need a unique id
-            currentLocation: generateRandomCoord(), //DEBUG: json location
-            destination: generateRandomCoord(), //DEBUG: json location
-            cancelTendency: Math.floor(Math.random())*10, //DEBUG: random cancel tendency
+            id: "passenger" + generateString(7),
+            currentLocation: generateRandomCoord(),
+            destination: generateRandomCoord(),
+            cancelTendency: Math.floor(Math.random())*10,
         })
         passengerLs.push(passenger)
     }
@@ -104,11 +110,6 @@ function App() {
         if (!destination){
             destination = location;
         }
-        if (location.length <= 2 || destination.length <= 2){
-            console.log('bug');
-            console.log(location);
-            console.log(destination);
-        }
         let path = buildPath(location, destination)
         driver.path = path;
         if (driver.distanceToTravel === 0){
@@ -119,8 +120,12 @@ function App() {
 
     for (let ticks = 0; ticks < 1000 * days; ticks++) {
         try{
-            // FIXME: how to add new passenger, current is to add new passenger every ticks
-            newPassenger(); 
+            let toGenerate = 1000 - passengerLs.length 
+            if (passengerLs.length < 1000){
+                for (let i = 0; i < toGenerate; i++){
+                    newPassenger();
+                }
+            }
             if (ticks % 60 == 0){ //NOTE: each hour
                 if (Math.random() < 0.5){ //NOTE: rain probability
                     god.raining = true;
