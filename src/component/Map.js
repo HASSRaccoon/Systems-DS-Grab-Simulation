@@ -197,8 +197,17 @@ export default function Map() {
   function animatedriver(driver, steps) {
     // console.log(driver);
     if (driver.counter === 0) {
-      console.log(driver.currentLocation, "first");
+      // console.log(driver.currentLocation, "first");
     }
+    // const indexstring = "Time" + driver.timeCounter.toString();
+    // console.log(indexstring, typeof indexstring);
+    // console.log(driver.timeLog);
+    // driver.timeLog[indexstring] = {};
+    // driver.timeLog[driver.timeCounter.toString()]["state"] = driver.state;
+    driver.timeLog[driver.timeCounter] = {};
+    driver.timeLog[driver.timeCounter]["state"] = driver.state;
+    console.log(driver.timeLog, "hello");
+
     const start =
       driver.path.geometry.coordinates[
         driver.counter >= steps ? driver.counter - 1 : driver.counter
@@ -233,9 +242,12 @@ export default function Map() {
     }
 
     driver.counter = driver.counter + 1;
-    if (driver.counter === steps) {
-      console.log(driver.currentLocation, "last");
-    }
+    driver.timeCounter = driver.timeCounter + 1;
+    console.log(driver.timeLog, "timelogperframe");
+
+    // if (driver.counter === steps) {
+    // console.log(driver.currentLocation, "last");
+    // }
     // console.log(driver.currentLocation, driver.counter);
   }
 
@@ -356,6 +368,7 @@ export default function Map() {
     isRunning = true;
     for (let i = 0; i < drivers.length; i++) {
       let driver = drivers[i];
+
       handleSearch(driver);
     }
   }
@@ -476,7 +489,9 @@ export default function Map() {
         console.log("checking");
         break;
       }
+
       console.log("will this print?");
+      driver.currentLocation = driver.destination;
       driver.pickUp();
       const endDate = new Date();
       const endDateTicks = dateToTicks(endDate);
@@ -491,7 +506,7 @@ export default function Map() {
       console.log(driver.id, driver.Log, "Pick Up Log");
       if (driver.state === "transit" && isRunning === true) {
         // driver.totalTicks = startDateTicks;
-
+        console.log("CallTransit");
         handleTransit(driver);
       }
     }, 8000);
