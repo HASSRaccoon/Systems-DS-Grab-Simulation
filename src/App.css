@@ -24,6 +24,17 @@
   color: white;
 }
 
+.topbar{
+  background-color: rgb(81, 111, 136);
+  height: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color:rgb(255, 255, 255);
+  font-size: 15px;
+  margin-right: 350px;
+}
+
 .App-link {
   color: #61dafb;
 }
@@ -35,6 +46,14 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.simulation{
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 350px;
 }
 
 /* body {
