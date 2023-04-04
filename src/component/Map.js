@@ -43,6 +43,7 @@ export default function Map() {
       const segment = turf.along(path, i);
       arc.push(segment.geometry.coordinates);
     }
+    arc.push(turf.along(path, lineDistance).geometry.coordinates);
     path.geometry.coordinates = arc;
   }
   const spawnProbability = 0.5;
@@ -248,14 +249,17 @@ export default function Map() {
     driver.timeLog[driver.timeCounter]["state"] = driver.state;
     driver.timeLog[driver.timeCounter]["distance travelled"] =
       driver.distancePerStep;
-    driver.timeLog[driver.timeCounter]["time passed"] = driver.timeCounter;
-    if (driver.counter === driver.currentSteps) {
+    driver.timeLog[driver.timeCounter]["time passed"] = 1;
+    // driver.timeLog[driver.timeCounter]["leftover time"] = 0;
+    if (driver.counter === driver.currentSteps + 1) {
       driver.timeLog[driver.timeCounter]["distance travelled"] =
         driver.currentLeftoverDistance;
+      driver.timeLog[driver.timeCounter]["time passed"] =
+        driver.currentLeftoverTime;
       // driver.timeLog[driver.timeCounter]["leftover distance"] =
       //   driver.currentLeftoverDistance;
-      driver.timeLog[driver.timeCounter]["leftover time"] =
-        driver.currentLeftoverTime;
+      // driver.timeLog[driver.timeCounter]["leftover time"] =
+      //   driver.currentLeftoverTime;
     }
 
     console.log(driver.id, driver.timeLog, "time log per frame");
@@ -478,7 +482,8 @@ export default function Map() {
       getPassengerTime = driver.timeCounter;
       driver.Log[driver.completedJobs]["searching"]["timeFound"] =
         getPassengerTime;
-      stopDriver(driver);
+      // stopDriver(driver);
+      console.log("driver stopped");
       // const foundDate = new Date();
       // const foundDateTicks = dateToTicks(foundDate);
 
@@ -486,26 +491,6 @@ export default function Map() {
     }
 
     driver.search(driver.passenger);
-
-    // let searchDistance = 0;
-
-    // console.log(initialLocation, "initial location");
-    // console.log(driver.currentLocation, "currentlocation");
-    // console.log(initialLocation === driver.currentLocation, "true?");
-
-    // if (
-    //   initialLocation[0].toFixed(7) === driver.destination[0].toFixed(7) &&
-    //   initialLocation[1].toFixed(7) === driver.destination[1].toFixed(7)
-    // ) {
-    //   searchDistance = 0;
-    //   console.log("did not travel for searching");
-    // } else {
-    //   const searchDistPath = buildPath(
-    //     initialLocation,
-    //     driver.currentLocation
-    //   );
-    //   searchDistance = getDistance(searchDistPath);
-    // }
 
     driver.Log[driver.completedJobs]["searching"]["distance"] =
       driver.timeLog[driver.timeCounter]["distance travelled"];
@@ -548,8 +533,9 @@ export default function Map() {
 
     // driver.totalTicks = startDateTicks - driver.totalTicks;
     map.getSource("routes").setData(driverPaths);
-    driver.counter = 0;
-    continueDriver(driver);
+    // driver.counter = 0;
+    // continueDriver(driver);
+    console.log("driver continued");
 
     setTimeout(() => {
       // console.log(
