@@ -498,7 +498,7 @@ export default function Map() {
     
       driver.passenger = passengers[driver.id]; // eugene: currently driver will be assigned with the same passenger every time? passengers[driver.id==2] == 2nd passenger in the array always
       console.log("this is the passengers array: ", passengers);
-      console.log("driver id you are checking: ", driver.id, ", which translates to the passenger he is carrying by his id: ", driver.passenger);
+      console.log("driver id you are checking: ", driver.id, ", which translates to the passenger he is carrying by his id: ", driver.passenger.id);
       // stopAnimation();
       
       getPassengerTime = driver.timeCounter;
@@ -637,8 +637,16 @@ export default function Map() {
       // eugene: but why the driver would go back to the passenger's original location as it's new destination? checking phenomenon looping
       for (let i = 0; i < passengerPoints.features.length; i++) {
         if (passengerPoints.features[i].properties.id === driver.passenger.id) {
-          passengerPoints.features.splice(i, 1); //remove passenger from map first? but this is still in transit?
+          console.log("before removal, remaining passengers: ", passengerPoints.features.length);
+          const victimSoul = passengers.splice(i, 1); //remove passenger from computation first? but this is still in transit?
+          console.log("passenger " + victimSoul[0].id + " removed from computation");
+          const victimFace = passengerPoints.features.splice(i, 1); //remove passenger from map first? but this is still in transit?
+          console.log("passenger " + victimFace[0].properties.id + " removed from map");
+          console.log("after removal, remaining passengers: ", passengerPoints.features.length);
+          console.log("passenger points (list of psng noted on map): ", passengerPoints.features);
+          console.log("passenger list (list of psng in computation): ", passengers);
           map.getSource("passengers").setData(passengerPoints);
+          // console.log("how many times have i been looped through? ", i);
         }
         // break;
       }
