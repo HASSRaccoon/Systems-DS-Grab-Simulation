@@ -1,132 +1,108 @@
-import Globals from '../src/Agents/globals.js' // sprint 2 shit
-
 export default class Driver {
-    constructor(location, speed = 1) {
-         // GLOBALS AFFECTED ATTRIBUTES/////////////////////////////
-        this.defaultSpeed = speed;
-        this.speed = this.defaultSpeed;
+    constructor(props) {
+        //// Global affecting ////
+        this.speed = props.speed;
+        /////////////////////////
 
-   
-        ////////////////////////////////////////////////////////////
-        
+        this.id = props.id;
         this.state = 'searching';
-        this.location = location;
-        this.currentLocation = location;
+        this.currentLocation = props.currentLocation;
         this.destination = null;
-        this.waitingTime = 0;
-
+        this.time = 0;
         this.distanceWillingToTravel = 0;
         this.completedJobs = 0;
-
-
-        this.passenger = null;
-
-        // dumping some other (maybe stupid) attributes
+        this.cancelledJobs = 0;
+        this.passenger = props.passenger;
         this.earnings = 0;
         this.rating = 0;
-        // this.raining = false;
-        // this.traffic = false;
-        // this.emotion = 'angry';
-        // if (this.emotion == 'angry'){
-        //     this.speed = 5;
-        //     Passenger.emotion = 'scared';
-        // }
-
-        //DEBUG: for testing purpose, will remove later
-        this.passengers = 3; 
-        this.passengerLocation = [100,50,10];
-        this.passengerDestination = [120,70,20];
-        
+        this.ref = props.ref;
+        this.moveTendency = props.moveTendency;
+        this.log = {};
+        this.jobLog = {};
+        this.distance = 0;
+        this.distanceToTravel = 0;
     }
-    // GLOBALS AFFECTED ATTRIBUTES/////////////////////////////
-    
     updateSpeed(raining) {
         if (raining) {
-          this.speed = this.defaultSpeed * 0.8;
+            this.speed *= 0.8; //TODO: change to parameter
         }
         else {
-            this.speed = this.defaultSpeed;
-            }
-      }
-    
-    
-    ////////////////////////////////////////////////////////////
-
-    search(){ //TODO:
-        if (this.passenger != null){ //FIXME: if there is passenger appear
-            this.state = 'picking up';
-            this.passengers -= 1; //DEBUG: for testing ?? idk what this means
-            this.waitingTime += 1; // idk if this is correct
-        this.speed = speed;
-        this.distanceWillingToTravel = 0;
-        this.completedJobs = 0;
-
-        this.passenger = null;
-
+            this.speed /= 0.8;
         }
     }
-
     search(passenger){
-        this.passenger = passenger;
         if (this.passenger){ 
+            this.jobLog['searching'] = {'time spent': this.time, 'distance': this.distance} //NOTE: log here
+            //NOTE: clear logged data
+            this.distance = 0
+            this.time = 0
+
+            this.destination = this.passenger.currentLocation;
+            this.distanceToTravel = this.distanceCalculation(this.currentLocation, this.destination);
             this.state = 'picking up';
         }
         else{
-            this.currentLocation += this.speed;
-            this.waitingTime += 1; //FIXME: need to add the correct timestamp
+            this.time += 1; //NOTE: time is in tick, waiting time of searching passenger
+            let random = Math.random();
+            if (random < this.moveTendency) {
+                this.destination = [Math.random()*200,Math.random()*200]; //FIXME: feels like sth wrong here
+            }
+            this.distance += this.distancePerTick(this.speed);
+            this.passenger = passenger;
         }
     }
     pickUp(){
-        this.destination = this.passenger.location;
-        if (this.currentLocation != this.destination){
-            this.currentLocation += this.speed;
-            console.log(`driver current location when picking up: ${this.currentLocation}`)
+        this.time += 1; //NOTE: time is in tick, time spent to travel to passenger location
+        let speed = this.distancePerTick(this.speed);
+        if (Math.floor(this.distanceToTravel / speed) != 0){ //NOTE: like 4km -> 2.66km etc (no remainder)
+            this.distance += speed
+            this.distanceToTravel -= speed
         }
-        else{ //FIXME:
+        else{
+            //NOTE: add the remainder
+            this.distance += this.distanceToTravel; //DEBUG: need to check is this correct
+            this.jobLog['pick up'] = {'time spent': this.time, 'distance': this.distance} //NOTE: log here
+            //NOTE: clear logged data
+            this.distance = 0
+            this.time = 0
             this.state = 'transit';
+            this.destination = this.passenger.destination;
+            this.distanceToTravel = this.distanceCalculation(this.currentLocation, this.destination);
         }
     }
     transit(){
-        this.destination = this.passenger.destination;
-        if (this.currentLocation != this.destination){
-            this.currentLocation += this.speed;
-            console.log(`driver current location when transit: ${this.currentLocation}`)
+        this.time += 1; //NOTE: time is in tick, time spent to travel to passenger location
+        let speed = this.distancePerTick(this.speed);
+        if (Math.floor(this.distanceToTravel / speed) != 0){ //NOTE: like 4km -> 2.66km etc (no remainder)
+            this.distance += speed
+            this.distanceToTravel -= speed
         }
         else{
+            //NOTE: add the remainder
+            this.distance += this.distanceToTravel; //DEBUG: need to check is this correct
+            this.jobLog['transit'] = {'time spent': this.time, 'distance': this.distance} //NOTE: log here
             this.state = 'completed';
+            this.destination = this.passenger.destination;
+            this.distanceToTravel = this.distanceCalculation(this.currentLocation, this.destination);
         }
     }
     completed(){
         this.state = 'searching';
         this.completedJobs += 1;
-        this.earnings += 10; // create a formula based on distance and price per km defined at globals
+        this.passenger = null;
+        // NOTE: clear logged data
+        this.distance = 0
+        this.time = 0
+        this.log[`${this.completedJobs}`] = {...this.jobLog}
+        console.log(`${this.id}'s log`)
+        console.log(this.log)
     }
 
-    test(){
-        while (this.passenger > 0){ //FIXME:
-            switch (this.state){
-                case 'searching':
-                    console.log("Searching")
-                    this.search();
-                    break;
-                case 'picking up':
-                    console.log('picking up')
-                    this.pickUp(this.passengerLocation[this.passengers - 1]);
-                    break;
-                case 'transit':
-                    console.log('Transiting')
-                    this.transit(this.passengerDestination[this.passengers - 1]);
-                    break
-                case 'completed':
-                    this.completed();
-                    break
-            }
-        }
+    distanceCalculation(location, destination){
+        return Math.sqrt(Math.pow(location[0] - destination[0], 2) + Math.pow(location[1] - destination[1], 2));
+    }
+
+    distancePerTick(speed){
+        return speed / 60;
     }
 }
-
-
-
-// let driver = new Driver(0);
-// driver.test();
-
