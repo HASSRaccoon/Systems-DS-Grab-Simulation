@@ -10,14 +10,81 @@ import exportFromJSON from 'export-from-json';
 
 function App() {
     //CHANGE PER SIMULATION
-    const DAYS = 0.7; 
+    const DAYS = 5; 
     const TICKRATE = 1440; //NOTE: 1 tick = 1 minute
     const TICKS = TICKRATE * DAYS;
 
+    const NUM_DRIVERS = 10;
+
+    // const simulationIter = 10; //cannot work as the simulation stores the data
     const EXPORT = true;
-    const simulationIter = 1;
 
     const pathBuilder = new PathFinder(sgJSON, { tolerance: 1e-4 });
+
+    let drivers= []
+    for (let i = 0; i < NUM_DRIVERS; i++) {
+        drivers.push( //CHANGE PER SIMULATION
+                { 
+                    id: `C${i}`,
+                    speed: 70,
+                    state: 'searching',
+                    moveTendency: 99999999999999,
+                }
+            )
+        }
+    // let drivers = [
+    //     { //Type A
+    //         id: "A",
+    //         speed: 80,
+    //         state: 'searching',
+    //         moveTendency: 0,
+    //     },
+    //     { //Type B
+    //         id: "B",
+    //         speed: 90,
+    //         state: 'searching',
+    //         moveTendency: 0,
+    //     },
+    //     { //Type C
+    //         id: "C",
+    //         speed: 70,
+    //         state: 'searching',
+    //         moveTendency: 99999999999999,
+    //     },
+    // ];
+
+    let passengers = [
+        {
+            id: "passenger1",
+            cancelTendency: 1000,
+            // currentLocation: generateRandomCoord(),
+            // destination: generateRandomCoord(),
+        },
+        {
+            id: "passenger2",
+            cancelTendency: 1000,
+        },
+        {
+            id: "passenger3",
+            cancelTendency: 1000,
+        },
+        {
+            id: "passenger4",
+            cancelTendency: 1000,
+        },
+    ];
+
+    let god = new Globals();
+    let passengerLs = []
+
+    // let cancelled = 0; //DEBUG: for debug purpose
+
+    //spawn drivers
+    // drivers.map((driver) => driverLs.push(new Driver(driver)));
+    drivers.map((driver) => god.registerDriver(new Driver(driver)));
+
+    passengers.map((passenger) => passengerLs.push(new Passenger(passenger)))
+
 
     function buildPath(start, end) {
         const path = pathToGeoJSON(
@@ -63,72 +130,6 @@ function App() {
 
     //     return Pos
     // }
-
-    let drivers= []
-    for (let i = 0; i < 10; i++) {
-        drivers.push( //CHANGE PER SIMULATION
-                { 
-                    id: `B${i}`,
-                    speed: 90,
-                    state: 'searching',
-                    moveTendency: 0,
-                }
-            )
-        }
-
-
-    // let drivers = [
-    //     { //Type A
-    //         id: "A",
-    //         speed: 80,
-    //         state: 'searching',
-    //         moveTendency: 0,
-    //     },
-    //     { //Type B
-    //         id: "B",
-    //         speed: 90,
-    //         state: 'searching',
-    //         moveTendency: 0,
-    //     },
-    //     { //Type C
-    //         id: "C",
-    //         speed: 70,
-    //         state: 'searching',
-    //         moveTendency: 1440,
-    //     },
-    // ];
-
-    let passengers = [
-        {
-            id: "passenger1",
-            cancelTendency: 1000,
-            // currentLocation: generateRandomCoord(),
-            // destination: generateRandomCoord(),
-        },
-        {
-            id: "passenger2",
-            cancelTendency: 1000,
-        },
-        {
-            id: "passenger3",
-            cancelTendency: 1000,
-        },
-        {
-            id: "passenger4",
-            cancelTendency: 1000,
-        },
-    ];
-
-    let god = new Globals();
-    let passengerLs = []
-
-    // let cancelled = 0; //DEBUG: for debug purpose
-
-    //spawn drivers
-    // drivers.map((driver) => driverLs.push(new Driver(driver)));
-    drivers.map((driver) => god.registerDriver(new Driver(driver)));
-
-    passengers.map((passenger) => passengerLs.push(new Passenger(passenger)))
 
     function assignPassenger(driver) {
 
@@ -208,7 +209,7 @@ function App() {
     function runSim(){
         // --------------------------------- RUN SIMULATION --------------------------------- //
         const startDate = new Date(); //NOTE: start time of simulation
-
+        console.log("(LOG) Start Time: ", startDate.toLocaleTimeString());
         for (let ticks = 0; ticks < TICKS ; ticks++) {
             if (ticks % TICKRATE === 0) console.log("Day: ", 1+(ticks/TICKRATE)); //log everyday
 
@@ -331,32 +332,31 @@ function App() {
         if (EXPORT === true){
 
             let exportType = exportFromJSON.types.json; // set output type
-            console.log(`JSONing drivers logs`);
+            console.log(`(LOG) Sim Completed: Exporting Data..`);
             
             // console.log("drivers:",god.drivers);
             let data = Object.values(driverlogs); // extract value from array object https://github.com/zheeeng/export-from-json/issues/110
             // console.log("data:",data); 
-            const filename = "10B_5Days_"; // set filename for export (NOT WORKING :( )
+            const filename = "10C_5Days"; // set filename for export (NOT WORKING :( )
             exportFromJSON({ data, filename, exportType });
 
         }
         else{
-            console.log("Sim Completed: Not Exporting")
+            console.log("(LOG) Sim Completed: Not Exporting")
         }
         
         //get current timing
         let endDate = new Date();
-        console.log("Start Time: ", startDate.toLocaleTimeString());
-        console.log("End Time: ", endDate.toLocaleTimeString());
+    
+        console.log("(LOG) End Time: ", endDate.toLocaleTimeString());
         //get total compute time in minutes
-        console.log("Total Time: ", (endDate.getTime() - startDate.getTime()) / 60000, "minutes");
+        console.log("(LOG) Total Time: ", (endDate.getTime() - startDate.getTime()) / 60000, "minutes");
         
     }
+    
+    console.log(`(LOG) Starting Simulation..`);
+    runSim();
 
-    for (let i = 0; i < simulationIter; i++){
-        console.log(`Starting Simulation ${i+1}..`);
-        runSim();
-    }
 }
 
 

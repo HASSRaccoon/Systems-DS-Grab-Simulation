@@ -31,16 +31,16 @@ export default class Driver {
         // this.breakEnd = 60; //NOTE: 1am
 
         // Type B
-        this.startTime = 420; //NOTE: 7am
-        this.endTime = 1140; //NOTE: 7pm
-        this.breakStart = 600; //NOTE: 10am
-        this.breakEnd = 660; //NOTE: 11am
+        // this.startTime = 420; //NOTE: 7am
+        // this.endTime = 1140; //NOTE: 7pm
+        // this.breakStart = 600; //NOTE: 10am
+        // this.breakEnd = 660; //NOTE: 11am
         
         // Type C
-        // this.startTime = 480; //NOTE: 8am
-        // this.endTime = 1080; //NOTE: 6pm
-        // this.breakStart = 660; //NOTE: 10am
-        // this.breakEnd = 720; //NOTE: 11am
+        this.startTime = 480; //NOTE: 8am
+        this.endTime = 1080; //NOTE: 6pm
+        this.breakStart = 660; //NOTE: 10am
+        this.breakEnd = 720; //NOTE: 11am
 
         this.path = null;
         this.speedLs = [];
@@ -102,7 +102,7 @@ export default class Driver {
         else{
             this.time += 1; //NOTE: time is in tick, waiting time of searching passenger
             let moveRandom = Math.random();
-            if (this.time > this.moveTendency && moveRandom > 0.8) {
+            if (this.time > this.moveTendency && moveRandom < 0.8) {
                 this.destination = this.generateRandomCoord();
             }
             else{
