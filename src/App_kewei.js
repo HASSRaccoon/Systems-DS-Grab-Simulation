@@ -13,7 +13,7 @@ function App() {
     const TICKRATE = 1440; //NOTE: 1 tick = 1 minute
     const TICKS = TICKRATE * DAYS;
 
-    let EXPORT = false;
+    const EXPORT = true;
 
     const pathBuilder = new PathFinder(sgJSON, { tolerance: 1e-4 });
 
@@ -48,11 +48,17 @@ function App() {
             id: "driver1",
             speed: 70,
             state: 'searching',
-            moveTendency: 3,
+            moveTendency: 0,
         },
         {
             id: "driver2",
-            speed: 50,
+            speed: 80,
+            state: 'searching',
+            moveTendency: 5,
+        },
+        {
+            id: "driver3",
+            speed: 90,
             state: 'searching',
             moveTendency: 5,
         },
@@ -79,12 +85,15 @@ function App() {
 
     let god = new Globals();
 
-    let driverLs = []
+    // let driverLs = []
     let passengerLs = []
 
     let cancelled = 0; //DEBUG: for debug purpose
 
-    drivers.map((driver) => driverLs.push(new Driver(driver)))
+    //spawn drivers
+    // drivers.map((driver) => driverLs.push(new Driver(driver)));
+    drivers.map((driver) => god.registerDriver(new Driver(driver)));
+
     passengers.map((passenger) => passengerLs.push(new Passenger(passenger)))
 
     function assignPassenger(driver) { //TODO: need to assign nearest passenger instead of random assignment
@@ -127,13 +136,14 @@ function App() {
                     newPassenger();
                 }
             }
-            if (ticks % 60 == 0){ //NOTE: each hour
+            if (ticks % 60 === 0){ //NOTE: each hour
                 if (Math.random() < 0.5){ //NOTE: rain probability
                     god.raining = true;
                 }
                 else{
                     god.raining = false;
                 }
+                
             }
             // for (let i = 0; i < passengerLs.length; i++){ //NOTE: passenger cancelling
             //     passengerLs[i].waitingTime += 1;
@@ -153,8 +163,8 @@ function App() {
             //         }
             //     }
             // }
-            for (let i = 0; i < driverLs.length; i++) { //NOTE: loop for each driver
-                let currentDriver = driverLs[i];
+            for (let i = 0; i < god.drivers.length; i++) { //NOTE: loop for each driver
+                let currentDriver = god.drivers[i];
                 if (currentDriver.breakStart < currentDriver.breakEnd ){
                     if (ticks % 1440 >= currentDriver.breakStart && ticks % 1440 <= currentDriver.breakEnd){ //NOTE: if driver on duty, assign passenger
                         console.log('break', ticks)
@@ -191,22 +201,22 @@ function App() {
                 }
                 switch (currentDriver.state) {
                     case "searching":
-                        currentDriver.search(currentDriver.passenger, ticks);
+                        currentDriver.search(currentDriver.passenger, ticks,god);
                         pathGenerator(currentDriver, currentDriver.currentLocation, currentDriver.destination);
                         break;
                     case "picking up":
-                        currentDriver.pickUp(ticks);
+                        currentDriver.pickUp(ticks,god);
                         currentDriver.passenger.carArrived();
                         pathGenerator(currentDriver, currentDriver.currentLocation, currentDriver.destination);
                         break;
                     case "transit":
-                        currentDriver.transit(ticks)
+                        currentDriver.transit(ticks,god)
                         currentDriver.passenger.transit()
                         pathGenerator(currentDriver, currentDriver.currentLocation, currentDriver.destination);
                         break;
                     case 'completed':
                         currentDriver.passenger.arrived()
-                        currentDriver.completed(ticks)
+                        currentDriver.completed(god)
                         break;
                     default:
                         currentDriver.search(currentDriver.passenger)
@@ -217,11 +227,11 @@ function App() {
         catch (e){
             console.log(e)
         }
-        if (ticks === TICKS - 1) EXPORT = true;
+        // if (ticks === TICKS - 1) EXPORT = true;
     }
 
     let driverlogs = []
-    driverLs.forEach(driver => {
+    god.drivers.forEach(driver => {
         console.log(`${driver.id}'s log`)
         console.log(driver.log)
         driverlogs.push({
@@ -232,12 +242,12 @@ function App() {
 
     console.log('driverlogs:',driverlogs)
   // ------------------------------- EXPORT JSON CODE -------------------------------
-    if (EXPORT == true){
+    if (EXPORT === true){
 
         let exportType = exportFromJSON.types.json; // set output type
-        console.log(`JSONing driverLs logs`);
+        console.log(`JSONing drivers logs`);
         let fileName = 'driverLs'; // set file name
-        // console.log("driverls:",driverLs);
+        // console.log("drivers:",god.drivers);
         let data = Object.values(driverlogs); // extract value from array object https://github.com/zheeeng/export-from-json/issues/110
         // console.log("data:",data); 
         try{
@@ -247,10 +257,16 @@ function App() {
             console.log(err);
         }
     }
+    else{
+        console.log("Sim Completed: Not Exporting")
+    }
 
 }
 
 
 export default App;
 
-//TODO: tendency: number of ticks willing to wait, driver waiting (KW)
+//TODO: 
+// 1) Speed dynamic to rain (done)
+// 2) Peak Hour
+// 3) Profits calculate (if its easier to do in javascript?) - Fares, fuel costs, peak hour

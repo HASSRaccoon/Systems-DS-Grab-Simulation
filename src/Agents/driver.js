@@ -25,18 +25,39 @@ export default class Driver {
         this.breakEnd = 60; //NOTE: 1am
         this.path = null;
         this.speedLs = [];
+        this.timeFlag = 0;
+
+        this.tripDistance = 0;
+        this.tripTime = 0;
+        this.tripFuelCost = 0;
+        this.tripFare = 0;
+        
     }
     updateSpeed(raining) {
         if (raining) {
-            this.speed *= 0.8; //TODO: change to parameter
+            // this.speed *= 0.8; //TODO: change to parameter
+            this.speed *= 0.84; //reduce by 16% if raining
         }
         else {
-            this.speed /= 0.8;
+            // this.speed /= 0.8;
+            this.speed /= 0.84;//revert to normal speed if not raining
         }
     }
-    search(passenger, ticks){
+    search(passenger, ticks, globals){
         if (this.passenger){ 
-            this.jobLog['searching'] = {'time spent': this.time, 'distance': this.distance, 'current time': ticks, 'speed': this.speedLs} //NOTE: log here
+            let fuelCost = globals.fuelcostCalculation(this.distance)
+            this.tripFuelCost += fuelCost;
+            this.tripDistance += this.distance;
+            this.tripTime += this.time;
+
+            this.jobLog['searching'] = {
+                'time spent': this.time, 
+                'distance': this.distance, 
+                'current time': ticks, 
+                'speed': this.speedLs,
+                'fuelcost': fuelCost
+            } //NOTE: log here
+
             //NOTE: clear logged data
             this.distance = 0
             this.time = 0
@@ -60,7 +81,7 @@ export default class Driver {
             this.passenger = passenger;
         }
     }
-    pickUp(ticks){
+    pickUp(ticks,globals){
         console.log(this.id, 'pick up distance', this.distance, 'pick up to travel', this.distanceToTravel)
         let speed = this.distancePerTick(this.speed);
         this.speedLs.push(speed);
@@ -73,7 +94,21 @@ export default class Driver {
             //NOTE: add the remainder
             this.distance += this.distanceToTravel;
             this.distanceToTravel = 0;
-            this.jobLog['pick up'] = {'time spent': this.time, 'distance': this.distance, 'current time': ticks, 'speed': this.speedLs} //NOTE: log here
+            
+            this.timeFlag = ticks; //NOTE: time flag to check if it is peak hour on pickup
+            let fuelCost = globals.fuelcostCalculation(this.distance)
+            this.tripFuelCost += fuelCost;
+            this.tripDistance += this.distance;
+            this.tripTime += this.time;
+
+            this.jobLog['pick up'] = {
+                'time spent': this.time, 
+                'distance': this.distance, 
+                'current time': ticks, 
+                'speed': this.speedLs, 
+                'fuelcost':fuelCost
+            } //NOTE: log here
+
             //NOTE: clear logged data
             this.distance = 0
             this.time = 0
@@ -81,7 +116,7 @@ export default class Driver {
             this.destination = this.passenger.destination;
         }
     }
-    transit(ticks){
+    transit(ticks,globals){
         console.log('transit distance', this.distance, 'transit to travel', this.distanceToTravel)
         let speed = this.distancePerTick(this.speed);
         this.speedLs.push(speed);
@@ -94,7 +129,23 @@ export default class Driver {
             //NOTE: add the remainder
             this.distance += this.distanceToTravel;
             this.distanceToTravel = 0;
-            this.jobLog['transit'] = {'time spent': this.time, 'distance': this.distance, 'current time': ticks, 'speed': this.speedLs} //NOTE: log here
+
+            let fare = globals.fareCalculation(this.distance, this.time, this.timeFlag)
+            this.tripFare = fare;
+            let fuelCost = globals.fuelcostCalculation(this.distance)
+            this.tripFuelCost += fuelCost;
+            this.tripDistance += this.distance;
+            this.tripTime += this.time;
+
+            this.jobLog['transit'] = {
+                'time spent': this.time, 
+                'distance': this.distance, 
+                'current time': ticks, 
+                'speed': this.speedLs, 
+                'fuelcost': fuelCost,
+                'fare': fare
+            } //NOTE: log here
+
             // NOTE: clear logged data
             this.distance = 0;
             this.time = 0;
@@ -103,10 +154,22 @@ export default class Driver {
             this.currentLocation = this.destination;
         }
     }
-    completed(){
+    completed(globals){
+        let profits = globals.profitCalculation(this.tripFare,this.tripFuelCost);
+
+        this.jobLog['totals'] = {
+            'time spent': this.tripTime, 
+            'distance': this.tripDistance, 
+            'fuelcost': this.tripFuelCost,
+            'fare': this.tripFare,
+            'profit': profits
+        }
+
         this.state = 'searching';
         this.completedJobs += 1;
         this.passenger = null;
+        this.resetTripVariables();
+        
         this.log[`${this.completedJobs}`] = {...this.jobLog}
         console.log(`${this.id}'s log`)
         console.log(this.log)
@@ -121,5 +184,12 @@ export default class Driver {
           sgJSON.features[Math.floor(Math.random() * sgJSON.features.length)]
             .geometry.coordinates[0];
         return Pos;
+    }
+
+    resetTripVariables(){
+        this.tripDistance = 0;
+        this.tripTime = 0;
+        this.tripFuelCost = 0;
+        this.tripFare = 0;
     }
 }
