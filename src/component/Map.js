@@ -677,7 +677,8 @@ export default function Map() {
   useEffect(() => {
     const map = new mapboxgl.Map({
       container: mapContainer.current,
-      style: "mapbox://styles/mapbox/streets-v11",
+      // style: "mapbox://styles/mapbox/streets-v11",
+      style: "mapbox://styles/mapbox/navigation-guidance-night-v3",
       center: [lng, lat],
       zoom: zoom,
     });
