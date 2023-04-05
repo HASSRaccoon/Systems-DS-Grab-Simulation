@@ -19,6 +19,10 @@ function Sidebar(props) {
 
   return (
     <>
+      <div className="topbar">
+        <IoIcons.IoCarSportOutline className="topbar-icon" />
+        <h1>Simulation</h1>
+      </div>
       <IconContext.Provider value={{ color: "#fff" }}>
         <nav className="nav-menu active">
           <div>

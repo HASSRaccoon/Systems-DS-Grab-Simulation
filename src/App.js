@@ -10,6 +10,8 @@ import * as IoIcons from "react-icons/io5";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { StatusDetails } from "./component/StatusDetails";
 import { SummarizedSidebar } from "./component/SummarizedSidebar";
+// import App_kewei from "./App_kewei";
+import { App_kewei } from "./App_kewei";
 
 export default function App() {
   return (
@@ -26,16 +28,16 @@ export default function App() {
     // </div>
     <>
       <div>
-        <div className="topbar">
-          <IoIcons.IoCarSportOutline className="topbar-icon" />
-          <h1>Simulation</h1>
-        </div>
-        <Map />
-        {/* <Sidebar /> */}
+        <Routes>
+          <Route path="/" element={<Map />} />
+          <Route path="/fastforward" element={<App_kewei />} />
+          {/* <Map /> */}
+          {/* <Sidebar /> */}
 
-        {/* <Routes>
+          {/* <Routes>
           <Route path="/" element={<Map></Map>} />
         </Routes> */}
+        </Routes>
       </div>
     </>
   );

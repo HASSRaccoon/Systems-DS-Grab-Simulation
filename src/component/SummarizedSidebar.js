@@ -10,16 +10,21 @@ export function SummarizedSidebar(props) {
   console.log(typeof props.driver, "type");
   //   console.log(props.time);
   //   console.log(props.setTime);
-  //   const [time, setTime] = useState(props.driver.timeCounter);
+
   //   const [day, setDay] = useState(0);
   //   const [time, setTime] = useState(props.driver.time);
+  const [time, setTime] = useState(props.driver.timeCounter);
   const [speed, setSpeed] = useState(props.driver.speed);
+  //   const [speed, setSpeed] = useState(props.driver.speed);
   const [state, setState] = useState(props.driver.state);
+
+  // let time = props.driver.timeCounter;
+  console.log(time, "time");
 
   useEffect(() => {
     //     console.log(props.driver, "does he update");
-    // const currentTime = props.time;
-    // props.setTime(currentTime);
+    const currentTime = props.time;
+    setTime(currentTime);
     // console.log(currentTime, "does he update");
     // console.log(time, "does he update");
     // const currentSpeed = props.driver.speed;
@@ -46,7 +51,7 @@ export function SummarizedSidebar(props) {
         <div className="nav-text">
           <div>
             <IoIcons.IoTimeOutline />
-            <span> Time: {props.time}</span>
+            <span> Time: {time}</span>
             {/* <Text>{time}</Text> */}
           </div>
         </div>

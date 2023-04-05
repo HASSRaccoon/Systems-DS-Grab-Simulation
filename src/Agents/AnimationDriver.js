@@ -97,25 +97,25 @@ export default class AnimationDriver {
   search(passenger) {
     // if (this.passenger === null && this.state === "searching") {
     // }
-    console.log("the passenger this driver received is: " + passenger.id);
-    console.log(
-      "the passenger this driver registered within constructor is: " +
-        this.passenger.id
-    );
+    // console.log("the passenger this driver received is: " + passenger.id);
+    // console.log(
+    //   "the passenger this driver registered within constructor is: " +
+    //     this.passenger.id
+    // );
     if (this.passenger) {
       // console.log('picking up')
       this.destination = this.passenger.currentLocation;
       this.state = "picking up";
-      console.log(
-        "from Driver class, Driver " +
-          this.id +
-          " has been appointed passenger" +
-          this.passenger.id +
-          " thus moving into the picking up state. Checking state: " +
-          this.state +
-          " and going to passenger current location now: " +
-          this.destination
-      );
+      // console.log(
+      //   "from Driver class, Driver " +
+      //     this.id +
+      //     " has been appointed passenger" +
+      //     this.passenger.id +
+      //     " thus moving into the picking up state. Checking state: " +
+      //     this.state +
+      //     " and going to passenger current location now: " +
+      //     this.destination
+      // );
     } else {
       // console.log('searching')
       // this.passenger = passenger;
@@ -143,16 +143,16 @@ export default class AnimationDriver {
     // );
     // this.passenger.carArrived(Date.now() / 1000 | 0, this);
     this.state = "transit";
-    console.log(
-      "from Driver class, Driver " +
-        this.id +
-        " has reached this passenger: " +
-        this.passenger.id +
-        " thus moving into the transit state. Checking state: " +
-        this.state +
-        " and going to passenger destination now: " +
-        this.destination
-    );
+    // console.log(
+    //   "from Driver class, Driver " +
+    //     this.id +
+    //     " has reached this passenger: " +
+    //     this.passenger.id +
+    //     " thus moving into the transit state. Checking state: " +
+    //     this.state +
+    //     " and going to passenger destination now: " +
+    //     this.destination
+    // );
   }
   //   pickUp() {
   //     if (this.currentLocation <= this.destination - this.speed) {

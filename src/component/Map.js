@@ -5,6 +5,7 @@ import React, { useEffect, useRef, useState } from "react";
 import sgJSON from "./../data/road-network.json";
 import * as turf from "@turf/turf";
 import PathFinder, { pathToGeoJSON } from "geojson-path-finder";
+import { Link } from "react-router-dom";
 import mapboxgl from "mapbox-gl";
 import caricon from "../public/grabcar.png";
 import { Button } from "@mantine/core";
@@ -13,6 +14,7 @@ import AnimationDriver from "../agents/AnimationDriver.js";
 import AnimationPassenger from "../agents/AnimationPassenger.js";
 import Globals from "../agents/Globals.js";
 import Sidebar from "./Sidebar.js";
+import { convertLength } from "@turf/turf";
 // --- ---------------------------------- ---
 
 mapboxgl.accessToken =
@@ -194,7 +196,7 @@ export default function Map() {
   };
 
   function animatedriver(driver) {
-    console.log(driver.currentSteps, "steps in animate");
+    // console.log(driver.currentSteps, "steps in animate");
     if (driver.timeCounter === 0) {
       console.log("start of the day");
       console.log("driver starting from ", driver.currentLocation);
@@ -239,10 +241,13 @@ export default function Map() {
       const animationId = requestAnimationFrame(() => animatedriver(driver));
       animationIds[driver.id - 1].push(animationId);
     }
-    console.log(driver.counter, driver.currentLocation);
+    // console.log(driver.counter, driver.currentLocation);
     driver.counter = driver.counter + 1;
 
     driver.timeCounter = driver.timeCounter + 1;
+    if (driver.id === 1) {
+      setTime(time);
+    }
 
     driver.timeLog[driver.timeCounter] = {};
     driver.timeLog[driver.timeCounter]["state"] = driver.state;
@@ -259,7 +264,7 @@ export default function Map() {
     // if (driver.id === 1) {
     //   setTime(driver.timeCounter);
     // }
-    console.log(driver.id, driver.timeLog, "time log per frame");
+    // console.log(driver.id, driver.timeLog, "time log per frame");
     if (driver.timeCounter === 1440) {
       console.log("end of the day");
       console.log("driver reached destination at ", driver.currentLocation);
@@ -401,21 +406,18 @@ export default function Map() {
   }
 
   function distanceperStep(speed, steps, distance, driver) {
-    console.log(driver.state, distance, "distance");
-
-    console.log(steps, "steps");
     const speedpermin = speed / 60;
-    console.log(speedpermin, "distanceperstep");
+
     const leftoverdistance = distance - speedpermin * (steps - 1);
-    console.log(leftoverdistance, "leftoverdistance");
+
     driver.currentLeftoverDistance = leftoverdistance;
-    // const distperstep = 0;
+
     return speedpermin;
   }
 
   function esttimeTaken(distance, speed) {
     const estimatedTimeMin = (distance / speed) * 60;
-    console.log(estimatedTimeMin, "est time taken");
+
     return estimatedTimeMin;
     //time = distance/speed
   }
@@ -423,22 +425,27 @@ export default function Map() {
   function assignPassenger(driver) {
     for (let i = 0; i < passengers.length; i++) {
       const passenger = passengers[i];
-      // console.log(passenger);
+
       const path = buildPath(passenger.currentLocation, driver.currentLocation);
       const distance = getDistance(path);
-      console.log(passenger.id, distance);
-      console.log(driver);
-      console.log(driver.distanceWillingToTravel, "willing distance");
-      if (driver.distanceWillingToTravel > distance) {
+
+      if (
+        driver.distanceWillingToTravel > distance &&
+        passenger.driver === null
+      ) {
         driver.passenger = passenger;
+        passenger.driver = driver;
         console.log(driver.passenger, "passenger assigned 1");
         break;
       }
     }
   }
-  // console.log(drivers[0].passenger, "before");
-  // assignPassenger(drivers[0]);
-  // console.log(drivers[0].passenger, "after");
+
+  function updateStats() {
+    setInterval(() => setTime(drivers[0].timeCounter), 1000);
+  }
+
+  updateStats();
 
   function handleSearch(driver) {
     const initialTime = driver.timeCounter;
@@ -464,7 +471,7 @@ export default function Map() {
     if (passengers.length > 0 && driver.state === "searching") {
       assignPassenger(driver);
       console.log(driver.passenger, "passenger assigned 2");
-
+      // console.log(driver.passenger.driver !== null, "true");
       getPassengerTime = driver.timeCounter;
       driver.Log[driver.completedJobs]["searching"]["timeFound"] =
         getPassengerTime;
@@ -540,15 +547,18 @@ export default function Map() {
       // }
     }, 3000);
   }
+  // function handleFFW() {
 
+  // }
   const [time, setTime] = useState(0);
+  const [state, setState] = useState("searching");
   const [profit, setProfit] = useState(0);
   const [jobsDone, setjobsDone] = useState(0);
 
   function handleTransit(driver) {
     const initialTime = driver.timeCounter;
     driver.Log[driver.completedJobs]["transit"] = {};
-
+    // console.log(currentLocation);
     driver.path = buildPath(driver.currentLocation, driver.destination);
     const distance = getDistance(driver.path);
     const estTimeMin = esttimeTaken(distance, driver.speed);
@@ -569,6 +579,33 @@ export default function Map() {
 
     setTimeout(() => {
       //need to debug passenger exit
+      // console.log(driver.id, driver.passenger);
+      // console.log(passengers.length, "before remove passenger");
+      // for (let i = 0; i < passengers.length; i++) {
+      //   if (driver.passenger === passengers[i]) {
+      //     console.log("check 1 passed");
+      //     const passenger = passengers[i];
+      //     const id = passenger.id;
+      //     console.log(id, "id to search for");
+      //     console.log(passengerPoints);
+      //     for (let k = 0; k < passengerPoints.features.length; i++) {
+      //       if (passengerPoints.features[k].properties.id === id) {
+      //         console.log("check 2 passed");
+      //         passengerPoints.features.splice(k, 1);
+      //         console.log(passengerPoints, "check correct passenger image");
+      //         map.getSource("passengers").setData(passengerPoints);
+      //       }
+      //       break;
+      //     }
+      //     const newpassengers = passengers.splice(i, 1);
+      //     setPassengers(newpassengers);
+      //   }
+      // }
+      // console.log(passengers.length, "passengers after remove passenger");
+      // console.log(
+      //   passengerPoints.length,
+      //   "PassengerPoints after remove passenger"
+      // );
 
       for (let i = 0; i < passengerPoints.features.length; i++) {
         if (passengerPoints.features[i].properties.id === driver.passenger.id) {
@@ -614,6 +651,7 @@ export default function Map() {
       console.log("Transit Log for driver", driver.id, driver.Log);
       driver.completed();
       console.log(driver.destination, "before");
+      driver.destination = generateRandomCoord();
       driver.destination = generateRandomCoord();
       console.log(driver.destination, "after");
       driver.path = buildPath(driver.currentLocation, driver.destination);
@@ -764,9 +802,14 @@ export default function Map() {
         <Button onClick={startAnimation}>Start Animation</Button>
         <Button onClick={stopAnimation}>Stop Animation</Button>
         <Button onClick={continueAnimation}>Continue Animation</Button>
+        <Link to="/fastforward">
+          <Button>Fast Forward</Button>
+        </Link>
+
         <div> No. of drivers : {drivers.length}</div>
         <div> No. of passengers : {passengers.length}</div>
-        <div>Checking: {drivers[0].timeCounter}</div>
+        <div>Check Time Update: {time}</div>
+        <div> Check State Update: {state} </div>
       </div>
     </>
   );
