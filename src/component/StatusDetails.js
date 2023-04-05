@@ -1,13 +1,20 @@
 import React from 'react'
 import * as IoIcons from "react-icons/io5";
+import { Button } from "@mantine/core";
+import "./Sidebar.css";
 
-export function StatusDetails() {
+export function StatusDetails(props) {
+
+    function toggle(){
+        props.toggleContent('summary')
+      }
     return (
         <div>
             <ul className='nav-menu-items'>
                 <div className='nav-text'>
-                    <IoIcons.IoArrowBackOutline /> 
-                    <span></span>
+                    <Button onClick={toggle()} color='cyan'><IoIcons.IoArrowBackOutline/><span></span> </Button>
+                    
+                    
                 </div>
                 <div className='padding-subheader'>
                     <span> </span>

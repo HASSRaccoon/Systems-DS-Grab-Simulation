@@ -31,6 +31,10 @@ export function SummarizedSidebar(props) {
     // setSpeed(currentSpeed);
   }, [props.time]);
 
+  function toggle(){
+    props.toggleContent('details')
+  }
+
   return (
     <div>
       <ul className="nav-menu-items">
@@ -45,26 +49,26 @@ export function SummarizedSidebar(props) {
         <div className="nav-text">
           <div>
             <IoIcons.IoCalendarClearOutline />
-            <span>Day:</span>
+            <span>Day: </span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoTimeOutline />
-            <span> Time: {time}</span>
+            <span>Time: {time}</span>
             {/* <Text>{time}</Text> */}
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoAlarmOutline />
-            <span>Peak hour:</span>
+            <span>Peak hour: </span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoRainyOutline />
-            <span>Weather:</span>
+            <span>Weather: </span>
           </div>
         </div>
         <div className="nav-text">
@@ -87,27 +91,32 @@ export function SummarizedSidebar(props) {
         <div className="nav-text">
           <div>
             <IoIcons.IoCarOutline />
-            <span>Work period:</span>
+            <span>Work period: </span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoRestaurantOutline />
-            <span>Rest period:</span>
+            <span>Rest period: </span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoFlashOutline />
-            <span>Speed:{speed}</span>
+            <span>Speed: {speed}</span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoHourglassOutline />
-            <span>Wait behavior:</span>
+            <span>Wait behavior: </span>
           </div>
         </div>
+        <div className="nav-text">
+            <IoIcons.IoAccessibilityOutline />
+            <span>Pickup tolerance: </span>
+          </div>
+       
         {/* <div className='nav-button'>
                 <Button variant="contained" color='primary'>see details</Button>
                 </div> */}
@@ -170,7 +179,7 @@ export function SummarizedSidebar(props) {
           </div>
         </div>
         <div className="details-button">
-          <Button color="cyan">
+          <Button color="cyan" onClick={toggle()}>
             SEE DETAILS<span></span>
           </Button>
         </div>

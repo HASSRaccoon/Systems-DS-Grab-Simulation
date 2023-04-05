@@ -16,6 +16,7 @@ import Globals from "../agents/Globals.js";
 import Sidebar from "./Sidebar.js";
 import { convertLength } from "@turf/turf";
 import "./Map.css";
+import * as IoIcons from "react-icons/io5";
 // --- ---------------------------------- ---
 
 mapboxgl.accessToken =
@@ -785,17 +786,28 @@ export default function Map() {
     <>
       <div>
         {/* <div className="map-container" ref={mapContainer} /> */}
+        <div className="topbar">
+          <IoIcons.IoCarSportOutline className="topbar-icon" />
+          <h1>Simulation</h1>
+        </div>
 
         <div className="simulation-container">
           <div className="map-container" ref={mapContainer} />
           <div className="simulation-controls">
-            <Link to="/fastforward">
-              <Button color="cyan">FFW</Button>
-            </Link>
+            
             <div className="small-space-right"></div>
-            <Button color="cyan" onClick={startAnimation}>
-              Start Animation
+            <Button color="cyan" size='lg' onClick={startAnimation}>
+              <IoIcons.IoPlayOutline/><span></span>
             </Button>
+          
+          <div className="small-space-right"></div>
+            <Button color="cyan" size='lg' onClick={startAnimation}>
+              <IoIcons.IoPauseOutline/><span></span>
+            </Button>
+            <div className="small-space-right"></div>
+            <Link to="/fastforward">
+              <Button color="cyan" size='lg' onClick={stopAnimation}><IoIcons.IoPlayForwardOutline/> <span></span></Button>
+            </Link>
           </div>
         </div>
       </div>

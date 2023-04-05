@@ -16,7 +16,7 @@ import { useForm } from "@mantine/form";
 import { ScrollArea } from "@mantine/core";
 import "./Sidebar.css";
 
-export function PersonalityQuiz() {
+export function PersonalityQuiz(props) {
   const form = useForm({
     initialValues: {
       workPeriod: "",
@@ -32,12 +32,22 @@ export function PersonalityQuiz() {
     },
   });
 
+  function toggle(){
+    console.log("toggle")
+    props.toggleContent('summary')
+  }
+
+  console.log('quiz time')
+
   return (
     <div>
+      {/* <div className="disable-map">
+        <img src= "/Black-Background-PNG-Photo.png" alt="map disabled" />
+      </div> */}
       <ul className="nav-menu-items">
         {/* <ScrollArea> */}
         <div className="nav-header">
-          <span> WHAT KIND OF DRIVER ARE YOU? </span>
+          <span> HOW DO YOU DRIVE? </span>
         </div>
 
         <div className="nav-subheader">
@@ -206,7 +216,7 @@ export function PersonalityQuiz() {
         </div>
         <div className="nav-desc"></div>
         <div className="nav-slider">
-          <span></span>
+
           <Slider
             marks={[
               { value: 0, label: "0Km/h" },
@@ -238,8 +248,34 @@ export function PersonalityQuiz() {
         </div>
         <span> </span>
 
+        <div className="nav-subheader">
+          <IoIcons.IoHourglassOutline />
+          <span> Your Pickup Tolerance: </span>
+        </div>
+
+        <div className="nav-smallspace"></div>
+        <div className="nav-desc">
+          <span>Maximum distance you're willing to travel to pickup: </span>
+            
+        </div>
+        <div className="small-space"></div>
+        <div className="nav-slider">
+          <span></span>
+          <Slider
+            marks={[
+              { value: 0, label: "0 Km" },
+              { value: 50, label: "5 Km" },
+              { value: 100, label: "10 Km" },
+            ]}
+          />
+        </div>
+
+        <span> </span>
+    
+        <span> </span>
+
         <div className="start-button">
-          <Button color="cyan">
+          <Button color="cyan" onClick={toggle()}>
             START SIMULATION<span></span>
           </Button>
         </div>
