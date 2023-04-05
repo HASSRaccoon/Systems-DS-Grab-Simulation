@@ -12,6 +12,7 @@ import { Button } from "@mantine/core";
 import AnimationDriver from "../agents/AnimationDriver.js";
 import AnimationPassenger from "../agents/AnimationPassenger.js";
 import Globals from "../agents/Globals.js";
+import Sidebar from "./Sidebar.js";
 // --- ---------------------------------- ---
 
 mapboxgl.accessToken =
@@ -59,6 +60,7 @@ export default function Map() {
     currentLocation: generateRandomCoord(),
     speed: 50,
     destination: generateRandomCoord(),
+    distanceWillingToTravel: 10,
     path: null,
     ref: null,
   });
@@ -68,6 +70,7 @@ export default function Map() {
     currentLocation: generateRandomCoord(),
     speed: 70,
     destination: generateRandomCoord(),
+    distanceWillingToTravel: 10,
     path: null,
     ref: null,
   });
@@ -77,6 +80,7 @@ export default function Map() {
     currentLocation: generateRandomCoord(),
     speed: 80,
     destination: generateRandomCoord(),
+    distanceWillingToTravel: 10,
     path: null,
     ref: null,
   });
@@ -252,7 +256,9 @@ export default function Map() {
       driver.timeLog[driver.timeCounter]["time passed"] =
         driver.currentLeftoverTime;
     }
-
+    // if (driver.id === 1) {
+    //   setTime(driver.timeCounter);
+    // }
     console.log(driver.id, driver.timeLog, "time log per frame");
     if (driver.timeCounter === 1440) {
       console.log("end of the day");
@@ -329,6 +335,7 @@ export default function Map() {
   }
 
   let isRunning = false;
+  // const [isRunning, setisRunning] = useState(false);
 
   function getFuelCost(distance) {
     const rateperkm = 22.54 / 100;
@@ -340,6 +347,8 @@ export default function Map() {
 
   function startAnimation() {
     isRunning = true;
+    // setisRunning(true);
+    console.log(isRunning, "true");
     for (let i = 0; i < drivers.length; i++) {
       let driver = drivers[i];
       driver.counter = 0;
@@ -357,6 +366,7 @@ export default function Map() {
   function stopAnimation() {
     console.log(animationIds, "animation ids");
     animationIds.forEach((id) => cancelAnimationFrame(id));
+    // setisRunning(false);
     isRunning = false;
   }
 
@@ -374,7 +384,7 @@ export default function Map() {
       for (let i = 0; i < drivers.length; i++) {
         let driver = drivers[i];
         animatedriver(driver); // eugene: this func might be a deeper call, might be more similar to startAnimation instead, where you call handle<state> for each driver instead
-
+        // setisRunning(true);
         //eugene: might be better for continueAnimation to just toggle a boolean that the main loop is listening to, so continueAnimation is just a toggle, and it does not have any logic on its own
       }
     }
@@ -410,6 +420,26 @@ export default function Map() {
     //time = distance/speed
   }
 
+  function assignPassenger(driver) {
+    for (let i = 0; i < passengers.length; i++) {
+      const passenger = passengers[i];
+      // console.log(passenger);
+      const path = buildPath(passenger.currentLocation, driver.currentLocation);
+      const distance = getDistance(path);
+      console.log(passenger.id, distance);
+      console.log(driver);
+      console.log(driver.distanceWillingToTravel, "willing distance");
+      if (driver.distanceWillingToTravel > distance) {
+        driver.passenger = passenger;
+        console.log(driver.passenger, "passenger assigned 1");
+        break;
+      }
+    }
+  }
+  // console.log(drivers[0].passenger, "before");
+  // assignPassenger(drivers[0]);
+  // console.log(drivers[0].passenger, "after");
+
   function handleSearch(driver) {
     const initialTime = driver.timeCounter;
     driver.Log[driver.completedJobs] = {};
@@ -432,14 +462,16 @@ export default function Map() {
     animatedriver(driver);
     let getPassengerTime = 0;
     if (passengers.length > 0 && driver.state === "searching") {
-      driver.passenger = passengers[driver.id]; // eugene: currently driver will be assigned with the same passenger every time? passengers[driver.id==2] == 2nd passenger in the array always
-      console.log("this is the passengers array: ", passengers);
-      console.log(
-        "driver id you are checking: ",
-        driver.id,
-        ", which translates to the passenger he is carrying by his id: ",
-        driver.passenger.id
-      );
+      assignPassenger(driver);
+      console.log(driver.passenger, "passenger assigned 2");
+      // driver.passenger = passengers[driver.id]; // eugene: currently driver will be assigned with the same passenger every time? passengers[driver.id==2] == 2nd passenger in the array always
+      // console.log("this is the passengers array: ", passengers);
+      // console.log(
+      //   "driver id you are checking: ",
+      //   driver.id,
+      //   ", which translates to the passenger he is carrying by his id: ",
+      //   driver.passenger.id
+      // );
       // stopAnimation();
 
       getPassengerTime = driver.timeCounter;
@@ -517,6 +549,8 @@ export default function Map() {
       // }
     }, 3000);
   }
+
+  const [time, setTime] = useState(0);
 
   function handleTransit(driver) {
     const initialTime = driver.timeCounter;
@@ -602,6 +636,10 @@ export default function Map() {
     //   handleSearch(driver); //earlier set path for new search direction
     // }, 8000);
   }
+  useEffect(() => {
+    const currentTime = drivers[0].timeCounter;
+    setTime(currentTime);
+  }, [drivers[0].timeCounter]);
 
   useEffect(() => {
     const map = new mapboxgl.Map({
@@ -713,18 +751,25 @@ export default function Map() {
     <>
       <div>
         <div className="map-container" ref={mapContainer} />
+        <Sidebar
+          driver={drivers[0]}
+          Log={drivers[0].Log}
+          timeLog={drivers[0].timeLog}
+          isRunning={isRunning}
+          time={drivers[0].timeCounter}
+        ></Sidebar>
         <Button onClick={startDriver}> Debug start driver</Button>
         <Button onClick={stopDriver}> Debug stop driver </Button>
         {/* <Center> */}
         <Button onClick={continueDriver}> Debug continue driver</Button>
         {/* </Center> */}
-
         <Button onClick={spawnPassenger}>Spawn Passenger</Button>
         <Button onClick={startAnimation}>Start Animation</Button>
         <Button onClick={stopAnimation}>Stop Animation</Button>
         <Button onClick={continueAnimation}>Continue Animation</Button>
         <div> No. of drivers : {drivers.length}</div>
         <div> No. of passengers : {passengers.length}</div>
+        <div>Checking: {drivers[0].timeCounter}</div>
       </div>
     </>
   );

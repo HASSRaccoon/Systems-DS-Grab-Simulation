@@ -8,6 +8,8 @@ import Sidebar from "./component/Sidebar";
 import * as IoIcons from "react-icons/io5";
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { StatusDetails } from "./component/StatusDetails";
+import { SummarizedSidebar } from "./component/SummarizedSidebar";
 
 export default function App() {
   return (
@@ -29,7 +31,7 @@ export default function App() {
           <h1>Simulation</h1>
         </div>
         <Map />
-        <Sidebar />
+        {/* <Sidebar /> */}
 
         {/* <Routes>
           <Route path="/" element={<Map></Map>} />

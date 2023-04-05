@@ -13,7 +13,8 @@ export default class AnimationDriver {
     this.currentLocation = props.currentLocation;
     this.destination = props.destination;
     this.waitingTime = 0;
-    this.distanceWillingToTravel = 0;
+
+    this.distanceWillingToTravel = props.distanceWillingToTravel;
     this.completedJobs = 0;
     this.cancelledJobs = 0;
     this.passenger = props.passenger;

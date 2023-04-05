@@ -16,7 +16,7 @@ export default class AnimationPassenger {
     this.agentType = "passenger";
 
     this.appearTime = (Date.now() / 1000) | 0;
-    console.log(`Passenger appear at ${this.appearTime}`);
+    // console.log(`Passenger appear at ${this.appearTime}`);
   }
 
   wait() {
