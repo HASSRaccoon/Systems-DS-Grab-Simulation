@@ -28,6 +28,9 @@ function Sidebar(props) {
               timeLog={props.timeLog}
               isRunning={props.isRunning}
               time={props.time}
+              setTime={props.time}
+              jobsDone={props.jobsDone}
+              setjobsDone={props.setjobsDone}
             ></SummarizedSidebar>
 
             {/* {<PersonalityQuiz/>} */}

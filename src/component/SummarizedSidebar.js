@@ -8,17 +8,18 @@ import { Text } from "@mantine/core";
 export function SummarizedSidebar(props) {
   console.log(props.driver, "pass driver can?");
   console.log(typeof props.driver, "type");
-  console.log(props.time);
+  //   console.log(props.time);
+  //   console.log(props.setTime);
   //   const [time, setTime] = useState(props.driver.timeCounter);
-  const [day, setDay] = useState(0);
-  const [time, setTime] = useState(props.driver.time);
+  //   const [day, setDay] = useState(0);
+  //   const [time, setTime] = useState(props.driver.time);
   const [speed, setSpeed] = useState(props.driver.speed);
   const [state, setState] = useState(props.driver.state);
 
   useEffect(() => {
     //     console.log(props.driver, "does he update");
-    const currentTime = props.time;
-    setTime(currentTime);
+    // const currentTime = props.time;
+    // props.setTime(currentTime);
     // console.log(currentTime, "does he update");
     // console.log(time, "does he update");
     // const currentSpeed = props.driver.speed;
@@ -64,7 +65,7 @@ export function SummarizedSidebar(props) {
         <div className="nav-text">
           <div>
             <IoIcons.IoPerson />
-            <span>Your state:{state}</span>
+            <span>Your state: {state}</span>
           </div>
         </div>
 

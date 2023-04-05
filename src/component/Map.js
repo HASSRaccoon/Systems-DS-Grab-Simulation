@@ -464,15 +464,6 @@ export default function Map() {
     if (passengers.length > 0 && driver.state === "searching") {
       assignPassenger(driver);
       console.log(driver.passenger, "passenger assigned 2");
-      // driver.passenger = passengers[driver.id]; // eugene: currently driver will be assigned with the same passenger every time? passengers[driver.id==2] == 2nd passenger in the array always
-      // console.log("this is the passengers array: ", passengers);
-      // console.log(
-      //   "driver id you are checking: ",
-      //   driver.id,
-      //   ", which translates to the passenger he is carrying by his id: ",
-      //   driver.passenger.id
-      // );
-      // stopAnimation();
 
       getPassengerTime = driver.timeCounter;
       driver.Log[driver.completedJobs]["searching"]["timeFound"] =
@@ -551,6 +542,8 @@ export default function Map() {
   }
 
   const [time, setTime] = useState(0);
+  const [profit, setProfit] = useState(0);
+  const [jobsDone, setjobsDone] = useState(0);
 
   function handleTransit(driver) {
     const initialTime = driver.timeCounter;
@@ -570,6 +563,7 @@ export default function Map() {
     driverPaths.features[driver.id - 1] = driver.path;
     map.getSource("routes").setData(driverPaths);
     driver.counter = 0;
+    driver.passenger.counter = 0;
     animatedriver(driver);
     animatepassenger(driver);
 
@@ -757,6 +751,9 @@ export default function Map() {
           timeLog={drivers[0].timeLog}
           isRunning={isRunning}
           time={drivers[0].timeCounter}
+          setTime={setTime}
+          jobsDone={jobsDone}
+          setjobsDone={setjobsDone}
         ></Sidebar>
         <Button onClick={startDriver}> Debug start driver</Button>
         <Button onClick={stopDriver}> Debug stop driver </Button>
