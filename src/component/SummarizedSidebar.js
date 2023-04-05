@@ -6,31 +6,43 @@ import "./Sidebar.css";
 import { Text } from "@mantine/core";
 
 export function SummarizedSidebar(props) {
-  // console.log(props.driver, "pass driver can?");
-  // console.log(typeof props.driver, "type");
-  //   console.log(props.time);
-  //   console.log(props.setTime);
+  // let time = 0;
+  const [time, setTime] = useState(0);
+  const [state, setState] = useState("searching");
+  const [jobsdone, setJobs] = useState(0);
+  const [speed, setSpeed] = useState(50);
+  const [profit, setProfit] = useState(0);
+  const [distance, setDistance] = useState(0);
+  const [avgdistance, setAvgDistance] = useState(0);
+  const [avgprofit, setAvgProfit] = useState(0);
+  const [avgjobsdone, setAvgJobsDone] = useState(0);
 
-  //   const [day, setDay] = useState(0);
-  //   const [time, setTime] = useState(props.driver.time);
-  const [time, setTime] = useState(props.driver.timeCounter);
-  const [speed, setSpeed] = useState(props.driver.speed);
-  const [jobsDone, setjobsDone] = useState(props.driver.completedJobs);
-  //   const [speed, setSpeed] = useState(props.driver.speed);
-  const [state, setState] = useState(props.driver.state);
-
-  // let time = props.driver.timeCounter;
-  console.log(time, "time");
-
-  useEffect(() => {
-    //     console.log(props.driver, "does he update");
-    const currentTime = props.time;
+  setInterval(() => {
+    // console.log(props.timelist[0], "in sidebar");
+    // time = props.timelist[0];
+    const currentTime = props.timelist[0];
     setTime(currentTime);
-    // console.log(currentTime, "does he update");
-    // console.log(time, "does he update");
-    // const currentSpeed = props.driver.speed;
-    // setSpeed(currentSpeed);
-  }, [props.time]);
+    const currentState = props.statelist[0];
+    setState(currentState);
+    const currentJobs = props.jobsdonelist[0];
+    setJobs(currentJobs);
+    const currentSpeed = props.speedlist[0];
+    setSpeed(currentSpeed);
+    const currentProfit = props.profitlist[0];
+    setProfit(currentProfit);
+    const currentAvgProfit = props.avgprofitlist[0];
+    setAvgProfit(currentAvgProfit);
+    const currentAvgDistance = props.avgdistancelist[0];
+    setAvgDistance(currentAvgDistance);
+    const currentAvgJobs = props.avgjobsdonelist[0];
+    setAvgJobsDone(currentAvgJobs);
+    const currentDistance = props.distancelist[0];
+    setDistance(currentDistance);
+    // console.log(time, "update time in sidebar");
+  }, 1000);
+  // useEffect(() => {
+  //   console.log("DOESNT ANYTHING EVEN CHANGE");
+  // }, [props]);
 
   return (
     <div>
@@ -46,26 +58,26 @@ export function SummarizedSidebar(props) {
         <div className="nav-text">
           <div>
             <IoIcons.IoCalendarClearOutline />
-            <span>Day:</span>
+            <span>Day: 1</span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoTimeOutline />
-            <span> Time: {time}</span>
+            <span>Time (min): {time}</span>
             {/* <Text>{time}</Text> */}
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoAlarmOutline />
-            <span>Peak hour:</span>
+            <span>Peak hour: Yes</span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoRainyOutline />
-            <span>Weather:</span>
+            <span>Weather: Dry</span>
           </div>
         </div>
         <div className="nav-text">
@@ -88,25 +100,25 @@ export function SummarizedSidebar(props) {
         <div className="nav-text">
           <div>
             <IoIcons.IoCarOutline />
-            <span>Work period:</span>
+            <span>Work period: 7am - 7pm</span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoRestaurantOutline />
-            <span>Rest period:</span>
+            <span>Rest period: 11am - 12pm</span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoFlashOutline />
-            <span>Speed:{speed}</span>
+            <span>Speed:{speed} km/h</span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoHourglassOutline />
-            <span>Wait behavior:</span>
+            <span>Wait behavior: Wait</span>
           </div>
         </div>
         {/* <div className='nav-button'>
@@ -129,19 +141,19 @@ export function SummarizedSidebar(props) {
         <div className="nav-text">
           <div>
             <IoIcons.IoCheckmark />
-            <span>Jobs done:{jobsDone}</span>
+            <span>Jobs done: {jobsdone}</span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoWalletOutline />
-            <span>Total profit:</span>
+            <span>Total profit: ${profit}</span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoNavigateOutline />
-            <span>Total Distance:</span>
+            <span>Total Distance: {distance}km</span>
           </div>
         </div>
 
@@ -155,19 +167,19 @@ export function SummarizedSidebar(props) {
         <div className="nav-text">
           <div>
             <IoIcons.IoCheckmark />
-            <span>Jobs done: </span>
+            <span>Jobs done: {avgjobsdone}</span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoWalletOutline />
-            <span>Total profit:</span>
+            <span>Total profit: ${avgprofit}</span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoNavigateOutline />
-            <span>Total Distance:</span>
+            <span>Total Distance: {avgdistance}km</span>
           </div>
         </div>
         <div className="details-button">

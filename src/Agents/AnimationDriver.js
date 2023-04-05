@@ -9,11 +9,12 @@ export default class AnimationDriver {
     /////////////////////////
     this.timeCounter = 0;
     this.id = props.id;
+    this.totalFuelCosts = 0;
     this.state = "searching";
     this.currentLocation = props.currentLocation;
     this.destination = props.destination;
     this.waitingTime = 0;
-
+    this.profit = 0;
     this.distanceWillingToTravel = props.distanceWillingToTravel;
     this.completedJobs = 0;
     this.cancelledJobs = 0;

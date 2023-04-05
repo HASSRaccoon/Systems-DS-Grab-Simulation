@@ -91,6 +91,17 @@ export default function Map() {
     passenger: null,
   });
 
+  let specialdriver = new AnimationDriver({
+    id: 4,
+    currentLocation: generateRandomCoord(),
+    speed: 50,
+    destination: generateRandomCoord(),
+    distanceWillingToTravel: 5,
+    path: null,
+    ref: null,
+    passenger: null,
+  });
+
   let running = false;
 
   const [drivers, setDrivers] = useState([driver1, driver2, driver3]);
@@ -146,6 +157,10 @@ export default function Map() {
     // driver.destination = generateRandomCoord();
     driver.path = buildPath(driver.currentLocation, driver.destination);
   }
+  specialdriver.path = buildPath(
+    specialdriver.currentLocation,
+    specialdriver.destination
+  );
 
   let driverPoints = {
     type: "FeatureCollection",
@@ -163,6 +178,17 @@ export default function Map() {
     }),
   };
 
+  let specialPoint = {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: specialdriver.currentLocation,
+    },
+    properties: {
+      id: specialdriver.id,
+    },
+  };
+
   let passengerPoints = {
     type: "FeatureCollection",
     features: passengers.map((passenger) => {
@@ -178,7 +204,7 @@ export default function Map() {
       };
     }),
   };
-
+  console.log(specialdriver, "special");
   //problem at 187
   let driverPaths = {
     type: "FeatureCollection",
@@ -198,8 +224,22 @@ export default function Map() {
     }),
   };
 
+  let specialPath = {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: specialdriver.path.geometry.coordinates,
+    },
+    properties: {
+      id: specialdriver.id,
+      weight: specialdriver.path.properties.weight,
+      edgeDatas: specialdriver.path.properties.edgeDatas,
+    },
+  };
+
   console.log(drivers, "initial drivers");
   console.log(driverPaths, "initial paths");
+  console.log(specialPath, "initial paths");
 
   function animatedriver(driver) {
     // console.log(driver.currentSteps, "steps in animate");
@@ -227,23 +267,46 @@ export default function Map() {
       running = false;
       return;
     }
-
-    driverPoints.features[driver.id - 1].geometry.coordinates =
-      driver.path.geometry.coordinates[driver.counter];
+    if (driver.id === 4) {
+      specialPoint.geometry.coordinates =
+        driver.path.geometry.coordinates[driver.counter];
+    } else {
+      driverPoints.features[driver.id - 1].geometry.coordinates =
+        driver.path.geometry.coordinates[driver.counter];
+    }
+    // driverPoints.features[driver.id - 1].geometry.coordinates =
+    //   driver.path.geometry.coordinates[driver.counter];
     //update currentLocation is here
     driver.currentLocation = driver.path.geometry.coordinates[driver.counter];
-    driverPoints.features[driver.id - 1].properties.bearing = turf.bearing(
-      turf.point(start),
-      turf.point(end)
-    );
+    if (driver.id === 4) {
+      specialPoint.properties.bearing = turf.bearing(
+        turf.point(start),
+        turf.point(end)
+      );
+    } else {
+      driverPoints.features[driver.id - 1].properties.bearing = turf.bearing(
+        turf.point(start),
+        turf.point(end)
+      );
+    }
 
-    map.getSource("drivers").setData(driverPoints);
+    // driverPoints.features[driver.id - 1].properties.bearing = turf.bearing(
+    //   turf.point(start),
+    //   turf.point(end)
+    // );
+    if (driver.id === 4) {
+      map.getSource("me").setData(specialPoint);
+    } else {
+      map.getSource("drivers").setData(driverPoints);
+    }
+    // map.getSource("drivers").setData(driverPoints);
 
     if (driver.counter < driver.currentSteps) {
       // requestAnimationFrame(() => animatedriver(driver, steps));
       // animationId = requestAnimationFrame(() => animatedriver(driver, steps));
       // const animationId = requestAnimationFrame(() => animatedriver(driver));
       // animationIds.push(animationId);
+      //error
       const animationId = requestAnimationFrame(() => animatedriver(driver));
       animationIds[driver.id - 1].push(animationId);
     }
@@ -254,7 +317,6 @@ export default function Map() {
     // if (driver.id === 1) {
     //   setTime(time);
     // }
-
     driver.timeLog[driver.timeCounter] = {};
     driver.timeLog[driver.timeCounter]["state"] = driver.state;
     driver.timeLog[driver.timeCounter]["distance travelled"] =
@@ -267,6 +329,15 @@ export default function Map() {
       driver.timeLog[driver.timeCounter]["time passed"] =
         driver.currentLeftoverTime;
     }
+
+    driver.totalDistanceTravelled =
+      driver.totalDistanceTravelled +
+      driver.timeLog[driver.timeCounter]["distance travelled"];
+
+    driver.totalFuelCosts =
+      driver.totalFuelCosts +
+      getFuelCost(driver.timeLog[driver.timeCounter]["distance travelled"]);
+
     // if (driver.id === 1) {
     //   setTime(driver.timeCounter);
     // }
@@ -282,7 +353,7 @@ export default function Map() {
     // console.log(driver.currentLocation, driver.counter);
   }
 
-  let animationIds = new Array(drivers.length).fill([]);
+  let animationIds = new Array(drivers.length + 1).fill([]);
 
   function animatepassenger(driver) {
     const start =
@@ -302,18 +373,22 @@ export default function Map() {
       running = false;
       return;
     }
-
-    passengerPoints.features[driver.id - 1].geometry.coordinates =
+    const passenger = driver.passenger;
+    passengerPoints.features[passenger.id - 1].geometry.coordinates =
       driver.path.geometry.coordinates[driver.passenger.counter];
 
-    passengerPoints.features[driver.id - 1].properties.bearing = turf.bearing(
-      turf.point(start),
-      turf.point(end)
-    );
+    // passengerPoints.features[driver.passenger.id - 1].geometry.coordinates =
+    //   driver.path.geometry.coordinates[driver.passenger.counter];
+    // passengerPoints.features[driver.passenger.id - 1].properties.bearing =
+    // turf.bearing(turf.point(start), turf.point(end));
+
+    passengerPoints.features[passenger.id - 1].properties.bearing =
+      turf.bearing(turf.point(start), turf.point(end));
 
     map.getSource("passengers").setData(passengerPoints);
 
     if (driver.passenger.counter < driver.currentSteps) {
+      //error
       // requestAnimationFrame(() => animatepassenger(driver, steps));
       const animationId = requestAnimationFrame(() => animatepassenger(driver));
       animationIds.push(animationId);
@@ -353,7 +428,7 @@ export default function Map() {
     const fuelcostperdist = distance * rateperkm;
     //22.54 per 100km
     //22.54/100 per km
-    return fuelcostperdist;
+    return fuelcostperdist.toFixed(2);
   }
 
   function startAnimation() {
@@ -366,6 +441,7 @@ export default function Map() {
 
       handleSearch(driver);
     }
+    handleSearch(specialdriver);
   }
 
   function startDriver() {
@@ -449,25 +525,72 @@ export default function Map() {
   }
 
   //maybe check these
-  const [time, setTime] = useState(0);
-  const [state, setState] = useState("searching");
-  const [profit, setProfit] = useState(0);
-  const [jobsDone, setjobsDone] = useState(0);
 
-  useEffect(() => {
-    const currentTime = drivers[0].timeCounter;
-    setTime(currentTime);
-  }, [drivers[0].timeCounter]);
+  // useEffect(() => {
+  //   const currentTime = drivers[0].timeCounter;
+  //   setTime(currentTime);
+  //   const driver = drivers[0];
+  //   console.log("THIS CAN PRINT");
+  //   console.log(time, "what time now");
+  //   console.log(drivers[0].timeLog, "log");
+  // }, [drivers]);
+  let timelist = [];
+  let statelist = [];
+  let speedlist = [];
+  let jobsdonelist = [];
+  let profitlist = [];
+  let distancelist = [];
+  let avgjobsdonelist = [];
+  let avgprofitlist = [];
+  let avgdistancelist = [];
+  //damn manual but nvm first
+  function updateStats() {
+    setInterval(() => {
+      console.log(drivers[0].timeCounter, "timecounter");
+      timelist[0] = drivers[0].timeCounter;
+      statelist[0] = drivers[0].state;
+      speedlist[0] = drivers[0].speed;
+      jobsdonelist[0] = drivers[0].completedJobs;
+      const yourfuelcost = getFuelCost(
+        drivers[0].totalDistanceTravelled.toFixed(3)
+      );
+      const yourprofit = drivers[0].earnings - yourfuelcost;
+      profitlist[0] = yourprofit.toFixed(2);
+      distancelist[0] = drivers[0].totalDistanceTravelled.toFixed(3);
+      avgjobsdonelist[0] =
+        (drivers[1].completedJobs + drivers[2].completedJobs) / 2;
+      const d2fuelcost = getFuelCost(
+        drivers[1].totalDistanceTravelled.toFixed(3)
+      );
+      const d3fuelcost = getFuelCost(
+        drivers[2].totalDistanceTravelled.toFixed(3)
+      );
+      const d2profit = drivers[1].earnings - d2fuelcost;
+      const d3profit = drivers[2].earnings - d3fuelcost;
+      const avgprofit = (d2profit + d3profit) / 2;
+      const avgdistance =
+        (drivers[1].totalDistanceTravelled +
+          drivers[2].totalDistanceTravelled) /
+        2;
+      avgprofitlist[0] = avgprofit.toFixed(2);
+      avgdistancelist[0] = avgdistance.toFixed(3);
 
-  // function updateStats() {
-  //   setInterval(() => {
-  //     setTime(drivers[0].timeCounter);
-  //     setState(drivers[0].state);
-  //     setjobsDone(drivers[0].completedJobs);
-  //   }, 1000);
-  // }
+      // const currentTime = drivers[0].timeCounter;
+      // setTime(currentTime);
+      // console.log(time, "update time");
+      // setState(drivers[0].state);
+      // setjobsDone(drivers[0].completedJobs);
+    }, 1000);
+  }
 
-  // updateStats();
+  updateStats();
+
+  //without peak/nonpeak yet
+  //without fuelcost
+  function earningCalculation(distance, timetaken) {
+    const earning = (3.5 + 0.5 * distance + 0.16 * timetaken) * 0.8;
+    return earning.toFixed(2);
+  }
 
   function handleSearch(driver) {
     const initialTime = driver.timeCounter;
@@ -498,14 +621,19 @@ export default function Map() {
     }
     driver.search(driver.passenger);
     //may need to update
+
     driver.Log[driver.completedJobs]["searching"]["distance"] =
       driver.timeLog[driver.timeCounter]["distance travelled"];
     driver.Log[driver.completedJobs]["searching"]["fuel cost"] = getFuelCost(
       driver.timeLog[driver.timeCounter]["distance travelled"]
     );
-
     driver.Log[driver.completedJobs]["searching"]["duration"] =
       getPassengerTime - initialTime;
+
+    // driver.totalDistanceTravelled =
+    //   driver.totalDistanceTravelled +
+    //   driver.timeLog[driver.timeCounter]["distance travelled"];
+
     console.log(driver.id, driver.Log, "Searching Log");
 
     //have new dest, so build new path there
@@ -520,7 +648,16 @@ export default function Map() {
       newdistance,
       driver
     );
-    driverPaths.features[driver.id - 1] = driver.path;
+    if (driver.id === 4) {
+      console.log("hello hi");
+      console.log(driver.path);
+      console.log(specialPath);
+      specialPath = driver.path;
+      console.log(driver.path);
+      console.log(specialPath);
+    } else {
+      driverPaths.features[driver.id - 1] = driver.path;
+    }
 
     if (driver.state === "picking up" && driver.passenger != null) {
       handlePickup(driver);
@@ -530,8 +667,12 @@ export default function Map() {
   function handlePickup(driver) {
     const initialTime = driver.timeCounter;
     driver.Log[driver.completedJobs]["pickingup"] = {};
-
-    map.getSource("routes").setData(driverPaths);
+    if (driver.id === 4) {
+      map.getSource("myroute").setData(specialPath);
+      // console.log(specialPath)
+    } else {
+      map.getSource("routes").setData(driverPaths);
+    }
 
     setTimeout(() => {
       // let whilepickupcheckcounter = 0
@@ -570,6 +711,8 @@ export default function Map() {
       const pickupDistance = getDistance(driver.path);
       driver.Log[driver.completedJobs]["pickingup"]["distance"] =
         pickupDistance;
+      // driver.totalDistanceTravelled =
+      //   driver.totalDistanceTravelled + pickupDistance;
       driver.Log[driver.completedJobs]["pickingup"]["fuel cost"] =
         getFuelCost(pickupDistance);
       console.log(driver.id, driver.Log, "Pick Up Log");
@@ -599,9 +742,19 @@ export default function Map() {
       distance,
       driver
     );
-    driverPaths.features[driver.id - 1] = driver.path;
+
+    if (driver.id === 4) {
+      specialPath = driver.path;
+    } else {
+      driverPaths.features[driver.id - 1] = driver.path;
+    }
+    // driverPaths.features[driver.id - 1] = driver.path;
     console.log(driverPaths, "why cannot getsource");
-    map.getSource("routes").setData(driverPaths);
+    if (driver.id === 4) {
+      map.getSource("myroute").setData(specialPath);
+    } else {
+      map.getSource("routes").setData(driverPaths);
+    }
     driver.counter = 0;
     driver.passenger.counter = 0;
     animatedriver(driver);
@@ -677,6 +830,11 @@ export default function Map() {
       driver.Log[driver.completedJobs]["transit"]["distance"] = transitDistance;
       driver.Log[driver.completedJobs]["transit"]["fuel cost"] =
         getFuelCost(transitDistance);
+
+      const earning = earningCalculation(transitDistance, estTimeMin);
+      driver.Log[driver.completedJobs]["transit"]["earning"] = earning;
+      driver.earnings = driver.earnings + earning;
+
       // const fare = god.fareCalculation(transitDistance, )
       //  const profit = god.profitCalculation(fare, fuel)
       console.log("Transit Log", driver.id, driver.Log);
@@ -685,9 +843,18 @@ export default function Map() {
       driver.destination = generateRandomCoord();
       console.log(driver.destination, "after");
       driver.path = buildPath(driver.currentLocation, driver.destination);
+      //error
       processPath(driver.path);
-      driverPaths.features[driver.id - 1] = driver.path;
-      map.getSource("routes").setData(driverPaths);
+      if (driver.id === 4) {
+        specialPath = driver.path;
+      } else {
+        driverPaths.features[driver.id - 1] = driver.path;
+      }
+      if (driver.id === 4) {
+        map.getSource("myroute").setData(specialPath);
+      } else {
+        map.getSource("routes").setData(driverPaths);
+      }
       handleSearch(driver);
     }, 3000);
   }
@@ -705,7 +872,8 @@ export default function Map() {
       // Add an image to use as a custom marker
       map.loadImage(
         // "https://freesvg.org/img/165649513901300-transport-car-sedan-green.png",
-        "https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png",
+        // "https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Eo_circle_green_blank.svg/2048px-Eo_circle_green_blank.svg.png",
         // "https://docs.mapbox.com/mapbox-gl-js/assets/car-15.png",
         // "mapbox://sprites/mapbox/streets-v11?access_token=pk.eyJ1IjoieWVva2V3ZWkiLCJhIjoiY2xlcG5wZ3ZmMGUweTNxdGt4ZG1ldGhsYyJ9.HHNGnKUPolWAo5_UYwzCZg",
         function (error, image) {
@@ -729,6 +897,29 @@ export default function Map() {
             type: "line",
             paint: {
               "line-width": 4,
+              // "line-color": "#F1295B",
+              // "line-color": "#00FF00",
+              "line-color": "#449e48",
+            },
+          });
+
+          map.addSource("myroute", {
+            type: "geojson",
+            data: specialPath,
+          });
+          //driver
+          // map.addSource("driverpoint", {
+          //   type: "geojson",
+          //   data: driverpoint,
+          // });
+
+          map.addLayer({
+            id: "myroute",
+            source: "myroute",
+            type: "line",
+            paint: {
+              "line-width": 4,
+              // "line-color": "#FFFFFF",
               "line-color": "#F1295B",
             },
           });
@@ -749,7 +940,36 @@ export default function Map() {
               // To add a new image to the style at runtime see
               // https://docs.mapbox.com/mapbox-gl-js/example/add-image/
               "icon-image": "custom-marker",
-              "icon-size": 0.5,
+              "icon-size": 0.02,
+              "icon-rotate": ["get", "bearing"],
+              "icon-rotation-alignment": "map",
+              "icon-allow-overlap": true,
+              "icon-ignore-placement": true,
+            },
+          });
+
+          map.loadImage(
+            // "https://docs.mapbox.com/mapbox-gl-js/assets/cat.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Red_Circle%28small%29.svg/2048px-Red_Circle%28small%29.svg.png",
+            // "https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Light_Blue_Circle.svg/768px-Light_Blue_Circle.svg.png",
+            (error, image) => {
+              if (error) throw error;
+
+              // Add the image to the map style.
+              map.addImage("special", image);
+            }
+          );
+          map.addSource("me", {
+            type: "geojson",
+            data: specialPoint,
+          });
+          map.addLayer({
+            id: "me",
+            source: "me",
+            type: "symbol",
+            layout: {
+              "icon-image": "special",
+              "icon-size": 0.02,
               "icon-rotate": ["get", "bearing"],
               "icon-rotation-alignment": "map",
               "icon-allow-overlap": true,
@@ -764,7 +984,8 @@ export default function Map() {
           });
 
           map.loadImage(
-            "https://docs.mapbox.com/mapbox-gl-js/assets/cat.png",
+            // "https://docs.mapbox.com/mapbox-gl-js/assets/cat.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Light_Blue_Circle.svg/768px-Light_Blue_Circle.svg.png",
             (error, image) => {
               if (error) throw error;
 
@@ -783,7 +1004,7 @@ export default function Map() {
               // To add a new image to the style at runtime see
               // https://docs.mapbox.com/mapbox-gl-js/example/add-image/
               "icon-image": "cat",
-              "icon-size": 0.08,
+              "icon-size": 0.02,
               "icon-rotate": ["get", "bearing"],
               "icon-rotation-alignment": "map",
               "icon-allow-overlap": true,
@@ -830,13 +1051,19 @@ export default function Map() {
       <div>Check Time Update: {time}</div>
       <div> Check State Update: {state} </div> */}
       <Sidebar
-        driver={drivers[0]}
-        // time={drivers[0].timeCounter}
-        time={time}
-        state={state}
-        setTime={setTime}
-        jobsDone={jobsDone}
-        setjobsDone={setjobsDone}
+        // driver={drivers[0]}
+
+        // time={time}
+        // time={time}
+        timelist={timelist}
+        statelist={statelist}
+        speedlist={speedlist}
+        jobsdonelist={jobsdonelist}
+        profitlist={profitlist}
+        distancelist={distancelist}
+        avgdistancelist={avgdistancelist}
+        avgprofitlist={avgprofitlist}
+        avgjobsdonelist={avgjobsdonelist}
       ></Sidebar>
     </>
   );

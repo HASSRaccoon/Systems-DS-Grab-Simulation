@@ -24,12 +24,15 @@ function Sidebar(props) {
         <nav className="nav-menu active">
           <div>
             <SummarizedSidebar
-              driver={props.driver}
-              time={props.time}
-              state={props.state}
-              setTime={props.time}
-              jobsDone={props.jobsDone}
-              setjobsDone={props.setjobsDone}
+              statelist={props.statelist}
+              timelist={props.timelist}
+              speedlist={props.speedlist}
+              jobsdonelist={props.jobsdonelist}
+              profitlist={props.profitlist}
+              distancelist={props.distancelist}
+              avgdistancelist={props.avgdistancelist}
+              avgprofitlist={props.avgprofitlist}
+              avgjobsdonelist={props.avgjobsdonelist}
             ></SummarizedSidebar>
             {/* <StatusDetails></StatusDetails> */}
             {/* {<PersonalityQuiz />} */}
