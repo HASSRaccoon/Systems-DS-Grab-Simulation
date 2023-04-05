@@ -63,9 +63,10 @@ export default function Map() {
     currentLocation: generateRandomCoord(),
     speed: 50,
     destination: generateRandomCoord(),
-    distanceWillingToTravel: 10,
+    distanceWillingToTravel: 5,
     path: null,
     ref: null,
+    passenger: null,
   });
 
   let driver2 = new AnimationDriver({
@@ -73,9 +74,10 @@ export default function Map() {
     currentLocation: generateRandomCoord(),
     speed: 70,
     destination: generateRandomCoord(),
-    distanceWillingToTravel: 10,
+    distanceWillingToTravel: 3,
     path: null,
     ref: null,
+    passenger: null,
   });
 
   let driver3 = new AnimationDriver({
@@ -83,9 +85,10 @@ export default function Map() {
     currentLocation: generateRandomCoord(),
     speed: 80,
     destination: generateRandomCoord(),
-    distanceWillingToTravel: 10,
+    distanceWillingToTravel: 6,
     path: null,
     ref: null,
+    passenger: null,
   });
 
   let running = false;
@@ -94,7 +97,7 @@ export default function Map() {
 
   let passengerListo = [];
 
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 120; i++) {
     passengerListo[i] = new AnimationPassenger({
       id: i,
       ref: null,
@@ -127,22 +130,20 @@ export default function Map() {
     // console.log(passengers);
   }
 
-  const numPassengers = 10;
-
   const pathBuilder = new PathFinder(sgJSON, { tolerance: 1e-4 });
 
   const mapContainer = useRef(null);
   const [map, setMap] = useState(null);
   const [lng, setLng] = useState(103.807);
   const [lat, setLat] = useState(1.37);
-  const [zoom, setZoom] = useState(10.5);
+  const [zoom, setZoom] = useState(11.5);
 
   //default paths on init
   for (let i = 0; i < drivers.length; i++) {
     const driver = drivers[i];
     // console.log(driver.currentLocation, driver.destination, "hello");
     // driver.currentLocation = generateRandomCoord();
-    driver.destination = generateRandomCoord();
+    // driver.destination = generateRandomCoord();
     driver.path = buildPath(driver.currentLocation, driver.destination);
   }
 
@@ -178,6 +179,7 @@ export default function Map() {
     }),
   };
 
+  //problem at 187
   let driverPaths = {
     type: "FeatureCollection",
     features: drivers.map((driver) => {
@@ -195,6 +197,9 @@ export default function Map() {
       };
     }),
   };
+
+  console.log(drivers, "initial drivers");
+  console.log(driverPaths, "initial paths");
 
   function animatedriver(driver) {
     // console.log(driver.currentSteps, "steps in animate");
@@ -246,9 +251,9 @@ export default function Map() {
     driver.counter = driver.counter + 1;
 
     driver.timeCounter = driver.timeCounter + 1;
-    if (driver.id === 1) {
-      setTime(time);
-    }
+    // if (driver.id === 1) {
+    //   setTime(time);
+    // }
 
     driver.timeLog[driver.timeCounter] = {};
     driver.timeLog[driver.timeCounter]["state"] = driver.state;
@@ -426,36 +431,49 @@ export default function Map() {
   function assignPassenger(driver) {
     for (let i = 0; i < passengers.length; i++) {
       const passenger = passengers[i];
-
       const path = buildPath(passenger.currentLocation, driver.currentLocation);
       const distance = getDistance(path);
 
       if (
         driver.distanceWillingToTravel > distance &&
+        //maybe this
         passenger.driver === null
+        // driver.passenger === null
       ) {
         driver.passenger = passenger;
         passenger.driver = driver;
-        console.log(driver.passenger, "passenger assigned 1");
+        console.log(driver.passenger, "passenger assigned");
         break;
       }
     }
   }
 
-  function updateStats() {
-    setInterval(() => setTime(drivers[0].timeCounter), 1000);
-  }
+  //maybe check these
+  const [time, setTime] = useState(0);
+  const [state, setState] = useState("searching");
+  const [profit, setProfit] = useState(0);
+  const [jobsDone, setjobsDone] = useState(0);
 
-  updateStats();
+  useEffect(() => {
+    const currentTime = drivers[0].timeCounter;
+    setTime(currentTime);
+  }, [drivers[0].timeCounter]);
+
+  // function updateStats() {
+  //   setInterval(() => {
+  //     setTime(drivers[0].timeCounter);
+  //     setState(drivers[0].state);
+  //     setjobsDone(drivers[0].completedJobs);
+  //   }, 1000);
+  // }
+
+  // updateStats();
 
   function handleSearch(driver) {
     const initialTime = driver.timeCounter;
     driver.Log[driver.completedJobs] = {};
     driver.Log[driver.completedJobs]["searching"] = {};
-    const initialLocation = driver.currentLocation;
-
-    driver.counter = 0;
-
+    // const initialLocation = driver.currentLocation;
     const initialDistance = getDistance(driver.path);
     const estTimeMin = esttimeTaken(initialDistance, driver.speed);
     driver.currentSteps = timeToSteps(estTimeMin, driver);
@@ -466,18 +484,18 @@ export default function Map() {
       initialDistance,
       driver
     );
-
+    driver.counter = 0;
     animatedriver(driver);
     let getPassengerTime = 0;
+    //if still have passengers on map and searching
     if (passengers.length > 0 && driver.state === "searching") {
+      //if passenger no driver, and dis to passenger < willingness to travel
       assignPassenger(driver);
-      console.log(driver.passenger, "passenger assigned 2");
-      // console.log(driver.passenger.driver !== null, "true");
+      console.log(driver.id, driver.passenger, "found");
       getPassengerTime = driver.timeCounter;
       driver.Log[driver.completedJobs]["searching"]["timeFound"] =
         getPassengerTime;
     }
-
     driver.search(driver.passenger);
     //may need to update
     driver.Log[driver.completedJobs]["searching"]["distance"] =
@@ -489,6 +507,8 @@ export default function Map() {
     driver.Log[driver.completedJobs]["searching"]["duration"] =
       getPassengerTime - initialTime;
     console.log(driver.id, driver.Log, "Searching Log");
+
+    //have new dest, so build new path there
     driver.path = buildPath(driver.currentLocation, driver.destination);
     const newdistance = getDistance(driver.path);
     const newestTimeMin = esttimeTaken(newdistance, driver.speed);
@@ -527,10 +547,23 @@ export default function Map() {
       //   console.log("while pickup, check number of times current location and destination don't match: ", whilepickupcheckcounter);
       //   break;
       // }
-
+      console.log(
+        driver.currentLocation,
+        driver.destination,
+        "driver not arrive"
+      );
       driver.currentLocation = driver.destination;
-
+      console.log(
+        driver.currentLocation,
+        driver.destination,
+        " make driver arrive"
+      );
       driver.pickUp();
+      console.log(
+        driver.currentLocation,
+        driver.destination,
+        "driver new dest"
+      );
       const finishTime = driver.timeCounter;
       driver.Log[driver.completedJobs]["pickingup"]["duration"] =
         finishTime - initialTime;
@@ -542,7 +575,7 @@ export default function Map() {
       console.log(driver.id, driver.Log, "Pick Up Log");
       if (driver.state === "transit" && isRunning === true) {
         // driver.totalTicks = startDateTicks;
-        console.log("CallTransit");
+        console.log("Call Transit");
         handleTransit(driver);
       }
       // }
@@ -551,15 +584,10 @@ export default function Map() {
   // function handleFFW() {
 
   // }
-  const [time, setTime] = useState(0);
-  const [state, setState] = useState("searching");
-  const [profit, setProfit] = useState(0);
-  const [jobsDone, setjobsDone] = useState(0);
 
   function handleTransit(driver) {
     const initialTime = driver.timeCounter;
     driver.Log[driver.completedJobs]["transit"] = {};
-    // console.log(currentLocation);
     driver.path = buildPath(driver.currentLocation, driver.destination);
     const distance = getDistance(driver.path);
     const estTimeMin = esttimeTaken(distance, driver.speed);
@@ -572,6 +600,7 @@ export default function Map() {
       driver
     );
     driverPaths.features[driver.id - 1] = driver.path;
+    console.log(driverPaths, "why cannot getsource");
     map.getSource("routes").setData(driverPaths);
     driver.counter = 0;
     driver.passenger.counter = 0;
@@ -637,6 +666,7 @@ export default function Map() {
           map.getSource("passengers").setData(passengerPoints);
           // console.log("how many times have i been looped through? ", i);
         }
+        break;
         // break;
       }
 
@@ -649,10 +679,9 @@ export default function Map() {
         getFuelCost(transitDistance);
       // const fare = god.fareCalculation(transitDistance, )
       //  const profit = god.profitCalculation(fare, fuel)
-      console.log("Transit Log for driver", driver.id, driver.Log);
+      console.log("Transit Log", driver.id, driver.Log);
       driver.completed();
       console.log(driver.destination, "before");
-      driver.destination = generateRandomCoord();
       driver.destination = generateRandomCoord();
       console.log(driver.destination, "after");
       driver.path = buildPath(driver.currentLocation, driver.destination);
@@ -661,18 +690,7 @@ export default function Map() {
       map.getSource("routes").setData(driverPaths);
       handleSearch(driver);
     }, 3000);
-    //   driver.destination = generateRandomCoord(); // currentlocation was set to prior destination that driver finished servicing passenger, but how come with new random destination set it is not driving into the random coord? check bottom
-    //   driver.path = buildPath(driver.currentLocation, driver.destination); // new path draw from prior passenger destination to new random destination
-    //   processPath(driver.path);
-    //   driverPaths.features[driver.id - 1] = driver.path;
-    //   map.getSource("routes").setData(driverPaths);
-    //   handleSearch(driver); //earlier set path for new search direction
-    // }, 8000);
   }
-  useEffect(() => {
-    const currentTime = drivers[0].timeCounter;
-    setTime(currentTime);
-  }, [drivers[0].timeCounter]);
 
   useEffect(() => {
     const map = new mapboxgl.Map({
@@ -800,23 +818,22 @@ export default function Map() {
         </div>
       </div>
       {/* <Button onClick={spawnPassenger}>Spawn Passenger</Button> */}
-      {/* <Button onClick={startAnimation}>Start Animation</Button> */}
-      {/* <Button onClick={stopAnimation}>Stop Animation</Button>
-      <Button onClick={continueAnimation}>Continue Animation</Button> */}
+      <Button onClick={startAnimation}>Start Animation</Button>
+      <Button onClick={stopAnimation}>Stop Animation</Button>
+      {/* <Button onClick={continueAnimation}>Continue Animation</Button> */}
       {/* <Link to="/fastforward">
         <Button>Fast Forward</Button>
       </Link> */}
-
+      {/* 
       <div> No. of drivers : {drivers.length}</div>
       <div> No. of passengers : {passengers.length}</div>
       <div>Check Time Update: {time}</div>
-      <div> Check State Update: {state} </div>
+      <div> Check State Update: {state} </div> */}
       <Sidebar
         driver={drivers[0]}
-        Log={drivers[0].Log}
-        timeLog={drivers[0].timeLog}
-        isRunning={isRunning}
-        time={drivers[0].timeCounter}
+        // time={drivers[0].timeCounter}
+        time={time}
+        state={state}
         setTime={setTime}
         jobsDone={jobsDone}
         setjobsDone={setjobsDone}

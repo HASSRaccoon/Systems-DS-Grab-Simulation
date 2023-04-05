@@ -25,16 +25,14 @@ function Sidebar(props) {
           <div>
             <SummarizedSidebar
               driver={props.driver}
-              Log={props.Log}
-              timeLog={props.timeLog}
-              isRunning={props.isRunning}
               time={props.time}
+              state={props.state}
               setTime={props.time}
               jobsDone={props.jobsDone}
               setjobsDone={props.setjobsDone}
             ></SummarizedSidebar>
             {/* <StatusDetails></StatusDetails> */}
-            {/* {<PersonalityQuiz/>} */}
+            {/* {<PersonalityQuiz />} */}
           </div>
         </nav>
 

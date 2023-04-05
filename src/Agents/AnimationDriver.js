@@ -242,30 +242,6 @@ export default class AnimationDriver {
     );
     this.completedJobs += 1;
     this.passenger = null;
-    // this.destination = [Math.random() * 200, Math.random() * 200];
-
-    // moveTo(
-    //   this.ref.current,
-    //   this.currentLocation,
-    //   this.destination,
-    //   this.ref,
-    //   this.speed
-    // );
-    //   }
-    //   completed() {
-    //     console.log("completed");
-    //     this.state = "searching";
-    //     this.completedJobs += 1;
-    //     this.passenger = null;
-    //     // this.destination = [Math.random()*200,Math.random()*200];
-
-    //     moveTo(
-    //       this.ref.current,
-    //       this.currentLocation,
-    //       this.destination,
-    //       this.ref,
-    //       this.speed
-    //     );
   }
 
   changeLocation = () => {

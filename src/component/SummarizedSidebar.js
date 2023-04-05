@@ -6,8 +6,8 @@ import "./Sidebar.css";
 import { Text } from "@mantine/core";
 
 export function SummarizedSidebar(props) {
-  console.log(props.driver, "pass driver can?");
-  console.log(typeof props.driver, "type");
+  // console.log(props.driver, "pass driver can?");
+  // console.log(typeof props.driver, "type");
   //   console.log(props.time);
   //   console.log(props.setTime);
 
@@ -15,6 +15,7 @@ export function SummarizedSidebar(props) {
   //   const [time, setTime] = useState(props.driver.time);
   const [time, setTime] = useState(props.driver.timeCounter);
   const [speed, setSpeed] = useState(props.driver.speed);
+  const [jobsDone, setjobsDone] = useState(props.driver.completedJobs);
   //   const [speed, setSpeed] = useState(props.driver.speed);
   const [state, setState] = useState(props.driver.state);
 
@@ -128,7 +129,7 @@ export function SummarizedSidebar(props) {
         <div className="nav-text">
           <div>
             <IoIcons.IoCheckmark />
-            <span>Jobs done:</span>
+            <span>Jobs done:{jobsDone}</span>
           </div>
         </div>
         <div className="nav-text">
@@ -154,7 +155,7 @@ export function SummarizedSidebar(props) {
         <div className="nav-text">
           <div>
             <IoIcons.IoCheckmark />
-            <span>Jobs done:</span>
+            <span>Jobs done: </span>
           </div>
         </div>
         <div className="nav-text">
