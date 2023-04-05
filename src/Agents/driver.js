@@ -19,12 +19,36 @@ export default class Driver {
         this.jobLog = {};
         this.distance = 0;
         this.distanceToTravel = 0;
-        this.startTime = 1020; //NOTE: 5pm
-        this.endTime = 240; //NOTE: 4am
-        this.breakStart = 0; //NOTE: 12am
-        this.breakEnd = 60; //NOTE: 1am
+
+        //// TIME AFFECTING //// 
+        
+        //CHANGE PER SIMULATION
+
+        // Type A
+        // this.startTime = 1020; //NOTE: 5pm
+        // this.endTime = 240; //NOTE: 4am
+        // this.breakStart = 0; //NOTE: 12am
+        // this.breakEnd = 60; //NOTE: 1am
+
+        // Type B
+        this.startTime = 420; //NOTE: 7am
+        this.endTime = 1140; //NOTE: 7pm
+        this.breakStart = 600; //NOTE: 10am
+        this.breakEnd = 660; //NOTE: 11am
+        
+        // Type C
+        // this.startTime = 480; //NOTE: 8am
+        // this.endTime = 1080; //NOTE: 6pm
+        // this.breakStart = 660; //NOTE: 10am
+        // this.breakEnd = 720; //NOTE: 11am
+
         this.path = null;
         this.speedLs = [];
+
+        this.initialLocation = this.currentLocation; //NOTE: for logging start location at start of each state
+        this.endLocation = null; //NOTE: for logging end location at end of each state
+        this.searchLocation = this.currentLocation
+
         this.timeFlag = 0;
 
         this.tripDistance = 0;
@@ -49,8 +73,13 @@ export default class Driver {
             this.tripFuelCost += fuelCost;
             this.tripDistance += this.distance;
             this.tripTime += this.time;
+            
+            this.endLocation = this.destination;
+            
 
             this.jobLog['searching'] = {
+                'start location': this.initialLocation,
+                'end location': this.endLocation,
                 'time spent': this.time, 
                 'distance': this.distance, 
                 'current time': ticks, 
@@ -64,7 +93,11 @@ export default class Driver {
             this.speedLs = [];
 
             this.destination = this.passenger.currentLocation;
+
+            this.initialLocation = this.passenger.currentLocation
+            this.endLocation = null
             this.state = 'picking up';
+
         }
         else{
             this.time += 1; //NOTE: time is in tick, waiting time of searching passenger
@@ -75,6 +108,8 @@ export default class Driver {
             else{
                 this.destination = this.currentLocation;
             }
+            this.endLocation = this.destination;
+
             let speed = this.distancePerTick(this.speed);
             this.speedLs.push(speed);
             this.distance += speed;
@@ -82,7 +117,7 @@ export default class Driver {
         }
     }
     pickUp(ticks,globals){
-        console.log(this.id, 'pick up distance', this.distance, 'pick up to travel', this.distanceToTravel)
+        // console.log(this.id, ' pick up distance', this.distance, 'pick up to travel', this.distanceToTravel)
         let speed = this.distancePerTick(this.speed);
         this.speedLs.push(speed);
         this.time += Math.min(1, this.distanceToTravel / speed); //NOTE: time is in tick, time spent to travel to passenger location
@@ -100,8 +135,12 @@ export default class Driver {
             this.tripFuelCost += fuelCost;
             this.tripDistance += this.distance;
             this.tripTime += this.time;
+            
+            this.endLocation = this.passenger.currentLocation
 
             this.jobLog['pick up'] = {
+                'start location': this.initialLocation,
+                'end location': this.endLocation,
                 'time spent': this.time, 
                 'distance': this.distance, 
                 'current time': ticks, 
@@ -112,12 +151,17 @@ export default class Driver {
             //NOTE: clear logged data
             this.distance = 0
             this.time = 0
+
+            this.initialLocation = this.endLocation
+            this.endLocation = null
+
             this.state = 'transit';
             this.destination = this.passenger.destination;
+            this.speedLs = [];
         }
     }
     transit(ticks,globals){
-        console.log('transit distance', this.distance, 'transit to travel', this.distanceToTravel)
+        // console.log(this.id, ' transit distance', this.distance, 'transit to travel', this.distanceToTravel)
         let speed = this.distancePerTick(this.speed);
         this.speedLs.push(speed);
         this.time += Math.min(1, this.distanceToTravel / speed); //NOTE: time is in tick, time spent to travel to passenger location
@@ -137,7 +181,11 @@ export default class Driver {
             this.tripDistance += this.distance;
             this.tripTime += this.time;
 
+            this.endLocation = this.destination
+
             this.jobLog['transit'] = {
+                'start location': this.initialLocation,
+                'end location': this.endLocation,
                 'time spent': this.time, 
                 'distance': this.distance, 
                 'current time': ticks, 
@@ -150,6 +198,9 @@ export default class Driver {
             this.distance = 0;
             this.time = 0;
             this.speedLs = [];
+
+            this.initialLocation = this.endLocation
+
             this.state = 'completed';
             this.currentLocation = this.destination;
         }
@@ -158,6 +209,8 @@ export default class Driver {
         let profits = globals.profitCalculation(this.tripFare,this.tripFuelCost);
 
         this.jobLog['totals'] = {
+            'start location': this.searchLocation,
+            'end location': this.endLocation,
             'time spent': this.tripTime, 
             'distance': this.tripDistance, 
             'fuelcost': this.tripFuelCost,
@@ -168,11 +221,16 @@ export default class Driver {
         this.state = 'searching';
         this.completedJobs += 1;
         this.passenger = null;
+
+        this.searchLocation = this.currentLocation;
+        
+        this.endLocation = null
+        this.speedLs = [];
         this.resetTripVariables();
         
         this.log[`${this.completedJobs}`] = {...this.jobLog}
-        console.log(`${this.id}'s log`)
-        console.log(this.log)
+        // console.log(`${this.id}'s log`)
+        // console.log(this.log)
     }
 
     distancePerTick(speed){
@@ -180,9 +238,12 @@ export default class Driver {
     }
 
     generateRandomCoord() {
+        let featureIndex = Math.floor(Math.random() * sgJSON.features.length)
+        let coordinateIndex = Math.floor(Math.random() * sgJSON.features[featureIndex].geometry.coordinates.length)
+
         let Pos =
-          sgJSON.features[Math.floor(Math.random() * sgJSON.features.length)]
-            .geometry.coordinates[0];
+          sgJSON.features[featureIndex]
+            .geometry.coordinates[coordinateIndex];
         return Pos;
     }
 
