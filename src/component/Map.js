@@ -8,7 +8,8 @@ import PathFinder, { pathToGeoJSON } from "geojson-path-finder";
 import { Link } from "react-router-dom";
 import mapboxgl from "mapbox-gl";
 import caricon from "../public/grabcar.png";
-import { Button } from "@mantine/core";
+import { Button, Modal, Box, LoadingOverlay , Center} from "@mantine/core";
+import { useDisclosure } from '@mantine/hooks';
 // import { Center } from "@mantine/core";
 import AnimationDriver from "../agents/AnimationDriver.js";
 import AnimationPassenger from "../agents/AnimationPassenger.js";
@@ -782,8 +783,33 @@ export default function Map() {
     return () => map.remove();
   }, []);
 
+const [opened, { open, close }] = useDisclosure(false);
+
   return (
-    <>
+    <> 
+      <Center>
+      <Modal opened={opened} onClose={close}>
+        <Center>
+        <div className="modal-header">
+        Would You Like to Fast Forward And Compile Data for 5 Days?
+        </div>
+        </Center>
+        <Center>
+        <div className="modal-text">
+          Compiling data will take a few seconds.
+        </div>
+        </Center>
+        <div className="modal-button">
+          <Link to="/fastforward">
+            <Button color="cyan" size='lg' onClick={stopAnimation}>
+              <IoIcons.IoCheckmarkOutline/><span></span>
+            </Button>
+          </Link>
+        </div>
+      </Modal> 
+      </Center>
+
+      <div className="map-container" ref={mapContainer} />
       <div>
         {/* <div className="map-container" ref={mapContainer} /> */}
         <div className="topbar">
@@ -805,9 +831,9 @@ export default function Map() {
               <IoIcons.IoPauseOutline/><span></span>
             </Button>
             <div className="small-space-right"></div>
-            <Link to="/fastforward">
-              <Button color="cyan" size='lg' onClick={stopAnimation}><IoIcons.IoPlayForwardOutline/> <span></span></Button>
-            </Link>
+
+            <Button color="cyan" size='lg' onClick={open}><IoIcons.IoPlayForwardOutline/> <span></span></Button>
+
           </div>
         </div>
       </div>

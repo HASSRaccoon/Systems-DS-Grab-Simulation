@@ -47,32 +47,34 @@ export function SummarizedSidebar(props) {
         <div className="nav-text">
           <div>
             <IoIcons.IoCalendarClearOutline />
-            <span>Day: </span>
+            <span>Day: 1</span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoTimeOutline />
-            <span>Time: {time}</span>
+            <span>Time: 5 PM</span>
+            {/* <span>Time: {time}</span> */}
             {/* <Text>{time}</Text> */}
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoAlarmOutline />
-            <span>Peak hour: </span>
+            <span>Peak hour: True</span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoRainyOutline />
-            <span>Weather: </span>
+            <span>Weather: Dry</span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoPerson />
-            <span>Your state: {state}</span>
+            <span>Your state: Transit</span>
+            {/* <span>Your state: {state}</span> */}
           </div>
         </div>
 
@@ -89,13 +91,13 @@ export function SummarizedSidebar(props) {
         <div className="nav-text">
           <div>
             <IoIcons.IoCarOutline />
-            <span>Work period: </span>
+            <span>Work period: 12PM-7PM </span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoRestaurantOutline />
-            <span>Rest period: </span>
+            <span>Rest period: 3PM-5PM</span>
           </div>
         </div>
         <div className="nav-text">
@@ -107,12 +109,12 @@ export function SummarizedSidebar(props) {
         <div className="nav-text">
           <div>
             <IoIcons.IoHourglassOutline />
-            <span>Wait behavior: </span>
+            <span>Wait behavior: drive</span>
           </div>
         </div>
         <div className="nav-text">
             <IoIcons.IoAccessibilityOutline />
-            <span>Pickup tolerance: </span>
+            <span>Pickup tolerance: 2 Km</span>
           </div>
        
         {/* <div className='nav-button'>
@@ -135,19 +137,19 @@ export function SummarizedSidebar(props) {
         <div className="nav-text">
           <div>
             <IoIcons.IoCheckmark />
-            <span>Jobs done:</span>
+            <span>Jobs done: 18</span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoWalletOutline />
-            <span>Total profit:</span>
+            <span>Total profit: $382</span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoNavigateOutline />
-            <span>Total Distance:</span>
+            <span>Total Distance: 253Km</span>
           </div>
         </div>
 
@@ -161,19 +163,19 @@ export function SummarizedSidebar(props) {
         <div className="nav-text">
           <div>
             <IoIcons.IoCheckmark />
-            <span>Jobs done:</span>
+            <span>Jobs done: 21</span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoWalletOutline />
-            <span>Total profit:</span>
+            <span>Total profit: $375</span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoNavigateOutline />
-            <span>Total Distance:</span>
+            <span>Total Distance: 250Km</span>
           </div>
         </div>
         <div className="details-button">
