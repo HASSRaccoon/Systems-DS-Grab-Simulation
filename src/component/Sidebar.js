@@ -7,6 +7,7 @@ import { IconContext } from "react-icons";
 import { Button } from "@mantine/core";
 // import Button from '@mui/material/Button';
 // import { StatusDetails } from './StatusDetails';
+import { StatusDetails } from "./StatusDetails";
 import { PersonalityQuiz } from "./PersonalityQuiz";
 
 function Sidebar(props) {
@@ -19,10 +20,6 @@ function Sidebar(props) {
 
   return (
     <>
-      <div className="topbar">
-        <IoIcons.IoCarSportOutline className="topbar-icon" />
-        <h1>Simulation</h1>
-      </div>
       <IconContext.Provider value={{ color: "#fff" }}>
         <nav className="nav-menu active">
           <div>
@@ -36,7 +33,7 @@ function Sidebar(props) {
               jobsDone={props.jobsDone}
               setjobsDone={props.setjobsDone}
             ></SummarizedSidebar>
-
+            {/* <StatusDetails></StatusDetails> */}
             {/* {<PersonalityQuiz/>} */}
           </div>
         </nav>

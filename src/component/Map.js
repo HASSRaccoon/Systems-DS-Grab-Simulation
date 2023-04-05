@@ -15,6 +15,7 @@ import AnimationPassenger from "../agents/AnimationPassenger.js";
 import Globals from "../agents/Globals.js";
 import Sidebar from "./Sidebar.js";
 import { convertLength } from "@turf/turf";
+import "./Map.css";
 // --- ---------------------------------- ---
 
 mapboxgl.accessToken =
@@ -782,35 +783,43 @@ export default function Map() {
   return (
     <>
       <div>
-        <div className="map-container" ref={mapContainer} />
-        <Sidebar
-          driver={drivers[0]}
-          Log={drivers[0].Log}
-          timeLog={drivers[0].timeLog}
-          isRunning={isRunning}
-          time={drivers[0].timeCounter}
-          setTime={setTime}
-          jobsDone={jobsDone}
-          setjobsDone={setjobsDone}
-        ></Sidebar>
-        <Button onClick={startDriver}> Debug start driver</Button>
-        <Button onClick={stopDriver}> Debug stop driver </Button>
-        {/* <Center> */}
-        <Button onClick={continueDriver}> Debug continue driver</Button>
-        {/* </Center> */}
-        <Button onClick={spawnPassenger}>Spawn Passenger</Button>
-        <Button onClick={startAnimation}>Start Animation</Button>
-        <Button onClick={stopAnimation}>Stop Animation</Button>
-        <Button onClick={continueAnimation}>Continue Animation</Button>
-        <Link to="/fastforward">
-          <Button>Fast Forward</Button>
-        </Link>
+        {/* <div className="map-container" ref={mapContainer} /> */}
 
-        <div> No. of drivers : {drivers.length}</div>
-        <div> No. of passengers : {passengers.length}</div>
-        <div>Check Time Update: {time}</div>
-        <div> Check State Update: {state} </div>
+        <div className="simulation-container">
+          <div className="map-container" ref={mapContainer} />
+          <div className="simulation-controls">
+            <Link to="/fastforward">
+              <Button color="cyan">FFW</Button>
+            </Link>
+            <div className="small-space-right"></div>
+            <Button color="cyan" onClick={startAnimation}>
+              Start Animation
+            </Button>
+          </div>
+        </div>
       </div>
+      {/* <Button onClick={spawnPassenger}>Spawn Passenger</Button> */}
+      {/* <Button onClick={startAnimation}>Start Animation</Button> */}
+      {/* <Button onClick={stopAnimation}>Stop Animation</Button>
+      <Button onClick={continueAnimation}>Continue Animation</Button> */}
+      {/* <Link to="/fastforward">
+        <Button>Fast Forward</Button>
+      </Link> */}
+
+      <div> No. of drivers : {drivers.length}</div>
+      <div> No. of passengers : {passengers.length}</div>
+      <div>Check Time Update: {time}</div>
+      <div> Check State Update: {state} </div>
+      <Sidebar
+        driver={drivers[0]}
+        Log={drivers[0].Log}
+        timeLog={drivers[0].timeLog}
+        isRunning={isRunning}
+        time={drivers[0].timeCounter}
+        setTime={setTime}
+        jobsDone={jobsDone}
+        setjobsDone={setjobsDone}
+      ></Sidebar>
     </>
   );
 }

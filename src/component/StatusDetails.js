@@ -13,7 +13,15 @@ export function StatusDetails() {
                     <span> </span>
                 </div>
                 <div className='nav-header'>
-                    <span>STATUS DETAILS</span>
+                    <span>DETAILS</span>
+                </div>
+
+                <div className='nav-subheader'>
+                    <span> Your Profit: </span>
+                </div>
+
+                <div className='nav-subheader'>
+                    <span> put graphs here: </span>
                 </div>
 
                 <div className='nav-subheader'>
@@ -29,7 +37,7 @@ export function StatusDetails() {
                 <div className='nav-text'>
                     <div>
                         <IoIcons.IoTimeOutline />
-                        <span>Time</span>
+                        <span>Time:</span>
                     </div>
                 </div>
                 <div className='nav-text'>
@@ -51,35 +59,42 @@ export function StatusDetails() {
                     </div>
                 </div>
 
+                <div className='nav-text'>
+                    <div>
+                    <IoIcons.IoWalletOutline />
+                        <span>Fare/Km:</span>
+                    </div>
+                </div>
+
                 <div className='padding-subheader'>
                     <span> </span>
                 </div>
 
-                <div className='nav-subheader'>
-                    <span> Drivers' States: </span>
+                {/* <div className='nav-subheader'>
+                    <span> Your Status: </span>
                 </div>
                 <div className='nav-text'>
                     <div>
-                        <IoIcons.IoPerson />
-                        <span>You:</span>
+                        <IoIcons.IoCarOutline />
+                        <span>State:</span>
                     </div>
                 </div>
                 <div className='nav-text'>
                         <IoIcons.IoCarOutline />
-                        <span>Type A:</span>
+                        <span>Current Speed:</span>
                 </div>
                 <div className='nav-text'>
                         <IoIcons.IoCarOutline />
-                        <span>Type B:</span>
+                        <span>Distance:</span>
                 </div>
                 <div className='nav-text'>
                         <IoIcons.IoCarOutline />
-                        <span>Type C:</span>
-                </div>
+                        <span>Profit:</span>
+                </div> */}
 
-                <div className='padding-subheader'>
+                {/* <div className='padding-subheader'>
                     <span> </span>
-                </div>
+                </div> */}
 
                 <div className='nav-subheader'>
                     <span> Passengers: </span>
