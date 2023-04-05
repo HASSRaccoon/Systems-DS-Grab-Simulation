@@ -35,8 +35,7 @@
     width: 350px;
     height: 100vh;
     display: flex;
-
-    position: fixed;
+    position: absolute;
     top: 0;
     right: -100%;
     transition: 850ms;

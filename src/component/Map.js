@@ -11,6 +11,7 @@ import { Button } from "@mantine/core";
 import Driver from "../agents/Driver.js";
 import Passenger from "../agents/Passenger.js";
 import Globals from "../agents/Globals.js";
+import './Map.css'
 // --- ---------------------------------- ---
 
 mapboxgl.accessToken =
@@ -744,8 +745,18 @@ export default function Map() {
   return (
     <>
       <div>
-        <div className="map-container" ref={mapContainer} />
-        <Button onClick={startDriver}> Debug start driver</Button>
+        <div className="simulation-container">
+          <div className="map-container" ref={mapContainer} />
+
+            <div className="simulation-controls">
+              <Button color='cyan'>FFW</Button>
+              <div className="small-space-right"></div>
+              <Button color='cyan' onClick={startAnimation}>Start Animation</Button>
+
+            </div>
+          </div>
+        </div>
+        {/* <Button onClick={startDriver}> Debug start driver</Button>
         <Button onClick={stopDriver}> Debug stop driver </Button>
         <Button onClick={continueDriver}> Debug continue driver</Button>
 
@@ -754,8 +765,8 @@ export default function Map() {
         <Button onClick={stopAnimation}>Stop Animation</Button>
         <Button onClick={continueAnimation}>Continue Animation</Button>
         <div> No. of drivers : {drivers.length}</div>
-        <div> No. of passengers : {passengers.length}</div>
-      </div>
+        <div> No. of passengers : {passengers.length}</div> */}
+      
     </>
   );
 }

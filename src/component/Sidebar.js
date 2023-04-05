@@ -6,7 +6,7 @@ import './Sidebar.css';
 import { IconContext } from 'react-icons'; 
 import { Button } from '@mantine/core';
 // import Button from '@mui/material/Button';
-// import { StatusDetails } from './StatusDetails';
+import { StatusDetails } from './StatusDetails';
 import { PersonalityQuiz } from './PersonalityQuiz';
 
 function Sidebar() {
@@ -23,7 +23,8 @@ function Sidebar() {
         <nav className= 'nav-menu active'>
             <div>
                 {/* <SummarizedSidebar /> */}
-                {<PersonalityQuiz/>}
+                {/* {<PersonalityQuiz/>} */}
+                <StatusDetails />
 
             </div>
         </nav>
