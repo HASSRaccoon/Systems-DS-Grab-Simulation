@@ -9,11 +9,11 @@ import PathFinder, { pathToGeoJSON } from "geojson-path-finder";
 import exportFromJSON from 'export-from-json';
 
 function App() {
-    const DAYS = 0.5;
+    const DAYS = 1;
     const TICKRATE = 1440; //NOTE: 1 tick = 1 minute
     const TICKS = TICKRATE * DAYS;
 
-    const EXPORT = true;
+    let EXPORT = false;
 
     const pathBuilder = new PathFinder(sgJSON, { tolerance: 1e-4 });
 
@@ -61,19 +61,19 @@ function App() {
     let passengers = [
         {
             id: "passenger1",
-            cancelTendency: 5,
+            cancelTendency: 1000,
         },
         {
             id: "passenger2",
-            cancelTendency: 10,
+            cancelTendency: 1000,
         },
         {
             id: "passenger3",
-            cancelTendency: 7,
+            cancelTendency: 1000,
         },
         {
             id: "passenger4",
-            cancelTendency: 4,
+            cancelTendency: 1000,
         },
     ];
 
@@ -122,11 +122,11 @@ function App() {
     for (let ticks = 0; ticks < TICKS ; ticks++) {
         try{
             let toGenerate = 1000 - passengerLs.length 
-            // if (passengerLs.length < 1000){
-            //     for (let i = 0; i < toGenerate; i++){
-            //         newPassenger();
-            //     }
-            // }
+            if (passengerLs.length < 1000){
+                for (let i = 0; i < toGenerate; i++){
+                    newPassenger();
+                }
+            }
             if (ticks % 60 == 0){ //NOTE: each hour
                 if (Math.random() < 0.5){ //NOTE: rain probability
                     god.raining = true;
@@ -135,32 +135,59 @@ function App() {
                     god.raining = false;
                 }
             }
-            for (let i = 0; i < passengerLs.length; i++){ //NOTE: passenger cancelling
-                passengerLs[i].waitingTime += 1;
-                if (passengerLs[i].waitingTime >= passengerLs[i].cancelTendency){
-                    let cancelRate = Math.random();
-                    if (cancelRate > 0.9){
-                        passengerLs[i].cancel()
-                        if (passengerLs[i].driver !== null){
-                            passengerLs[i].driver.passenger = null;
-                            passengerLs[i].driver.cancelledJobs += 1;
-                            passengerLs[i].driver.state = "searching";
-                        }
-                        else{ //DEBUG: for debug purpose
-                            cancelled += 1;
-                        }
-                    passengerLs = passengerLs.filter(passenger => passenger.id !== passengerLs[i].id)
-                    }
-                }
-            }
+            // for (let i = 0; i < passengerLs.length; i++){ //NOTE: passenger cancelling
+            //     passengerLs[i].waitingTime += 1;
+            //     if (passengerLs[i].waitingTime >= passengerLs[i].cancelTendency){
+            //         let cancelRate = Math.random();
+            //         if (cancelRate > 0.9){
+            //             passengerLs[i].cancel()
+            //             if (passengerLs[i].driver !== null){
+            //                 passengerLs[i].driver.passenger = null;
+            //                 passengerLs[i].driver.cancelledJobs += 1;
+            //                 passengerLs[i].driver.state = "searching";
+            //             }
+            //             else{ //DEBUG: for debug purpose
+            //                 cancelled += 1;
+            //             }
+            //         passengerLs = passengerLs.filter(passenger => passenger.id !== passengerLs[i].id)
+            //         }
+            //     }
+            // }
             for (let i = 0; i < driverLs.length; i++) { //NOTE: loop for each driver
                 let currentDriver = driverLs[i];
-                if (ticks % 1440 >= currentDriver.startTime && ticks % 1440 <= currentDriver.endTime){ //NOTE: if driver on duty, assign passenger
-                    assignPassenger(currentDriver);
+                if (currentDriver.breakStart < currentDriver.breakEnd ){
+                    if (ticks % 1440 >= currentDriver.breakStart && ticks % 1440 <= currentDriver.breakEnd){ //NOTE: if driver on duty, assign passenger
+                        console.log('break', ticks)
+                        currentDriver.time = 0;
+                        currentDriver.distance = 0;
+                        break;
+                    }
                 }
                 else{
-                    currentDriver.time = 0;
-                    currentDriver.distance = 0;
+                    if (ticks % 1440 >= currentDriver.breakStart && ticks % 1440 <= currentDriver.breakEnd){ //NOTE: if driver on duty, assign passenger
+                        console.log('break', ticks)
+                        currentDriver.time = 0;
+                        currentDriver.distance = 0;
+                        break;
+                    }
+                }
+                if (currentDriver.startTime < currentDriver.endTime){
+                    if (ticks % 1440 >= currentDriver.startTime && ticks % 1440 <= currentDriver.endTime){ //NOTE: if driver on duty, assign passenger
+                        assignPassenger(currentDriver);
+                    }
+                    else{
+                        currentDriver.time = 0;
+                        currentDriver.distance = 0;
+                    }
+                }
+                else{
+                    if (ticks % 1440 <= currentDriver.startTime && ticks % 1440 >= currentDriver.endTime){ //NOTE: if driver on duty, assign passenger
+                        currentDriver.time = 0;
+                        currentDriver.distance = 0;
+                    }
+                    else{
+                        assignPassenger(currentDriver);
+                    }
                 }
                 switch (currentDriver.state) {
                     case "searching":
@@ -190,19 +217,20 @@ function App() {
         catch (e){
             console.log(e)
         }
+        if (ticks === TICKS - 1) EXPORT = true;
     }
 
-  let driverlogs = []
-  driverLs.forEach(driver => {
-    console.log(`${driver.id}'s log`)
-    console.log(driver.log)
-    driverlogs.push({
-        key: driver.id,
-        log: driver.log
-    })
-  });
+    let driverlogs = []
+    driverLs.forEach(driver => {
+        console.log(`${driver.id}'s log`)
+        console.log(driver.log)
+        driverlogs.push({
+            key: driver.id,
+            log: driver.log
+        })
+    });
 
-  console.log('driverlogs:',driverlogs)
+    console.log('driverlogs:',driverlogs)
   // ------------------------------- EXPORT JSON CODE -------------------------------
     if (EXPORT == true){
 

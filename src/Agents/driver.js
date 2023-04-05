@@ -19,8 +19,10 @@ export default class Driver {
         this.jobLog = {};
         this.distance = 0;
         this.distanceToTravel = 0;
-        this.startTime = 0; //NOTE: 7am
-        this.endTime = 500; //NOTE: 5pm
+        this.startTime = 1020; //NOTE: 5pm
+        this.endTime = 240; //NOTE: 4am
+        this.breakStart = 0; //NOTE: 12am
+        this.breakEnd = 60; //NOTE: 1am
         this.path = null;
         this.speedLs = [];
     }
@@ -98,7 +100,7 @@ export default class Driver {
             this.time = 0;
             this.speedLs = [];
             this.state = 'completed';
-            this.destination = this.passenger.destination;
+            this.currentLocation = this.destination;
         }
     }
     completed(){
