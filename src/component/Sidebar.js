@@ -11,110 +11,38 @@ import { StatusDetails } from "./StatusDetails";
 import { PersonalityQuiz } from "./PersonalityQuiz";
 
 function Sidebar(props) {
-//   const [sidebar, setSidebar] = useState(false);
-//   const [showDetails, setShowDetails] = useState(false);
-//   const [showQuiz, setShowQuiz] = useState(true);
-    // const [showContent, setShowContent] = useState('quiz');
-    let showContent = 'quiz';
+    const [renderType, setRenderType] = useState('quiz')
 
-
-    // const toggleContent = (content) => {
-    //     if (showContent === 'quiz') {
-    //         <PersonalityQuiz />
-    //     } else if (showContent === 'details') {
-    //         <StatusDetails />
-    //     }
-    //     else if (showContent === 'summary') {
-    //         <SummarizedSidebar driver={props.driver}
-    //         Log={props.Log}
-    //         timeLog={props.timeLog}
-    //         isRunning={props.isRunning}
-    //         time={props.time}
-    //         setTime={props.time}
-    //         jobsDone={props.jobsDone}
-    //         setjobsDone={props.setjobsDone}
-    //         toggleDetails={toggleDetails} />
-    //     }
-    // }
-
-
-    function toggleContent(content) {
-        console.log(content, "content");
-        showContent = content;
-        console.log(showContent, "showContent");
+    const handleRenderQuiz = () => {
+        setRenderType('summary');
     }
-//   const toggleDetails = () => {
-//     if (showDetails) {
-//         setShowDetails(false);
-//     } else {
-//         setShowDetails(true);
-//     }
-//   };
 
-//   let content;
-//   if (showDetails) {
-//     content = <StatusDetails />;
-//   } else {
-//     content = (
-//       <SummarizedSidebar
-//         driver={props.driver}
-//         Log={props.Log}
-//         timeLog={props.timeLog}
-//         isRunning={props.isRunning}
-//         time={props.time}
-//         setTime={props.time}
-//         jobsDone={props.jobsDone}
-//         setjobsDone={props.setjobsDone}
-//         toggleDetails={toggleDetails}
-//       />
-//     );
-//   }
-//   let content;
-function test(){
-    console.log('here')
-    console.log(showContent)
-    if (showContent === 'quiz') {
-        // console.log('content', showContent)
-        return(
-        <PersonalityQuiz 
-        toggleContent={toggleContent}
-        />)}
-        else if (showContent === 'summary') {
-            // console.log('content', showContent)
-            return(
-            <SummarizedSidebar driver={props.driver}
-            Log={props.Log}
-            timeLog={props.timeLog}
-            isRunning={props.isRunning}
-            time={props.time}
-            setTime={props.time}
-            jobsDone={props.jobsDone}
-            setjobsDone={props.setjobsDone}
-            toggleContent={toggleContent} />)
-        }
-        else if (showContent === 'details') {
-        <StatusDetails 
-        toggleContent={toggleContent}
-        />
+    const handleRenderSummary = () => {
+        setRenderType('details');
     }
-    else{
-        console.log('here2')
+
+    const handleRenderDetails = () => {
+        setRenderType('summary');
     }
-}
-
-
-
-
-  var statusdetails = useState(false);
-  var showStatusDetails = () => (statusdetails = !statusdetails);
 
   return (
     <>
       <IconContext.Provider value={{ color: "#fff" }}>
         <nav className="nav-menu active">
           <div>
-            {}
-            {test()}
+            {renderType === 'quiz' && <PersonalityQuiz handleRenderQuiz={handleRenderQuiz} />}
+            {renderType === 'summary' && <SummarizedSidebar 
+                                        driver={props.driver}
+                                        Log={props.Log}
+                                        timeLog={props.timeLog}
+                                        isRunning={props.isRunning}
+                                        time={props.time}  
+                                        setTime={props.time}
+                                        jobsDone={props.jobsDone}
+                                        setjobsDone={props.setjobsDone}
+                                        handleRenderSummary={handleRenderSummary} />}
+            {renderType === 'details' && <StatusDetails handleRenderDetails={handleRenderDetails} />}
+
             {/* <SummarizedSidebar
             driver={props.driver}
             Log={props.Log}

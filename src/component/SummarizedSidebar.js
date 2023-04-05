@@ -31,9 +31,7 @@ export function SummarizedSidebar(props) {
     // setSpeed(currentSpeed);
   }, [props.time]);
 
-  function toggle(){
-    props.toggleContent('details')
-  }
+
 
   return (
     <div>
@@ -179,7 +177,7 @@ export function SummarizedSidebar(props) {
           </div>
         </div>
         <div className="details-button">
-          <Button color="cyan" onClick={toggle()}>
+          <Button color="cyan" onClick={props.handleRenderSummary}>
             SEE DETAILS<span></span>
           </Button>
         </div>

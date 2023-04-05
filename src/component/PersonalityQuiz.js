@@ -32,10 +32,6 @@ export function PersonalityQuiz(props) {
     },
   });
 
-  function toggle(){
-    console.log("toggle")
-    props.toggleContent('summary')
-  }
 
   console.log('quiz time')
 
@@ -275,7 +271,7 @@ export function PersonalityQuiz(props) {
         <span> </span>
 
         <div className="start-button">
-          <Button color="cyan" onClick={toggle()}>
+          <Button color="cyan" onClick={props.handleRenderQuiz}>
             START SIMULATION<span></span>
           </Button>
         </div>

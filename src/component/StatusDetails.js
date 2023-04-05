@@ -5,14 +5,12 @@ import "./Sidebar.css";
 
 export function StatusDetails(props) {
 
-    function toggle(){
-        props.toggleContent('summary')
-      }
+
     return (
         <div>
             <ul className='nav-menu-items'>
                 <div className='nav-text'>
-                    <Button onClick={toggle()} color='cyan'><IoIcons.IoArrowBackOutline/><span></span> </Button>
+                    <Button onClick={props.handleRenderDetails} color='cyan'><IoIcons.IoArrowBackOutline/><span></span> </Button>
                     
                     
                 </div>
