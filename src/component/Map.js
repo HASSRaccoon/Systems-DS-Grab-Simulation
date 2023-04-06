@@ -94,7 +94,7 @@ export default function Map() {
   let specialdriver = new AnimationDriver({
     id: 4,
     currentLocation: generateRandomCoord(),
-    speed: 50,
+    speed: 60,
     destination: generateRandomCoord(),
     distanceWillingToTravel: 5,
     path: null,
@@ -108,7 +108,7 @@ export default function Map() {
 
   let passengerListo = [];
 
-  for (let i = 0; i < 120; i++) {
+  for (let i = 0; i < 150; i++) {
     passengerListo[i] = new AnimationPassenger({
       id: i,
       ref: null,
@@ -157,6 +157,7 @@ export default function Map() {
     // driver.destination = generateRandomCoord();
     driver.path = buildPath(driver.currentLocation, driver.destination);
   }
+
   specialdriver.path = buildPath(
     specialdriver.currentLocation,
     specialdriver.destination
@@ -204,7 +205,7 @@ export default function Map() {
       };
     }),
   };
-  console.log(specialdriver, "special");
+  // console.log(specialdriver, "special");
   //problem at 187
   let driverPaths = {
     type: "FeatureCollection",
@@ -237,9 +238,123 @@ export default function Map() {
     },
   };
 
-  console.log(drivers, "initial drivers");
-  console.log(driverPaths, "initial paths");
-  console.log(specialPath, "initial paths");
+  // console.log(drivers, "initial drivers");
+  // console.log(driverPaths, "initial paths");
+  // console.log(specialPath, "initial paths");
+
+  function animatespecialdriver(driver) {
+    // console.log(driver.currentSteps, "steps in animate");
+    if (driver.timeCounter === 0) {
+      console.log("start of the day");
+      console.log("driver starting from ", driver.currentLocation);
+    }
+
+    // console.log(driver.timeLog, "hello");
+
+    const start =
+      driver.path.geometry.coordinates[
+        driver.counter >= driver.currentSteps
+          ? driver.counter - 1
+          : driver.counter
+      ];
+    const end =
+      driver.path.geometry.coordinates[
+        driver.counter >= driver.currentSteps
+          ? driver.counter
+          : driver.counter + 1
+      ];
+
+    if (!start || !end) {
+      running = false;
+      return;
+    }
+    // if (driver.id === 4) {
+    specialPoint.geometry.coordinates =
+      driver.path.geometry.coordinates[driver.counter];
+    // } else {
+    //   driverPoints.features[driver.id - 1].geometry.coordinates =
+    //     driver.path.geometry.coordinates[driver.counter];
+    // }
+    // driverPoints.features[driver.id - 1].geometry.coordinates =
+    //   driver.path.geometry.coordinates[driver.counter];
+    //update currentLocation is here
+    driver.currentLocation = driver.path.geometry.coordinates[driver.counter];
+    // if (driver.id === 4) {
+    specialPoint.properties.bearing = turf.bearing(
+      turf.point(start),
+      turf.point(end)
+    );
+    // } else {
+    //   driverPoints.features[driver.id - 1].properties.bearing = turf.bearing(
+    //     turf.point(start),
+    //     turf.point(end)
+    //   );
+    // }
+
+    // driverPoints.features[driver.id - 1].properties.bearing = turf.bearing(
+    //   turf.point(start),
+    //   turf.point(end)
+    // );
+    // if (driver.id === 4) {
+    map.getSource("me").setData(specialPoint);
+    // } else {
+    //   map.getSource("drivers").setData(driverPoints);
+    // }
+    // map.getSource("drivers").setData(driverPoints);
+
+    if (driver.counter < driver.currentSteps) {
+      // requestAnimationFrame(() => animatedriver(driver, steps));
+      // animationId = requestAnimationFrame(() => animatedriver(driver, steps));
+      // const animationId = requestAnimationFrame(() => animatedriver(driver));
+      // animationIds.push(animationId);
+      //error
+      const animationId = requestAnimationFrame(() =>
+        animatespecialdriver(driver)
+      );
+      animationIds[driver.id - 1].push(animationId);
+    }
+    // console.log(driver.counter, driver.currentLocation);
+    driver.counter = driver.counter + 1;
+
+    driver.timeCounter = driver.timeCounter + 1;
+    // if (driver.id === 1) {
+    //   setTime(time);
+    // }
+    driver.timeLog[driver.timeCounter] = {};
+    driver.timeLog[driver.timeCounter]["state"] = driver.state;
+    driver.timeLog[driver.timeCounter]["distance travelled"] =
+      driver.distancePerStep;
+    driver.timeLog[driver.timeCounter]["time passed"] = 1;
+    driver.timeLog[driver.timeCounter]["speed"] = driver.speed;
+    if (driver.counter === driver.currentSteps + 1) {
+      driver.timeLog[driver.timeCounter]["distance travelled"] =
+        driver.currentLeftoverDistance;
+      driver.timeLog[driver.timeCounter]["time passed"] =
+        driver.currentLeftoverTime;
+    }
+
+    driver.totalDistanceTravelled =
+      driver.totalDistanceTravelled +
+      driver.timeLog[driver.timeCounter]["distance travelled"];
+
+    driver.totalFuelCosts =
+      driver.totalFuelCosts +
+      getFuelCost(driver.timeLog[driver.timeCounter]["distance travelled"]);
+
+    // if (driver.id === 1) {
+    //   setTime(driver.timeCounter);
+    // }
+    // console.log(driver.id, driver.timeLog, "time log per frame");
+    if (driver.timeCounter === 1440) {
+      console.log("end of the day");
+      console.log("driver reached destination at ", driver.currentLocation);
+    }
+
+    // if (driver.counter === steps) {
+    // console.log(driver.currentLocation, "last");
+    // }
+    // console.log(driver.currentLocation, driver.counter);
+  }
 
   function animatedriver(driver) {
     // console.log(driver.currentSteps, "steps in animate");
@@ -267,39 +382,39 @@ export default function Map() {
       running = false;
       return;
     }
-    if (driver.id === 4) {
-      specialPoint.geometry.coordinates =
-        driver.path.geometry.coordinates[driver.counter];
-    } else {
-      driverPoints.features[driver.id - 1].geometry.coordinates =
-        driver.path.geometry.coordinates[driver.counter];
-    }
-    // driverPoints.features[driver.id - 1].geometry.coordinates =
-    //   driver.path.geometry.coordinates[driver.counter];
+    // if (driver.id === 4) {
+    //   specialPoint.geometry.coordinates =
+    //     driver.path.geometry.coordinates[driver.counter];
+    // } else {
+
+    // }
+    driverPoints.features[driver.id - 1].geometry.coordinates =
+      driver.path.geometry.coordinates[driver.counter];
+
     //update currentLocation is here
     driver.currentLocation = driver.path.geometry.coordinates[driver.counter];
-    if (driver.id === 4) {
-      specialPoint.properties.bearing = turf.bearing(
-        turf.point(start),
-        turf.point(end)
-      );
-    } else {
-      driverPoints.features[driver.id - 1].properties.bearing = turf.bearing(
-        turf.point(start),
-        turf.point(end)
-      );
-    }
+    // if (driver.id === 4) {
+    //   specialPoint.properties.bearing = turf.bearing(
+    //     turf.point(start),
+    //     turf.point(end)
+    //   );
+    // } else {
+    //   driverPoints.features[driver.id - 1].properties.bearing = turf.bearing(
+    //     turf.point(start),
+    //     turf.point(end)
+    //   );
+    // }
 
-    // driverPoints.features[driver.id - 1].properties.bearing = turf.bearing(
-    //   turf.point(start),
-    //   turf.point(end)
-    // );
-    if (driver.id === 4) {
-      map.getSource("me").setData(specialPoint);
-    } else {
-      map.getSource("drivers").setData(driverPoints);
-    }
-    // map.getSource("drivers").setData(driverPoints);
+    driverPoints.features[driver.id - 1].properties.bearing = turf.bearing(
+      turf.point(start),
+      turf.point(end)
+    );
+    // if (driver.id === 4) {
+    //   map.getSource("me").setData(specialPoint);
+    // } else {
+    //   map.getSource("drivers").setData(driverPoints);
+    // }
+    map.getSource("drivers").setData(driverPoints);
 
     if (driver.counter < driver.currentSteps) {
       // requestAnimationFrame(() => animatedriver(driver, steps));
@@ -373,6 +488,59 @@ export default function Map() {
       running = false;
       return;
     }
+    // const passenger = driver.passenger;
+    //check
+    // passengerPoints.features[passenger.id - 1].geometry.coordinates =
+    //   driver.path.geometry.coordinates[driver.passenger.counter];
+    passengerPoints.features[driver.id - 1].geometry.coordinates =
+      driver.path.geometry.coordinates[driver.passenger.counter];
+
+    // passengerPoints.features[driver.passenger.id - 1].geometry.coordinates =
+    //   driver.path.geometry.coordinates[driver.passenger.counter];
+    // passengerPoints.features[driver.passenger.id - 1].properties.bearing =
+    // turf.bearing(turf.point(start), turf.point(end));
+
+    // passengerPoints.features[passenger.id - 1].properties.bearing =
+    //   turf.bearing(turf.point(start), turf.point(end));
+
+    passengerPoints.features[driver.id - 1].properties.bearing = turf.bearing(
+      turf.point(start),
+      turf.point(end)
+    );
+
+    map.getSource("passengers").setData(passengerPoints);
+
+    if (driver.passenger.counter < driver.currentSteps) {
+      //error
+      // requestAnimationFrame(() => animatepassenger(driver, steps));
+      const animationId = requestAnimationFrame(() => animatepassenger(driver));
+      animationIds.push(animationId);
+
+      // const animationId = requestAnimationFrame(() => animatedriver(driver));
+      // animationIds[driver.id - 1].push(animationId);
+    }
+
+    driver.passenger.counter = driver.passenger.counter + 1;
+  }
+
+  function animatespecialpassenger(driver) {
+    const start =
+      driver.path.geometry.coordinates[
+        driver.passenger.counter >= driver.currentSteps
+          ? driver.passenger.counter - 1
+          : driver.passenger.counter
+      ];
+    const end =
+      driver.path.geometry.coordinates[
+        driver.passenger.counter >= driver.currentSteps
+          ? driver.passenger.counter
+          : driver.passenger.counter + 1
+      ];
+
+    if (!start || !end) {
+      running = false;
+      return;
+    }
     const passenger = driver.passenger;
     passengerPoints.features[passenger.id - 1].geometry.coordinates =
       driver.path.geometry.coordinates[driver.passenger.counter];
@@ -390,7 +558,9 @@ export default function Map() {
     if (driver.passenger.counter < driver.currentSteps) {
       //error
       // requestAnimationFrame(() => animatepassenger(driver, steps));
-      const animationId = requestAnimationFrame(() => animatepassenger(driver));
+      const animationId = requestAnimationFrame(() =>
+        animatespecialpassenger(driver)
+      );
       animationIds.push(animationId);
 
       // const animationId = requestAnimationFrame(() => animatedriver(driver));
@@ -543,35 +713,48 @@ export default function Map() {
   let avgjobsdonelist = [];
   let avgprofitlist = [];
   let avgdistancelist = [];
+
   //damn manual but nvm first
+
   function updateStats() {
     setInterval(() => {
-      console.log(drivers[0].timeCounter, "timecounter");
-      timelist[0] = drivers[0].timeCounter;
-      statelist[0] = drivers[0].state;
-      speedlist[0] = drivers[0].speed;
-      jobsdonelist[0] = drivers[0].completedJobs;
+      console.log(specialdriver.timeCounter, "timecounter");
+      timelist[0] = specialdriver.timeCounter;
+      statelist[0] = specialdriver.state;
+      speedlist[0] = specialdriver.speed;
+      jobsdonelist[0] = specialdriver.completedJobs;
       const yourfuelcost = getFuelCost(
+        specialdriver.totalDistanceTravelled.toFixed(3)
+      );
+      const yourprofit = specialdriver.earnings - yourfuelcost;
+      profitlist[0] = yourprofit.toFixed(2);
+      distancelist[0] = specialdriver.totalDistanceTravelled.toFixed(3);
+
+      const avgjobsdone =
+        (drivers[0].completedJobsdrivers +
+          [1].completedJobs +
+          drivers[2].completedJobs) /
+        3;
+      avgjobsdonelist[0] = avgjobsdone.toFixed(1);
+
+      const d1fuelcost = getFuelCost(
         drivers[0].totalDistanceTravelled.toFixed(3)
       );
-      const yourprofit = drivers[0].earnings - yourfuelcost;
-      profitlist[0] = yourprofit.toFixed(2);
-      distancelist[0] = drivers[0].totalDistanceTravelled.toFixed(3);
-      avgjobsdonelist[0] =
-        (drivers[1].completedJobs + drivers[2].completedJobs) / 2;
       const d2fuelcost = getFuelCost(
         drivers[1].totalDistanceTravelled.toFixed(3)
       );
       const d3fuelcost = getFuelCost(
         drivers[2].totalDistanceTravelled.toFixed(3)
       );
+      const d1profit = drivers[0].earnings - d1fuelcost;
       const d2profit = drivers[1].earnings - d2fuelcost;
       const d3profit = drivers[2].earnings - d3fuelcost;
-      const avgprofit = (d2profit + d3profit) / 2;
+      const avgprofit = (d1profit + d2profit + d3profit) / 3;
       const avgdistance =
-        (drivers[1].totalDistanceTravelled +
+        (drivers[0].totalDistanceTravelled +
+          drivers[1].totalDistanceTravelled +
           drivers[2].totalDistanceTravelled) /
-        2;
+        3;
       avgprofitlist[0] = avgprofit.toFixed(2);
       avgdistancelist[0] = avgdistance.toFixed(3);
 
@@ -608,12 +791,19 @@ export default function Map() {
       driver
     );
     driver.counter = 0;
-    animatedriver(driver);
+
+    if (driver.id === 4) {
+      animatespecialdriver(driver);
+    } else {
+      animatedriver(driver);
+    }
+
     let getPassengerTime = 0;
     //if still have passengers on map and searching
     if (passengers.length > 0 && driver.state === "searching") {
       //if passenger no driver, and dis to passenger < willingness to travel
       assignPassenger(driver);
+
       console.log(driver.id, driver.passenger, "found");
       getPassengerTime = driver.timeCounter;
       driver.Log[driver.completedJobs]["searching"]["timeFound"] =
@@ -649,15 +839,11 @@ export default function Map() {
       driver
     );
     if (driver.id === 4) {
-      console.log("hello hi");
-      console.log(driver.path);
-      console.log(specialPath);
       specialPath = driver.path;
-      console.log(driver.path);
-      console.log(specialPath);
     } else {
       driverPaths.features[driver.id - 1] = driver.path;
     }
+    // driverPaths.features[driver.id - 1] = driver.path;
 
     if (driver.state === "picking up" && driver.passenger != null) {
       handlePickup(driver);
@@ -673,6 +859,7 @@ export default function Map() {
     } else {
       map.getSource("routes").setData(driverPaths);
     }
+    // map.getSource("routes").setData(driverPaths);
 
     setTimeout(() => {
       // let whilepickupcheckcounter = 0
@@ -749,16 +936,24 @@ export default function Map() {
       driverPaths.features[driver.id - 1] = driver.path;
     }
     // driverPaths.features[driver.id - 1] = driver.path;
-    console.log(driverPaths, "why cannot getsource");
+    // console.log(driverPaths, "why cannot getsource");
     if (driver.id === 4) {
       map.getSource("myroute").setData(specialPath);
     } else {
       map.getSource("routes").setData(driverPaths);
     }
+    // map.getSource("routes").setData(driverPaths);
     driver.counter = 0;
     driver.passenger.counter = 0;
-    animatedriver(driver);
-    animatepassenger(driver);
+    if (driver.id === 4) {
+      animatespecialdriver(driver);
+      animatespecialpassenger(driver);
+    } else {
+      animatedriver(driver);
+      animatepassenger(driver);
+    }
+    // animatedriver(driver);
+    // animatepassenger(driver);
 
     setTimeout(() => {
       //need to debug passenger exit
@@ -839,22 +1034,24 @@ export default function Map() {
       //  const profit = god.profitCalculation(fare, fuel)
       console.log("Transit Log", driver.id, driver.Log);
       driver.completed();
+      console.log(driver.currentLocation, "current loc");
       console.log(driver.destination, "before");
       driver.destination = generateRandomCoord();
+      // driver.destination = generateRandomCoord();
       console.log(driver.destination, "after");
       driver.path = buildPath(driver.currentLocation, driver.destination);
       //error
       processPath(driver.path);
       if (driver.id === 4) {
         specialPath = driver.path;
-      } else {
-        driverPaths.features[driver.id - 1] = driver.path;
-      }
-      if (driver.id === 4) {
         map.getSource("myroute").setData(specialPath);
       } else {
+        driverPaths.features[driver.id - 1] = driver.path;
         map.getSource("routes").setData(driverPaths);
       }
+
+      // driverPaths.features[driver.id - 1] = driver.path;
+      // map.getSource("routes").setData(driverPaths);
       handleSearch(driver);
     }, 3000);
   }
