@@ -1,4 +1,4 @@
- import Driver from "./agents/Driver.js";
+import Driver from "./agents/Driver.js";
 import Passenger from "./agents/Passenger.js";
 import Globals from "./agents/Globals.js";
 
@@ -8,14 +8,131 @@ import PathFinder, { pathToGeoJSON } from "geojson-path-finder";
 
 import exportFromJSON from "export-from-json";
 
-export function App_kewei() {
+export default function App_Kewei() {
+  //CHANGE PER SIMULATION
   const DAYS = 0.5;
   const TICKRATE = 1440; //NOTE: 1 tick = 1 minute
   const TICKS = TICKRATE * DAYS;
 
+  const NUM_DRIVERS = 2;
+
+  // const simulationIter = 10; //cannot work as the simulation stores the data
   const EXPORT = true;
 
   const pathBuilder = new PathFinder(sgJSON, { tolerance: 1e-4 });
+
+  //CHANGE PER SIMULATION
+
+  // Type A
+  // this.startTime = 1020; //NOTE: 5pm
+  // this.endTime = 240; //NOTE: 4am
+  // this.breakStart = 0; //NOTE: 12am
+  // this.breakEnd = 60; //NOTE: 1am
+
+  // Type B
+  // this.startTime = 420; //NOTE: 7am
+  // this.endTime = 1140; //NOTE: 7pm
+  // this.breakStart = 600; //NOTE: 10am
+  // this.breakEnd = 660; //NOTE: 11am
+
+  // Type C
+  // this.startTime = 480; //NOTE: 8am
+  // this.endTime = 1080; //NOTE: 6pm
+  // this.breakStart = 660; //NOTE: 10am
+  // this.breakEnd = 720; //NOTE: 11am
+
+  let drivers = [];
+  for (let i = 0; i < NUM_DRIVERS; i++) {
+    // drivers.push( //CHANGE PER SIMULATION
+    //         {
+    //             id: `A${i}`,
+    //             speed: 80,
+    //             state: 'searching',
+    //             moveTendency: 0,
+    //             startTime: 1020, //NOTE: 5pm
+    //             endTime: 240, //NOTE: 4am
+    //             breakStart: 0, //NOTE: 12am
+    //             breakEnd: 60, //NOTE: 1am
+    //         }
+    //     );
+    // drivers.push( //CHANGE PER SIMULATION
+    //         {
+    //             id: `B${i}`,
+    //             speed: 90,
+    //             state: 'searching',
+    //             moveTendency: 0,
+    //             startTime: 420, //NOTE: 7am
+    //             endTime: 1140, //NOTE: 7pm
+    //             breakStart: 600, //NOTE: 10am
+    //             breakEnd: 660, //NOTE: 11am
+    //         }
+    //     );
+    drivers.push(
+      //CHANGE PER SIMULATION
+      {
+        id: `C${i}`,
+        speed: 70,
+        state: "searching",
+        moveTendency: 99999999999999,
+        startTime: 480, //NOTE: 8am
+        endTime: 1080, //NOTE: 6pm
+        breakStart: 660, //NOTE: 10am
+        breakEnd: 720, //NOTE: 11am
+      }
+    );
+  }
+  // let drivers = [
+  //     { //Type A
+  //         id: "A",
+  //         speed: 80,
+  //         state: 'searching',
+  //         moveTendency: 0,
+  //     },
+  //     { //Type B
+  //         id: "B",
+  //         speed: 90,
+  //         state: 'searching',
+  //         moveTendency: 0,
+  //     },
+  //     { //Type C
+  //         id: "C",
+  //         speed: 70,
+  //         state: 'searching',
+  //         moveTendency: 99999999999999,
+  //     },
+  // ];
+
+  let passengers = [
+    {
+      id: "passenger1",
+      cancelTendency: 1000,
+      // currentLocation: generateRandomCoord(),
+      // destination: generateRandomCoord(),
+    },
+    {
+      id: "passenger2",
+      cancelTendency: 1000,
+    },
+    {
+      id: "passenger3",
+      cancelTendency: 1000,
+    },
+    {
+      id: "passenger4",
+      cancelTendency: 1000,
+    },
+  ];
+
+  let god = new Globals();
+  let passengerLs = [];
+
+  // let cancelled = 0; //DEBUG: for debug purpose
+
+  //spawn drivers
+  // drivers.map((driver) => driverLs.push(new Driver(driver)));
+  drivers.map((driver) => god.registerDriver(new Driver(driver)));
+
+  passengers.map((passenger) => passengerLs.push(new Passenger(passenger)));
 
   function buildPath(start, end) {
     const path = pathToGeoJSON(
@@ -37,78 +154,109 @@ export function App_kewei() {
     return result;
   }
 
-  function generateRandomCoord() {
-    let Pos =
-      sgJSON.features[Math.floor(Math.random() * sgJSON.features.length)]
-        .geometry.coordinates[0];
-    return Pos;
-  }
+  // function generateRandomCoord() {
+  //     let featureIndex = Math.floor(Math.random() * sgJSON.features.length)
+  //     let coordinateIndex = Math.floor(Math.random() * sgJSON.features[featureIndex].geometry.coordinates.length)
 
-  let drivers = [
-    {
-      id: "driver1",
-      speed: 70,
-      state: "searching",
-      moveTendency: 3,
-    },
-    {
-      id: "driver2",
-      speed: 50,
-      state: "searching",
-      moveTendency: 5,
-    },
-  ];
+  //     let Pos =
+  //       sgJSON.features[featureIndex]
+  //         .geometry.coordinates[coordinateIndex];
+  //     return Pos;
+  // }
 
-  let passengers = [
-    {
-      id: "passenger1",
-      cancelTendency: 5,
-    },
-    {
-      id: "passenger2",
-      cancelTendency: 10,
-    },
-    {
-      id: "passenger3",
-      cancelTendency: 7,
-    },
-    {
-      id: "passenger4",
-      cancelTendency: 4,
-    },
-  ];
+  //trying to generate a random coordinate with a certain distance from the current location
+  // function generateRandomCoordWithDist(distanceKM) {
+  //     let Pos = this.generateRandomCoord()
 
-  let god = new Globals();
+  //     let path = this.buildPath(this.currentLocation, Pos);
+  //     let dist = turf.length(path, {units: 'kilometers'});
 
-  let driverLs = [];
-  let passengerLs = [];
+  //     while (dist < distanceKM) {
+  //         Pos = this.generateRandomCoord()
+  //         path = this.buildPath(this.currentLocation, Pos);
+  //         dist = turf.length(path, {units: 'kilometers'});
+  //     }
 
-  let cancelled = 0; //DEBUG: for debug purpose
-
-  drivers.map((driver) => driverLs.push(new Driver(driver)));
-  passengers.map((passenger) => passengerLs.push(new Passenger(passenger)));
+  //     return Pos
+  // }
 
   function assignPassenger(driver) {
-    //TODO: need to assign nearest passenger instead of random assignment
     if (passengerLs.length > 0 && driver.state === "searching") {
-      let passengerIndex = Math.floor(Math.random() * passengerLs.length); //DEBUG: assigning random passenger part
-      let currentPassenger = passengerLs[passengerIndex];
-      if (currentPassenger.driver === null) {
-        //NOTE: to avoid reassigning passenger to another driver
-        driver.passenger = currentPassenger;
-        currentPassenger.driver = driver;
-        passengerLs = passengerLs.filter(
-          (passenger) => passenger.id !== currentPassenger.id
-        );
+      let radius = 0;
+      // if driver has been searching for less than 5 minutes, search with 2.5km radius, else search with 5km radius
+      driver.time < 5
+        ? (radius = 2.5)
+        : driver.time < 7
+        ? (radius = 5)
+        : (radius = 7.5);
+
+      let center = turf.point(driver.currentLocation);
+      let options = { steps: 64, units: "kilometers" };
+      let circle = turf.circle(center, radius, options); //create circle
+      let passengerLsInRadius = passengerLs.filter((passenger) =>
+        turf.booleanPointInPolygon(
+          turf.point(passenger.currentLocation),
+          circle
+        )
+      ); //filter passenger in circle
+
+      console.log(
+        "Passengers in " + radius + "(km) " + driver.id + ": ",
+        passengerLsInRadius
+      );
+      //filter passenger that has shortest distance to driver
+      let passengerIndex = null;
+      if (passengerLsInRadius.length > 1) {
+        let shortestDist = 100000;
+
+        for (let i = 0; i < passengerLsInRadius.length; i++) {
+          //loop through passengers in circle
+          let currentPassenger = passengerLsInRadius[i];
+          let currentDist = turf.distance(
+            turf.point(driver.currentLocation),
+            turf.point(currentPassenger.currentLocation),
+            { units: "kilometers" }
+          );
+          if (currentDist < shortestDist) {
+            shortestDist = currentDist;
+            passengerIndex = i;
+          }
+        }
+      } else if (passengerLsInRadius.length === 1) {
+        passengerIndex = 0;
+      }
+
+      // Assign passenger to driver
+      if (passengerIndex !== null) {
+        let currentPassenger = passengerLsInRadius[passengerIndex];
+        if (currentPassenger.driver === null) {
+          //NOTE: to avoid reassigning passenger to another driver
+          driver.passenger = currentPassenger;
+          currentPassenger.driver = driver;
+          passengerLs = passengerLs.filter(
+            (passenger) => passenger.id !== currentPassenger.id
+          );
+        }
       }
     }
   }
 
+  // Old assignPassenger function
+  // function assignPassenger(driver) { //TODO: need to assign nearest passenger instead of random assignment
+  //     if (passengerLs.length > 0 && driver.state === "searching") {
+  //         let passengerIndex = Math.floor(Math.random() * passengerLs.length); //DEBUG: assigning random passenger part
+  //         let currentPassenger = passengerLs[passengerIndex];
+  //         if (currentPassenger.driver === null){ //NOTE: to avoid reassigning passenger to another driver
+  //             driver.passenger = currentPassenger;
+  //             currentPassenger.driver = driver;
+  //             passengerLs = passengerLs.filter(passenger => passenger.id !== currentPassenger.id)
+  //         }
+  //     }
+  // }
+
   function newPassenger() {
     let passenger = new Passenger({
       id: "passenger" + generateString(7),
-      currentLocation: generateRandomCoord(),
-      destination: generateRandomCoord(),
       cancelTendency: Math.floor(Math.random()) * 10,
     });
     passengerLs.push(passenger);
@@ -121,134 +269,183 @@ export function App_kewei() {
     if (driver.distanceToTravel === 0) {
       driver.distanceToTravel = turf.length(path, { units: "kilometers" });
     }
-    console.log(driver.state, driver.distanceToTravel);
+    // console.log(driver.state, driver.distanceToTravel)
   }
 
-  for (let ticks = 0; ticks < TICKS; ticks++) {
-    try {
-      let toGenerate = 1000 - passengerLs.length;
-      // if (passengerLs.length < 1000){
-      //     for (let i = 0; i < toGenerate; i++){
-      //         newPassenger();
-      //     }
-      // }
-      if (ticks % 60 == 0) {
-        //NOTE: each hour
-        if (Math.random() < 0.5) {
-          //NOTE: rain probability
-          god.raining = true;
-        } else {
-          god.raining = false;
-        }
-      }
-      for (let i = 0; i < passengerLs.length; i++) {
-        //NOTE: passenger cancelling
-        passengerLs[i].waitingTime += 1;
-        if (passengerLs[i].waitingTime >= passengerLs[i].cancelTendency) {
-          let cancelRate = Math.random();
-          if (cancelRate > 0.9) {
-            passengerLs[i].cancel();
-            if (passengerLs[i].driver !== null) {
-              passengerLs[i].driver.passenger = null;
-              passengerLs[i].driver.cancelledJobs += 1;
-              passengerLs[i].driver.state = "searching";
-            } else {
-              //DEBUG: for debug purpose
-              cancelled += 1;
-            }
-            passengerLs = passengerLs.filter(
-              (passenger) => passenger.id !== passengerLs[i].id
-            );
+  function runSim() {
+    // --------------------------------- RUN SIMULATION --------------------------------- //
+    const startDate = new Date(); //NOTE: start time of simulation
+    console.log("(LOG) Start Time: ", startDate.toLocaleTimeString());
+    for (let ticks = 0; ticks < TICKS; ticks++) {
+      if (ticks % TICKRATE === 0) console.log("Day: ", 1 + ticks / TICKRATE); //log everyday
+
+      try {
+        //Spawn new passengers every 5 minutes
+        let toGenerate = 100 - passengerLs.length;
+        if (passengerLs.length < 100) {
+          for (let i = 0; i < toGenerate; i++) {
+            newPassenger();
           }
         }
-      }
-      for (let i = 0; i < driverLs.length; i++) {
-        //NOTE: loop for each driver
-        let currentDriver = driverLs[i];
-        if (
-          ticks % 1440 >= currentDriver.startTime &&
-          ticks % 1440 <= currentDriver.endTime
-        ) {
-          //NOTE: if driver on duty, assign passenger
-          assignPassenger(currentDriver);
-        } else {
-          currentDriver.time = 0;
-          currentDriver.distance = 0;
-        }
-        switch (currentDriver.state) {
-          case "searching":
-            currentDriver.search(currentDriver.passenger, ticks);
-            pathGenerator(
-              currentDriver,
-              currentDriver.currentLocation,
-              currentDriver.destination
-            );
-            break;
-          case "picking up":
-            currentDriver.pickUp(ticks);
-            currentDriver.passenger.carArrived();
-            pathGenerator(
-              currentDriver,
-              currentDriver.currentLocation,
-              currentDriver.destination
-            );
-            break;
-          case "transit":
-            currentDriver.transit(ticks);
-            currentDriver.passenger.transit();
-            pathGenerator(
-              currentDriver,
-              currentDriver.currentLocation,
-              currentDriver.destination
-            );
-            break;
-          case "completed":
-            currentDriver.passenger.arrived();
-            currentDriver.completed(ticks);
-            break;
-          default:
-            currentDriver.search(currentDriver.passenger);
-            break;
-        }
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  }
 
-  let driverlogs = [];
-  driverLs.forEach((driver) => {
-    console.log(`${driver.id}'s log`);
-    console.log(driver.log);
-    driverlogs.push({
-      key: driver.id,
-      log: driver.log,
+        if (ticks % 60 === 0) {
+          //NOTE: each hour
+          if (Math.random() < 0.5) {
+            //NOTE: rain probability
+            god.raining = true;
+          } else {
+            god.raining = false;
+          }
+        }
+        // for (let i = 0; i < passengerLs.length; i++){ //NOTE: passenger cancelling
+        //     passengerLs[i].waitingTime += 1;
+        //     if (passengerLs[i].waitingTime >= passengerLs[i].cancelTendency){
+        //         let cancelRate = Math.random();
+        //         if (cancelRate > 0.9){
+        //             passengerLs[i].cancel()
+        //             if (passengerLs[i].driver !== null){
+        //                 passengerLs[i].driver.passenger = null;
+        //                 passengerLs[i].driver.cancelledJobs += 1;
+        //                 passengerLs[i].driver.state = "searching";
+        //             }
+        //             else{ //DEBUG: for debug purpose
+        //                 cancelled += 1;
+        //             }
+        //         passengerLs = passengerLs.filter(passenger => passenger.id !== passengerLs[i].id)
+        //         }
+        //     }
+        // }
+        for (let i = 0; i < god.drivers.length; i++) {
+          //NOTE: loop for each driver
+          let currentDriver = god.drivers[i];
+          if (currentDriver.breakStart < currentDriver.breakEnd) {
+            if (
+              ticks % 1440 >= currentDriver.breakStart &&
+              ticks % 1440 <= currentDriver.breakEnd
+            ) {
+              //NOTE: if driver on duty, assign passenger
+              console.log("break " + currentDriver.id, ticks);
+              currentDriver.time = 0;
+              currentDriver.distance = 0;
+              break;
+            }
+          } else {
+            if (
+              ticks % 1440 >= currentDriver.breakStart &&
+              ticks % 1440 <= currentDriver.breakEnd
+            ) {
+              //NOTE: if driver on duty, assign passenger
+              console.log("break " + currentDriver.id, ticks);
+              currentDriver.time = 0;
+              currentDriver.distance = 0;
+              break;
+            }
+          }
+          if (currentDriver.startTime < currentDriver.endTime) {
+            if (
+              ticks % 1440 >= currentDriver.startTime &&
+              ticks % 1440 <= currentDriver.endTime
+            ) {
+              //NOTE: if driver on duty, assign passenger
+              assignPassenger(currentDriver);
+            } else {
+              currentDriver.time = 0;
+              currentDriver.distance = 0;
+              break;
+            }
+          } else {
+            if (
+              ticks % 1440 <= currentDriver.startTime &&
+              ticks % 1440 >= currentDriver.endTime
+            ) {
+              //NOTE: if driver on duty, assign passenger
+              currentDriver.time = 0;
+              currentDriver.distance = 0;
+              break;
+            } else {
+              assignPassenger(currentDriver);
+            }
+          }
+          switch (currentDriver.state) {
+            case "searching":
+              currentDriver.search(currentDriver.passenger, ticks, god);
+              pathGenerator(
+                currentDriver,
+                currentDriver.currentLocation,
+                currentDriver.destination
+              );
+              break;
+            case "picking up":
+              currentDriver.pickUp(ticks, god);
+              currentDriver.passenger.carArrived();
+              pathGenerator(
+                currentDriver,
+                currentDriver.currentLocation,
+                currentDriver.destination
+              );
+              break;
+            case "transit":
+              currentDriver.transit(ticks, god);
+              currentDriver.passenger.transit();
+              pathGenerator(
+                currentDriver,
+                currentDriver.currentLocation,
+                currentDriver.destination
+              );
+              break;
+            case "completed":
+              currentDriver.passenger.arrived();
+              currentDriver.completed(god);
+              break;
+            default:
+              currentDriver.search(currentDriver.passenger);
+              break;
+          }
+        }
+      } catch (e) {
+        console.log(e);
+      }
+      // if (ticks === TICKS - 1) EXPORT = true;
+    }
+
+    let driverlogs = [];
+    god.drivers.forEach((driver) => {
+      console.log(`${driver.id}'s log: `, driver.log);
+      driverlogs.push({
+        key: driver.id,
+        log: driver.log,
+      });
     });
-  });
 
-  console.log("driverlogs:", driverlogs);
-  // ------------------------------- EXPORT JSON CODE -------------------------------
-  if (EXPORT == true) {
-    let exportType = exportFromJSON.types.json; // set output type
-    console.log(`JSONing driverLs logs`);
-    let fileName = "driverLs"; // set file name
-    // console.log("driverls:",driverLs);
-    let data = Object.values(driverlogs); // extract value from array object https://github.com/zheeeng/export-from-json/issues/110
-    // console.log("data:",data);
-    try {
-      exportFromJSON({ data, fileName, exportType });
-    } catch (err) {
-      console.log(err);
+    console.log("driverlogs:", driverlogs);
+    // ------------------------------- EXPORT JSON CODE -------------------------------
+    if (EXPORT === true) {
+      let exportType = exportFromJSON.types.json; // set output type
+      console.log(`(LOG) Sim Completed: Exporting Data..`);
+
+      // console.log("drivers:",god.drivers);
+      let data = Object.values(driverlogs); // extract value from array object https://github.com/zheeeng/export-from-json/issues/110
+      // console.log("data:",data);
+      const filename = "10C_5Days"; // set filename for export (NOT WORKING :( )
+      exportFromJSON({ data, filename, exportType });
+    } else {
+      console.log("(LOG) Sim Completed: Not Exporting");
     }
+
+    //get current timing
+    let endDate = new Date();
+
+    console.log("(LOG) End Time: ", endDate.toLocaleTimeString());
+    //get total compute time in minutes
+    console.log(
+      "(LOG) Total Time: ",
+      (endDate.getTime() - startDate.getTime()) / 60000,
+      "minutes"
+    );
   }
 
-  return (
-    <>
-      <div>Fast Forward Blank Page</div>
-    </>
-  );
+  console.log(`(LOG) Starting Simulation..`);
+  runSim();
 }
 
-// export default App_kewei;
-
-//TODO: tendency: number of ticks willing to wait, driver waiting (KW)
+// export default App_Kewei;

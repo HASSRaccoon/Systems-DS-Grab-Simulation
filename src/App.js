@@ -11,7 +11,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { StatusDetails } from "./component/StatusDetails";
 import { SummarizedSidebar } from "./component/SummarizedSidebar";
 // import App_kewei from "./App_kewei";
-import { App_kewei } from "./App_kewei";
+// import { App_kewei } from "./App_kewei";
+import App_Kewei from "./App_kewei";
 
 export default function App() {
   return (
@@ -28,10 +29,9 @@ export default function App() {
     // </div>
     <>
       <div>
- 
         <Routes>
           <Route path="/" element={<Map />} />
-          <Route path="/fastforward" element={<App_kewei />} />
+          <Route path="/fastforward" element={<App_Kewei />} />
           {/* <Map /> */}
           {/* <Sidebar /> */}
 
