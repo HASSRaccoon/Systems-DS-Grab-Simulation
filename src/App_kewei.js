@@ -10,27 +10,76 @@ import exportFromJSON from 'export-from-json';
 
 function App() {
     //CHANGE PER SIMULATION
-    const DAYS = 5; 
+    const DAYS = 0.7; 
     const TICKRATE = 1440; //NOTE: 1 tick = 1 minute
     const TICKS = TICKRATE * DAYS;
 
-    const NUM_DRIVERS = 10;
+    const NUM_DRIVERS = 2;
 
     // const simulationIter = 10; //cannot work as the simulation stores the data
     const EXPORT = true;
 
     const pathBuilder = new PathFinder(sgJSON, { tolerance: 1e-4 });
 
+        //CHANGE PER SIMULATION
+
+        // Type A
+        // this.startTime = 1020; //NOTE: 5pm
+        // this.endTime = 240; //NOTE: 4am
+        // this.breakStart = 0; //NOTE: 12am
+        // this.breakEnd = 60; //NOTE: 1am
+
+        // Type B
+        // this.startTime = 420; //NOTE: 7am
+        // this.endTime = 1140; //NOTE: 7pm
+        // this.breakStart = 600; //NOTE: 10am
+        // this.breakEnd = 660; //NOTE: 11am
+        
+        // Type C
+        // this.startTime = 480; //NOTE: 8am
+        // this.endTime = 1080; //NOTE: 6pm
+        // this.breakStart = 660; //NOTE: 10am
+        // this.breakEnd = 720; //NOTE: 11am
+
     let drivers= []
     for (let i = 0; i < NUM_DRIVERS; i++) {
         drivers.push( //CHANGE PER SIMULATION
                 { 
-                    id: `C${i}`,
-                    speed: 70,
+                    id: `A${i}`,
+                    speed: 80,
                     state: 'searching',
-                    moveTendency: 99999999999999,
+                    moveTendency: 0,
+                    startTime: 1020, //NOTE: 5pm
+                    endTime: 240, //NOTE: 4am
+                    breakStart: 0, //NOTE: 12am
+                    breakEnd: 60, //NOTE: 1am
                 }
-            )
+            );
+        // drivers.push( //CHANGE PER SIMULATION
+        //         { 
+        //             id: `B${i}`,
+        //             speed: 90,
+        //             state: 'searching',
+        //             moveTendency: 0,
+        //             startTime: 420, //NOTE: 7am
+        //             endTime: 1140, //NOTE: 7pm
+        //             breakStart: 600, //NOTE: 10am
+        //             breakEnd: 660, //NOTE: 11am                    
+        //         }
+        //     );
+        // drivers.push( //CHANGE PER SIMULATION
+        //         { 
+        //             id: `C${i}`,
+        //             speed: 70,
+        //             state: 'searching',
+        //             moveTendency: 99999999999999,
+        //             startTime: 480, //NOTE: 8am
+        //             endTime: 1080, //NOTE: 6pm
+        //             breakStart: 660, //NOTE: 10am
+        //             breakEnd: 720, //NOTE: 11am
+        //         }
+        //     );
+
         }
     // let drivers = [
     //     { //Type A
@@ -215,8 +264,8 @@ function App() {
 
             try{
                 //Spawn new passengers every 5 minutes
-                let toGenerate = 300 - passengerLs.length 
-                if (passengerLs.length < 300){
+                let toGenerate = 900 - passengerLs.length 
+                if (passengerLs.length < 900){
                     for (let i = 0; i < toGenerate; i++){
                         newPassenger();
                     }

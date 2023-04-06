@@ -21,26 +21,11 @@ export default class Driver {
         this.distanceToTravel = 0;
 
         //// TIME AFFECTING //// 
+        this.startTime = props.startTime;
+        this.endTime = props.endTime;
+        this.breakStart = props.breakStart;
+        this.breakEnd = props.breakEnd;
         
-        //CHANGE PER SIMULATION
-
-        // Type A
-        // this.startTime = 1020; //NOTE: 5pm
-        // this.endTime = 240; //NOTE: 4am
-        // this.breakStart = 0; //NOTE: 12am
-        // this.breakEnd = 60; //NOTE: 1am
-
-        // Type B
-        // this.startTime = 420; //NOTE: 7am
-        // this.endTime = 1140; //NOTE: 7pm
-        // this.breakStart = 600; //NOTE: 10am
-        // this.breakEnd = 660; //NOTE: 11am
-        
-        // Type C
-        this.startTime = 480; //NOTE: 8am
-        this.endTime = 1080; //NOTE: 6pm
-        this.breakStart = 660; //NOTE: 10am
-        this.breakEnd = 720; //NOTE: 11am
 
         this.path = null;
         this.speedLs = [];
