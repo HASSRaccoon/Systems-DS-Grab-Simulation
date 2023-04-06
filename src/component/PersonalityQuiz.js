@@ -48,7 +48,7 @@ export function PersonalityQuiz(props) {
 
         <div className="nav-subheader">
           <IoIcons.IoCarOutline />
-          <span> Your Woking Period: </span>
+          <span> Your Working Period: </span>
         </div>
 
         <div className="nav-smallspace"></div>

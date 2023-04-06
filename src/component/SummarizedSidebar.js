@@ -101,19 +101,19 @@ export function SummarizedSidebar(props) {
         <div className="nav-text">
           <div>
             <IoIcons.IoCarOutline />
-            <span>Work period: 7AM - 7PM</span>
+            <span>Work period: 7AM-7PM</span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoRestaurantOutline />
-            <span>Rest period: 11AM - 12PM</span>
+            <span>Rest period: 11AM-12PM</span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoFlashOutline />
-            <span>Speed:{speed} km/h</span>
+            <span>Speed: {speed} Km/h</span>
           </div>
         </div>
         <div className="nav-text">
@@ -124,7 +124,7 @@ export function SummarizedSidebar(props) {
         </div>
         <div className="nav-text">
           <IoIcons.IoAccessibilityOutline />
-          <span>Pickup tolerance:5 Km</span>
+          <span>Pickup tolerance: 5 Km</span>
         </div>
 
         {/* <div className='nav-button'>

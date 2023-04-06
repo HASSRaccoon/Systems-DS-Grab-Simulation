@@ -34,11 +34,11 @@ export function StatusDetails(props) {
 
                 <div className='nav-text'>
                         <IoIcons.IoWalletOutline />
-                        <span>Your profit: $382</span>
+                        <span>Your profit: $375</span>
                 </div>
                 <div className='nav-text'>
                         <IoIcons.IoWalletOutline />
-                        <span>Average profit: $375</span>
+                        <span>Average profit: $382</span>
                 </div>
                 <span></span>
 
@@ -73,14 +73,14 @@ export function StatusDetails(props) {
                 <div className='nav-text'>
                     <div>
                     <IoIcons.IoFlashOutline />
-                        <span>Fuel Cost: $2.63/l</span>
+                        <span>Fuel Cost: $0.22/Km</span>
                     </div>
                 </div>
 
                 <div className='nav-text'>
                     <div>
                     <IoIcons.IoWalletOutline />
-                        <span>Fare/Km: $1.53/Km</span>
+                        <span>Average Fare: $1.53/Km</span>
                     </div>
                 </div>
 

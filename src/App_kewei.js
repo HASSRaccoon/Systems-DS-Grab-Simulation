@@ -7,6 +7,7 @@ import * as turf from "@turf/turf";
 import PathFinder, { pathToGeoJSON } from "geojson-path-finder";
 
 import exportFromJSON from "export-from-json";
+import "./App.css"
 
 export default function App_Kewei() {
   //CHANGE PER SIMULATION
@@ -446,6 +447,19 @@ export default function App_Kewei() {
 
   console.log(`(LOG) Starting Simulation..`);
   runSim();
+
+  return(
+    <>  
+
+    <div className="app-kewei-header">
+      Thank You For Choosing Us!
+    </div>
+    <div className="app-kewei-desc">
+        Your data has been downloaded to your local drive!
+    </div>
+    </>
+
+  )
 }
 
 // export default App_Kewei;

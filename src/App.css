@@ -44,6 +44,35 @@
   margin-right: 350px;
 }
 
+.app-kewei-header{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 50px;
+  font-weight: bold;
+  color: teal;
+  margin-top: 250px;
+
+}
+
+.app-kewei-desc{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 30px;
+
+
+}
 /* body {
   overflow: hidden;
 } */
+.app-kewei{
+  background-color: #282c34;
+  min-height: 100vh;
+ 
+}
+.app-kewei-padding{
+  margin-bottom: 200px;
+}
