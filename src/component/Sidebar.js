@@ -11,29 +11,57 @@ import { StatusDetails } from "./StatusDetails";
 import { PersonalityQuiz } from "./PersonalityQuiz";
 
 function Sidebar(props) {
-  const [sidebar, setSidebar] = useState(false);
+  const [renderType, setRenderType] = useState("quiz");
 
-  const showSidebar = () => setSidebar(!sidebar);
+  const handleRenderQuiz = () => {
+    setRenderType("summary");
+  };
 
-  var statusdetails = useState(false);
-  var showStatusDetails = () => (statusdetails = !statusdetails);
+  const handleRenderSummary = () => {
+    setRenderType("details");
+  };
+
+  const handleRenderDetails = () => {
+    setRenderType("summary");
+  };
 
   return (
     <>
       <IconContext.Provider value={{ color: "#fff" }}>
         <nav className="nav-menu active">
           <div>
-            <SummarizedSidebar
-              statelist={props.statelist}
-              timelist={props.timelist}
-              speedlist={props.speedlist}
-              jobsdonelist={props.jobsdonelist}
-              profitlist={props.profitlist}
-              distancelist={props.distancelist}
-              avgdistancelist={props.avgdistancelist}
-              avgprofitlist={props.avgprofitlist}
-              avgjobsdonelist={props.avgjobsdonelist}
-            ></SummarizedSidebar>
+            {renderType === "quiz" && (
+              <PersonalityQuiz handleRenderQuiz={handleRenderQuiz} />
+            )}
+            {renderType === "summary" && (
+              <SummarizedSidebar
+                statelist={props.statelist}
+                timelist={props.timelist}
+                speedlist={props.speedlist}
+                jobsdonelist={props.jobsdonelist}
+                profitlist={props.profitlist}
+                distancelist={props.distancelist}
+                avgdistancelist={props.avgdistancelist}
+                avgprofitlist={props.avgprofitlist}
+                avgjobsdonelist={props.avgjobsdonelist}
+                handleRenderSummary={handleRenderSummary}
+              />
+            )}
+            {renderType === "details" && (
+              <StatusDetails handleRenderDetails={handleRenderDetails} />
+            )}
+
+            {/* <SummarizedSidebar
+            driver={props.driver}
+            Log={props.Log}
+            timeLog={props.timeLog}
+            isRunning={props.isRunning}
+            time={props.time}  
+            setTime={props.time}
+            jobsDone={props.jobsDone}
+            setjobsDone={props.setjobsDone}
+            toggleDetails={toggleDetails}
+            /> */}
             {/* <StatusDetails></StatusDetails> */}
             {/* {<PersonalityQuiz />} */}
           </div>

@@ -83,7 +83,8 @@ export function SummarizedSidebar(props) {
         <div className="nav-text">
           <div>
             <IoIcons.IoPerson />
-            <span>Your state: {state}</span>
+            <span>Your state: Transit</span>
+            {/* <span>Your state: {state}</span> */}
           </div>
         </div>
 
@@ -100,13 +101,13 @@ export function SummarizedSidebar(props) {
         <div className="nav-text">
           <div>
             <IoIcons.IoCarOutline />
-            <span>Work period: 7am - 7pm</span>
+            <span>Work period: 7AM - 7PM</span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoRestaurantOutline />
-            <span>Rest period: 11am - 12pm</span>
+            <span>Rest period: 11AM - 12PM</span>
           </div>
         </div>
         <div className="nav-text">
@@ -121,6 +122,11 @@ export function SummarizedSidebar(props) {
             <span>Wait behavior: Wait</span>
           </div>
         </div>
+        <div className="nav-text">
+          <IoIcons.IoAccessibilityOutline />
+          <span>Pickup tolerance:5 Km</span>
+        </div>
+
         {/* <div className='nav-button'>
                 <Button variant="contained" color='primary'>see details</Button>
                 </div> */}
@@ -183,7 +189,7 @@ export function SummarizedSidebar(props) {
           </div>
         </div>
         <div className="details-button">
-          <Button color="cyan">
+          <Button color="cyan" onClick={props.handleRenderSummary}>
             SEE DETAILS<span></span>
           </Button>
         </div>

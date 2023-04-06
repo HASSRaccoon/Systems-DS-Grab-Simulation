@@ -28,10 +28,7 @@ export default function App() {
     // </div>
     <>
       <div>
-        <div className="topbar">
-          <IoIcons.IoCarSportOutline className="topbar-icon" />
-          <h1>Simulation</h1>
-        </div>
+ 
         <Routes>
           <Route path="/" element={<Map />} />
           <Route path="/fastforward" element={<App_kewei />} />

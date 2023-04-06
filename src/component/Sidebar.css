@@ -1,5 +1,5 @@
 .topbar {
-  background-color: rgb(81, 111, 136);
+  background-color: rgb(13, 26, 49);
   height: 70px;
   display: flex;
   justify-content: center;
@@ -153,4 +153,15 @@ span {
 }
 .nav-smallspace {
   margin-top: 10px;
+}
+
+.nav-graph {
+  height: 20px;
+  width: 30px;
+  margin-left: 30px;
+  margin-top: 10px;
+}
+
+.padding-aftergraph {
+  margin-bottom: 250px;
 }

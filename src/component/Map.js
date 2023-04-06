@@ -8,7 +8,8 @@ import PathFinder, { pathToGeoJSON } from "geojson-path-finder";
 import { Link } from "react-router-dom";
 import mapboxgl from "mapbox-gl";
 import caricon from "../public/grabcar.png";
-import { Button } from "@mantine/core";
+import { Button, Modal, Box, LoadingOverlay, Center } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 // import { Center } from "@mantine/core";
 import AnimationDriver from "../agents/AnimationDriver.js";
 import AnimationPassenger from "../agents/AnimationPassenger.js";
@@ -16,6 +17,7 @@ import Globals from "../agents/Globals.js";
 import Sidebar from "./Sidebar.js";
 import { convertLength } from "@turf/turf";
 import "./Map.css";
+import * as IoIcons from "react-icons/io5";
 // --- ---------------------------------- ---
 
 mapboxgl.accessToken =
@@ -1217,27 +1219,66 @@ export default function Map() {
     return () => map.remove();
   }, []);
 
+  const [opened, { open, close }] = useDisclosure(false);
+
   return (
     <>
+      <Center>
+        <Modal opened={opened} onClose={close}>
+          <Center>
+            <div className="modal-header">
+              Would You Like to Fast Forward And Compile Data for 5 Days?
+            </div>
+          </Center>
+          <Center>
+            <div className="modal-text">
+              Compiling data will take a few seconds.
+            </div>
+          </Center>
+          <div className="modal-button">
+            <Link to="/fastforward">
+              <Button color="cyan" size="lg" onClick={stopAnimation}>
+                <IoIcons.IoCheckmarkOutline />
+                <span></span>
+              </Button>
+            </Link>
+          </div>
+        </Modal>
+      </Center>
+
+      <div className="map-container" ref={mapContainer} />
       <div>
         {/* <div className="map-container" ref={mapContainer} /> */}
+        <div className="topbar">
+          <IoIcons.IoCarSportOutline className="topbar-icon" />
+          <h1>Simulation</h1>
+        </div>
 
         <div className="simulation-container">
           <div className="map-container" ref={mapContainer} />
           <div className="simulation-controls">
-            <Link to="/fastforward">
-              <Button color="cyan">FFW</Button>
-            </Link>
             <div className="small-space-right"></div>
-            <Button color="cyan" onClick={startAnimation}>
-              Start Animation
+            <Button color="cyan" size="lg" onClick={startAnimation}>
+              <IoIcons.IoPlayOutline />
+              <span></span>
+            </Button>
+
+            <div className="small-space-right"></div>
+            <Button color="cyan" size="lg" onClick={stopAnimation}>
+              <IoIcons.IoPauseOutline />
+              <span></span>
+            </Button>
+            <div className="small-space-right"></div>
+
+            <Button color="cyan" size="lg" onClick={open}>
+              <IoIcons.IoPlayForwardOutline /> <span></span>
             </Button>
           </div>
         </div>
       </div>
       {/* <Button onClick={spawnPassenger}>Spawn Passenger</Button> */}
-      <Button onClick={startAnimation}>Start Animation</Button>
-      <Button onClick={stopAnimation}>Stop Animation</Button>
+      {/* <Button onClick={startAnimation}>Start Animation</Button>
+      <Button onClick={stopAnimation}>Stop Animation</Button> */}
       {/* <Button onClick={continueAnimation}>Continue Animation</Button> */}
       {/* <Link to="/fastforward">
         <Button>Fast Forward</Button>
