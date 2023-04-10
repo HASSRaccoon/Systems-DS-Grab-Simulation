@@ -618,13 +618,79 @@ export default function Map() {
     }
     handleSearch(specialdriver);
   }
+
+  //without fuelcost
+  function earningCalculation(distance, timetaken) {
+    if (peakHour === true) {
+      const earning =
+        (3.5 + 0.5 * distance + 0.16 * timetaken) * 1.5 * 0.8 - 0.3;
+      return earning.toFixed(2);
+    } else {
+      const earning = (3.5 + 0.5 * distance + 0.16 * timetaken) * 0.8 - 0.3;
+      return earning.toFixed(2);
+    }
+  }
+
+  //time = 0 is 8am
+  //time = 120 is 10am
+  //time = 540 is 5pm
+  //time = 720 is 8pm
+  //time = 1440 is midnight, day is completed
+  //peakHour default is true bc we start at 8am
+  let peakHour = true;
+  let peakStatus = "Yes";
+  let day = 1;
+
+  function updatepeakHour() {
+    setInterval(() => {
+      if (drivers[0].timeCounter >= 0 && drivers[0].timeCounter < 121) {
+        peakHour = true;
+        peakStatus = "Yes";
+      } else if (drivers[0].timeCounter > 120 && drivers[0].timeCounter < 541) {
+        peakHour = false;
+        peakStatus = "No";
+      } else if (drivers[0].timeCounter > 540 && drivers[0].timeCounter < 721) {
+        peakHour = true;
+        peakStatus = "Yes";
+      } else if (
+        drivers[0].timeCounter > 1380 &&
+        drivers[0].timeCounter < 1441
+      ) {
+        peakHour = true;
+        peakStatus = "Yes";
+      } else {
+        peakHour = false;
+        peakStatus = "No";
+      }
+      // console.log(peakHour, "checking peakHour");
+    }, 1000);
+  }
+
+  function updateDay() {
+    setInterval(() => {
+      if (drivers[0].timeCounter >= 1440) {
+      }
+      for (let i = 0; i < drivers.length; i++) {
+        const driver = drivers[i];
+        driver.timeCounter = 0;
+      }
+      day = day + 1;
+    }, 500);
+  }
+
   let raining = false;
+
+  let weatherStatus = "Dry";
+
   function changetoWetWeather(driver) {
-    driver.speed = driver.speed * 1.5;
+    driver.speed = driver.speed * 0.84;
+    weatherStatus = "Wet";
   }
   function changetoDryWeather(driver) {
     driver.speed = driver.defaultspeed;
+    weatherStatus = "Dry";
   }
+
   function weatherEffects() {
     setInterval(() => {
       if (Math.random() < 0.5) {
@@ -644,10 +710,13 @@ export default function Map() {
           changetoDryWeather(driver);
         }
       }
-      console.log(drivers[1].speed, "see if this changes");
+      // console.log(drivers[1].speed, "see if this changes");
+      // console.log(weatherStatus, "wet or dry");
     }, 1000);
   }
 
+  updatepeakHour();
+  updateDay();
   weatherEffects();
 
   function startDriver() {
@@ -724,7 +793,7 @@ export default function Map() {
       ) {
         driver.passenger = passenger;
         passenger.driver = driver;
-        console.log(driver.passenger, "passenger assigned");
+        // console.log(driver.passenger, "passenger assigned");
         break;
       }
     }
@@ -749,6 +818,8 @@ export default function Map() {
   let avgjobsdonelist = [];
   let avgprofitlist = [];
   let avgdistancelist = [];
+  let weatherlist = [];
+  let peakHourlist = [];
 
   //damn manual but nvm first
 
@@ -793,23 +864,18 @@ export default function Map() {
         3;
       avgprofitlist[0] = avgprofit.toFixed(2);
       avgdistancelist[0] = avgdistance.toFixed(3);
+      weatherlist[0] = weatherStatus;
+      peakHourlist[0] = peakStatus;
 
       // const currentTime = drivers[0].timeCounter;
       // setTime(currentTime);
       // console.log(time, "update time");
       // setState(drivers[0].state);
       // setjobsDone(drivers[0].completedJobs);
-    }, 1000);
+    }, 500);
   }
 
   updateStats();
-
-  //without peak/nonpeak yet
-  //without fuelcost
-  function earningCalculation(distance, timetaken) {
-    const earning = (3.5 + 0.5 * distance + 0.16 * timetaken) * 0.8;
-    return earning.toFixed(2);
-  }
 
   function handleSearch(driver) {
     const initialTime = driver.timeCounter;
@@ -840,7 +906,7 @@ export default function Map() {
       //if passenger no driver, and dis to passenger < willingness to travel
       assignPassenger(driver);
 
-      console.log(driver.id, driver.passenger, "found");
+      // console.log(driver.id, driver.passenger, "found");
       getPassengerTime = driver.timeCounter;
       driver.Log[driver.completedJobs]["searching"]["timeFound"] =
         getPassengerTime;
@@ -1336,6 +1402,8 @@ export default function Map() {
         avgdistancelist={avgdistancelist}
         avgprofitlist={avgprofitlist}
         avgjobsdonelist={avgjobsdonelist}
+        weatherlist={weatherlist}
+        peakHourlist={peakHourlist}
       ></Sidebar>
     </>
   );

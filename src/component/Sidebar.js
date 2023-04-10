@@ -44,6 +44,8 @@ function Sidebar(props) {
                 avgdistancelist={props.avgdistancelist}
                 avgprofitlist={props.avgprofitlist}
                 avgjobsdonelist={props.avgjobsdonelist}
+                weatherlist={props.weatherlist}
+                peakHourlist={props.peakHourlist}
                 handleRenderSummary={handleRenderSummary}
               />
             )}

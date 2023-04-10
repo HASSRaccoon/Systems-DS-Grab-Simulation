@@ -16,6 +16,9 @@ export function SummarizedSidebar(props) {
   const [avgdistance, setAvgDistance] = useState(0);
   const [avgprofit, setAvgProfit] = useState(0);
   const [avgjobsdone, setAvgJobsDone] = useState(0);
+  // const[peakHour, setPeakHour] =useState(t)
+  const [weatherStatus, setWeather] = useState("Dry");
+  const [peakHour, setPeakHour] = useState("Yes");
 
   setInterval(() => {
     // console.log(props.timelist[0], "in sidebar");
@@ -38,6 +41,12 @@ export function SummarizedSidebar(props) {
     setAvgJobsDone(currentAvgJobs);
     const currentDistance = props.distancelist[0];
     setDistance(currentDistance);
+    const currentWeather = props.weatherlist[0];
+    setWeather(currentWeather);
+    const currentHour = props.peakHourlist[0];
+    setPeakHour(currentHour);
+    // weatherStatus={props.weatherStatus}
+
     // console.log(time, "update time in sidebar");
   }, 1000);
   // useEffect(() => {
@@ -71,13 +80,13 @@ export function SummarizedSidebar(props) {
         <div className="nav-text">
           <div>
             <IoIcons.IoAlarmOutline />
-            <span>Peak hour: Yes</span>
+            <span>Peak hour: {peakHour}</span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoRainyOutline />
-            <span>Weather: Dry</span>
+            <span>Weather: {weatherStatus}</span>
           </div>
         </div>
         <div className="nav-text">
