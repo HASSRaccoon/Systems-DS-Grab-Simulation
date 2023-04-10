@@ -15,6 +15,7 @@ export default class AnimationDriver {
     this.destination = props.destination;
     this.waitingTime = 0;
     this.profit = 0;
+    this.defaultspeed = props.defaultspeed;
     this.distanceWillingToTravel = props.distanceWillingToTravel;
     this.completedJobs = 0;
     this.cancelledJobs = 0;

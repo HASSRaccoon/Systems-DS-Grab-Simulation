@@ -64,6 +64,7 @@ export default function Map() {
     id: 1,
     currentLocation: generateRandomCoord(),
     speed: 50,
+    defaultspeed: 50,
     destination: generateRandomCoord(),
     distanceWillingToTravel: 5,
     path: null,
@@ -75,6 +76,7 @@ export default function Map() {
     id: 2,
     currentLocation: generateRandomCoord(),
     speed: 70,
+    defaultspeed: 70,
     destination: generateRandomCoord(),
     distanceWillingToTravel: 3,
     path: null,
@@ -86,6 +88,7 @@ export default function Map() {
     id: 3,
     currentLocation: generateRandomCoord(),
     speed: 80,
+    defaultspeed: 80,
     destination: generateRandomCoord(),
     distanceWillingToTravel: 6,
     path: null,
@@ -615,6 +618,37 @@ export default function Map() {
     }
     handleSearch(specialdriver);
   }
+  let raining = false;
+  function changetoWetWeather(driver) {
+    driver.speed = driver.speed * 1.5;
+  }
+  function changetoDryWeather(driver) {
+    driver.speed = driver.defaultspeed;
+  }
+  function weatherEffects() {
+    setInterval(() => {
+      if (Math.random() < 0.5) {
+        if (raining === false) {
+          raining = true;
+          for (let i = 0; i < drivers.length; i++) {
+            const driver = drivers[i];
+            changetoWetWeather(driver);
+          }
+        } else {
+          raining = true;
+        }
+      } else {
+        raining = false;
+        for (let i = 0; i < drivers.length; i++) {
+          const driver = drivers[i];
+          changetoDryWeather(driver);
+        }
+      }
+      console.log(drivers[1].speed, "see if this changes");
+    }, 1000);
+  }
+
+  weatherEffects();
 
   function startDriver() {
     let driver = drivers[0];
@@ -720,7 +754,7 @@ export default function Map() {
 
   function updateStats() {
     setInterval(() => {
-      console.log(specialdriver.timeCounter, "timecounter");
+      // console.log(specialdriver.timeCounter, "timecounter");
       timelist[0] = specialdriver.timeCounter;
       statelist[0] = specialdriver.state;
       speedlist[0] = specialdriver.speed;
