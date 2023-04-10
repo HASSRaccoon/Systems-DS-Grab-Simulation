@@ -10,11 +10,12 @@ import exportFromJSON from 'export-from-json';
 
 function App() {
     //CHANGE PER SIMULATION
-    const DAYS = 0.7; 
+    const DAYS = 1; 
     const TICKRATE = 1440; //NOTE: 1 tick = 1 minute
     const TICKS = TICKRATE * DAYS;
 
-    const NUM_DRIVERS = 2;
+    const NUM_DRIVERS = 10;
+    const NUM_PASSENGERS = 900;
 
     // const simulationIter = 10; //cannot work as the simulation stores the data
     const EXPORT = true;
@@ -43,64 +44,53 @@ function App() {
 
     let drivers= []
     for (let i = 0; i < NUM_DRIVERS; i++) {
+
+        // Type A
         drivers.push( //CHANGE PER SIMULATION
                 { 
                     id: `A${i}`,
                     speed: 80,
                     state: 'searching',
-                    moveTendency: 0,
+                    framesToMove: 0,
+                    moveTendency: 0.8,
                     startTime: 1020, //NOTE: 5pm
                     endTime: 240, //NOTE: 4am
                     breakStart: 0, //NOTE: 12am
                     breakEnd: 60, //NOTE: 1am
                 }
             );
-        // drivers.push( //CHANGE PER SIMULATION
-        //         { 
-        //             id: `B${i}`,
-        //             speed: 90,
-        //             state: 'searching',
-        //             moveTendency: 0,
-        //             startTime: 420, //NOTE: 7am
-        //             endTime: 1140, //NOTE: 7pm
-        //             breakStart: 600, //NOTE: 10am
-        //             breakEnd: 660, //NOTE: 11am                    
-        //         }
-        //     );
-        // drivers.push( //CHANGE PER SIMULATION
-        //         { 
-        //             id: `C${i}`,
-        //             speed: 70,
-        //             state: 'searching',
-        //             moveTendency: 99999999999999,
-        //             startTime: 480, //NOTE: 8am
-        //             endTime: 1080, //NOTE: 6pm
-        //             breakStart: 660, //NOTE: 10am
-        //             breakEnd: 720, //NOTE: 11am
-        //         }
-        //     );
+
+        //Type B
+        drivers.push( //CHANGE PER SIMULATION
+                { 
+                    id: `B${i}`,
+                    speed: 90,
+                    state: 'searching',
+                    framesToMove: 0,
+                    moveTendency: 0.8,
+                    startTime: 420, //NOTE: 7am
+                    endTime: 1140, //NOTE: 7pm
+                    breakStart: 600, //NOTE: 10am
+                    breakEnd: 660, //NOTE: 11am                    
+                }
+            );
+
+        //Type C
+        drivers.push( //CHANGE PER SIMULATION
+                { 
+                    id: `C${i}`,
+                    speed: 70,
+                    state: 'searching',
+                    framesToMove: 9999999,
+                    moveTendency: 0,
+                    startTime: 480, //NOTE: 8am
+                    endTime: 1080, //NOTE: 6pm
+                    breakStart: 660, //NOTE: 10am
+                    breakEnd: 720, //NOTE: 11am
+                }
+            );
 
         }
-    // let drivers = [
-    //     { //Type A
-    //         id: "A",
-    //         speed: 80,
-    //         state: 'searching',
-    //         moveTendency: 0,
-    //     },
-    //     { //Type B
-    //         id: "B",
-    //         speed: 90,
-    //         state: 'searching',
-    //         moveTendency: 0,
-    //     },
-    //     { //Type C
-    //         id: "C",
-    //         speed: 70,
-    //         state: 'searching',
-    //         moveTendency: 99999999999999,
-    //     },
-    // ];
 
     let passengers = [
         {
@@ -181,12 +171,14 @@ function App() {
     // }
 
     function assignPassenger(driver) {
-
+        console.log('assigning passenger')
         if (passengerLs.length > 0 && driver.state === "searching") {
+            
             let radius = 0;
             // if driver has been searching for less than 5 minutes, search with 2.5km radius, else search with 5km radius
-            driver.time < 5 ? radius = 2.5 : driver.time < 7 ? radius = 5 : radius = 7.5;            
-            
+            driver.time < 5 ? radius = 2.5 : driver.time < 7 ? radius = 5 : radius = 7.5;
+            driver.radius = radius;            
+            // console.log( '','radius: ', radius)
             let center = turf.point(driver.currentLocation);
             let options = { steps: 64, units: 'kilometers' };
             let circle = turf.circle(center, radius, options); //create circle
@@ -206,6 +198,8 @@ function App() {
                         passengerIndex = i;
                     }
                 }
+                if (shortestDist > radius)
+                {console.log('(LOG ERROR) shortestDist: ', shortestDist, 'passengerIndex: ', passengerIndex)}
             }
             else if (passengerLsInRadius.length === 1){
                 passengerIndex = 0;
@@ -260,12 +254,11 @@ function App() {
         const startDate = new Date(); //NOTE: start time of simulation
         console.log("(LOG) Start Time: ", startDate.toLocaleTimeString());
         for (let ticks = 0; ticks < TICKS ; ticks++) {
-            if (ticks % TICKRATE === 0) console.log("Day: ", 1+(ticks/TICKRATE)); //log everyday
-
+            if (ticks % TICKRATE === 0) console.log("(LOG) Day: ", 1+(ticks/TICKRATE)); //log everyday
+            
             try{
-                //Spawn new passengers every 5 minutes
-                let toGenerate = 900 - passengerLs.length 
-                if (passengerLs.length < 900){
+                let toGenerate = NUM_PASSENGERS - passengerLs.length 
+                if (passengerLs.length < NUM_PASSENGERS){
                     for (let i = 0; i < toGenerate; i++){
                         newPassenger();
                     }
@@ -318,7 +311,9 @@ function App() {
                     }
                     if (currentDriver.startTime < currentDriver.endTime){
                         if (ticks % 1440 >= currentDriver.startTime && ticks % 1440 <= currentDriver.endTime){ //NOTE: if driver on duty, assign passenger
-                            assignPassenger(currentDriver);
+                            if (currentDriver.state === 'searching' && !currentDriver.passenger){
+                                assignPassenger(currentDriver);
+                            }
                         }
                         else{
                             currentDriver.time = 0;
@@ -333,7 +328,9 @@ function App() {
                             break;
                         }
                         else{
-                            assignPassenger(currentDriver);
+                            if (currentDriver.state === 'searching' && !currentDriver.passenger){
+                                assignPassenger(currentDriver);
+                            }
                         }
                     }
                     switch (currentDriver.state) {
@@ -362,7 +359,7 @@ function App() {
                 }
             }
             catch (e){
-                console.log(e)
+                console.log("(LOG ERROR)",e)
             }
             // if (ticks === TICKS - 1) EXPORT = true;
         }

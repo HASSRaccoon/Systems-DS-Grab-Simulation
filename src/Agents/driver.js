@@ -8,13 +8,18 @@ export default class Driver {
 
         this.id = props.id;
         this.state = 'searching';
+        this.searchingRadius = 0;
         this.currentLocation = this.generateRandomCoord();
         this.destination = null;
         this.time = 0;
         this.completedJobs = 0;
         this.cancelledJobs = 0;
         this.passenger = props.passenger;
-        this.moveTendency = props.moveTendency;
+
+
+        this.framesToMove = props.framesToMove;
+        this.moveTendency = props.moveTendency; //likelihood of travelling in search of passenger
+
         this.log = {};
         this.jobLog = {};
         this.distance = 0;
@@ -58,10 +63,15 @@ export default class Driver {
             this.tripFuelCost += fuelCost;
             this.tripDistance += this.distance;
             this.tripTime += this.time;
-            
-            this.endLocation = this.destination;
-            
 
+        
+            if (this.destination !== null){
+                this.endLocation = this.destination;
+            }
+            else{
+                this.endLocation = this.currentLocation;
+            }
+            
             this.jobLog['searching'] = {
                 'start location': this.initialLocation,
                 'end location': this.endLocation,
@@ -69,7 +79,8 @@ export default class Driver {
                 'distance': this.distance, 
                 'current time': ticks, 
                 'speed': this.speedLs,
-                'fuelcost': fuelCost
+                'fuelcost': fuelCost,
+                'radius': this.radius
             } //NOTE: log here
 
             //NOTE: clear logged data
@@ -87,17 +98,18 @@ export default class Driver {
         else{
             this.time += 1; //NOTE: time is in tick, waiting time of searching passenger
             let moveRandom = Math.random();
-            if (this.time > this.moveTendency && moveRandom < 0.8) {
+            if (this.time > this.framesToMove && moveRandom < this.moveTendency) {
                 this.destination = this.generateRandomCoord();
-            }
-            else{
-                this.destination = this.currentLocation;
-            }
-            this.endLocation = this.destination;
+                this.endLocation = this.destination;
 
-            let speed = this.distancePerTick(this.speed);
-            this.speedLs.push(speed);
-            this.distance += speed;
+                let speed = this.distancePerTick(this.speed);
+                this.speedLs.push(speed);
+                this.distance += speed;
+            }
+            // else{
+                //     this.destination = this.currentLocation;
+                // }
+                
             this.passenger = passenger;
         }
     }
@@ -187,7 +199,7 @@ export default class Driver {
             this.initialLocation = this.endLocation
 
             this.state = 'completed';
-            this.currentLocation = this.destination;
+            this.currentLocation = this.endLocation;
         }
     }
     completed(globals){
@@ -206,6 +218,7 @@ export default class Driver {
         this.state = 'searching';
         this.completedJobs += 1;
         this.passenger = null;
+        this.destination = null;
 
         this.searchLocation = this.currentLocation;
         
@@ -214,8 +227,8 @@ export default class Driver {
         this.resetTripVariables();
         
         this.log[`${this.completedJobs}`] = {...this.jobLog}
-        // console.log(`${this.id}'s log`)
-        // console.log(this.log)
+        console.log(`${this.id}'s log`)
+        console.log(this.log)
     }
 
     distancePerTick(speed){
