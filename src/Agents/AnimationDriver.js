@@ -15,6 +15,11 @@ export default class AnimationDriver {
     this.destination = props.destination;
     this.waitingTime = 0;
     this.profit = 0;
+    this.searchBehaviour = props.searchBehaviour;
+    this.startWork = props.startWork;
+    this.endWork = props.endWork;
+    this.startBreak = props.startBreak;
+    this.endBreak = props.endBreak;
     this.defaultspeed = props.defaultspeed;
     this.distanceWillingToTravel = props.distanceWillingToTravel;
     this.completedJobs = 0;

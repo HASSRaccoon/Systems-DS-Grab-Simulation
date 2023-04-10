@@ -56,60 +56,113 @@ export default function Map() {
   const spawnProbability = 0.5;
 
   let god = new Globals();
-  // console.log(god.checkPeak(new Date())); //check peak hour
-  // console.log("fares",god.fareCalculation(0.5,4,new Date())); //check raining
-  // console.log("profit", god.profitCalculation(70, 44.5));
 
-  let driver1 = new AnimationDriver({
-    id: 1,
-    currentLocation: generateRandomCoord(),
-    speed: 50,
-    defaultspeed: 50,
-    destination: generateRandomCoord(),
-    distanceWillingToTravel: 5,
-    path: null,
-    ref: null,
-    passenger: null,
-  });
+  let driversList = [];
 
-  let driver2 = new AnimationDriver({
-    id: 2,
-    currentLocation: generateRandomCoord(),
-    speed: 70,
-    defaultspeed: 70,
-    destination: generateRandomCoord(),
-    distanceWillingToTravel: 3,
-    path: null,
-    ref: null,
-    passenger: null,
-  });
+  // type A drivers
+  for (let i = 0; i < 3; i++) {
+    driversList[i] = new AnimationDriver({
+      id: i + 1,
+      currentLocation: generateRandomCoord(),
+      speed: 80,
+      defaultspeed: 80,
+      destination: generateRandomCoord(),
+      distanceWillingToTravel: 5,
+      path: null,
+      ref: null,
+      passenger: null,
+      searchBehaviour: "Move",
+      startWork: 540, //5pm
+      endWork: 1200, //4am
+      startBreak: 960, //12am
+      endBreak: 1020, //1am
+    });
+  }
 
-  let driver3 = new AnimationDriver({
-    id: 3,
-    currentLocation: generateRandomCoord(),
-    speed: 80,
-    defaultspeed: 80,
-    destination: generateRandomCoord(),
-    distanceWillingToTravel: 6,
-    path: null,
-    ref: null,
-    passenger: null,
-  });
+  //type B drivers
+  for (let i = 0; i < 3; i++) {
+    driversList[i + 3] = new AnimationDriver({
+      id: i + 4,
+      currentLocation: generateRandomCoord(),
+      speed: 90,
+      defaultspeed: 90,
+      destination: generateRandomCoord(),
+      distanceWillingToTravel: 3,
+      path: null,
+      ref: null,
+      passenger: null,
+      searchBehaviour: "Move",
+      startWork: 1380, //7am
+      endWork: 660, //7pm
+      startBreak: 120, //10am
+      endBreak: 180, //11am
+    });
+  }
 
+  //type C drivers
+  for (let i = 0; i < 3; i++) {
+    driversList[i + 6] = new AnimationDriver({
+      id: i + 7,
+      currentLocation: generateRandomCoord(),
+      speed: 70,
+      defaultspeed: 70,
+      destination: generateRandomCoord(),
+      distanceWillingToTravel: 6,
+      path: null,
+      ref: null,
+      passenger: null,
+      searchBehaviour: "Wait",
+      startWork: 0, //7am
+      endWork: 600, //7pm
+      startBreak: 180, //11am
+      endBreak: 240, //12am
+    });
+  }
+
+  //existing
+  // let driver1 = new AnimationDriver({
+  //   id: 1,
+  //   currentLocation: generateRandomCoord(),
+  //   speed: 80,
+  //   defaultspeed: 80,
+  //   destination: generateRandomCoord(),
+  //   distanceWillingToTravel: 5,
+  //   path: null,
+  //   ref: null,
+  //   passenger: null,
+  //   searchBehaviour: "Move",
+  //   startWork: 540, //5pm
+  //   endWork: 1200, //4am
+  //   startBreak: 960, //12am
+  //   endBreak: 1020, //1am
+  // });
+
+  //unique driver later to be created by input
   let specialdriver = new AnimationDriver({
-    id: 4,
+    id: 10,
     currentLocation: generateRandomCoord(),
     speed: 60,
+    defaultspeed: 60,
     destination: generateRandomCoord(),
     distanceWillingToTravel: 5,
     path: null,
     ref: null,
     passenger: null,
+    searchBehaviour: "Move",
+    startWork: 540, //5pm
+    endWork: 1200, //4am
+    startBreak: 960, //12am
+    endBreak: 1020, //1am
   });
+
+  driversList.push(specialdriver);
 
   let running = false;
 
-  const [drivers, setDrivers] = useState([driver1, driver2, driver3]);
+  console.log(driversList, "drivers list before");
+  const [drivers, setDrivers] = useState(driversList);
+
+  console.log(drivers, "drivers after");
 
   let passengerListo = [];
 
@@ -184,6 +237,7 @@ export default function Map() {
     }),
   };
 
+  console.log(driverPoints);
   let specialPoint = {
     type: "Feature",
     geometry: {
@@ -685,29 +739,34 @@ export default function Map() {
   function changetoWetWeather(driver) {
     driver.speed = driver.speed * 0.84;
     weatherStatus = "Wet";
+    // console.log("wet weather");
   }
   function changetoDryWeather(driver) {
     driver.speed = driver.defaultspeed;
     weatherStatus = "Dry";
+    // console.log("dry weather");
   }
 
   function weatherEffects() {
     setInterval(() => {
-      if (Math.random() < 0.5) {
-        if (raining === false) {
-          raining = true;
-          for (let i = 0; i < drivers.length; i++) {
-            const driver = drivers[i];
-            changetoWetWeather(driver);
+      //only change weather every hour?
+      if (drivers[0].timeCounter % 60 === 0) {
+        if (Math.random() < 0.5) {
+          if (raining === false) {
+            raining = true;
+            for (let i = 0; i < drivers.length; i++) {
+              const driver = drivers[i];
+              changetoWetWeather(driver);
+            }
+          } else {
+            raining = true;
           }
         } else {
-          raining = true;
-        }
-      } else {
-        raining = false;
-        for (let i = 0; i < drivers.length; i++) {
-          const driver = drivers[i];
-          changetoDryWeather(driver);
+          raining = false;
+          for (let i = 0; i < drivers.length; i++) {
+            const driver = drivers[i];
+            changetoDryWeather(driver);
+          }
         }
       }
       // console.log(drivers[1].speed, "see if this changes");

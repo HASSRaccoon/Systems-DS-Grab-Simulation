@@ -7,9 +7,9 @@ import * as turf from "@turf/turf";
 import PathFinder, { pathToGeoJSON } from "geojson-path-finder";
 
 import exportFromJSON from "export-from-json";
-import "./App.css"
+import "./App.css";
 
-export default function App_Kewei() {
+export default function App_ruiyang() {
   //CHANGE PER SIMULATION
   const DAYS = 0.5;
   const TICKRATE = 1440; //NOTE: 1 tick = 1 minute
@@ -448,18 +448,14 @@ export default function App_Kewei() {
   console.log(`(LOG) Starting Simulation..`);
   runSim();
 
-  return(
-    <>  
-
-    <div className="app-kewei-header">
-      Thank You For Choosing Us!
-    </div>
-    <div className="app-kewei-desc">
+  return (
+    <>
+      <div className="app-kewei-header">Thank You For Choosing Us!</div>
+      <div className="app-kewei-desc">
         Your data has been downloaded to your local drive!
-    </div>
+      </div>
     </>
-
-  )
+  );
 }
 
-// export default App_Kewei;
+// export default App_ruiyang;

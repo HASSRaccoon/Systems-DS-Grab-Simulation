@@ -12,8 +12,7 @@ import { StatusDetails } from "./component/StatusDetails";
 import { SummarizedSidebar } from "./component/SummarizedSidebar";
 // import App_kewei from "./App_kewei";
 // import { App_kewei } from "./App_kewei";
-import App_Kewei from "./App_kewei";
-
+import App_ruiyang from "./App_ruiyang";
 export default function App() {
   return (
     // <div>
@@ -31,7 +30,7 @@ export default function App() {
       <div>
         <Routes>
           <Route path="/" element={<Map />} />
-          <Route path="/fastforward" element={<App_Kewei />} />
+          <Route path="/fastforward" element={<App_ruiyang />} />
           {/* <Map /> */}
           {/* <Sidebar /> */}
 

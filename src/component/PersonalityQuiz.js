@@ -32,8 +32,7 @@ export function PersonalityQuiz(props) {
     },
   });
 
-
-  console.log('quiz time')
+  // console.log('quiz time')
 
   return (
     <div>
@@ -212,7 +211,6 @@ export function PersonalityQuiz(props) {
         </div>
         <div className="nav-desc"></div>
         <div className="nav-slider">
-
           <Slider
             marks={[
               { value: 0, label: "0Km/h" },
@@ -252,7 +250,6 @@ export function PersonalityQuiz(props) {
         <div className="nav-smallspace"></div>
         <div className="nav-desc">
           <span>Maximum distance you're willing to travel to pickup: </span>
-            
         </div>
         <div className="small-space"></div>
         <div className="nav-slider">
@@ -267,7 +264,7 @@ export function PersonalityQuiz(props) {
         </div>
 
         <span> </span>
-    
+
         <span> </span>
 
         <div className="start-button">
