@@ -1227,7 +1227,7 @@ export default function Map() {
         <Modal opened={opened} onClose={close}>
           <Center>
             <div className="modal-header">
-              Would You Like to Fast Forward And Compile Data for 5 Days?
+              Would You Like to Fast Forward And Compile Data for 0.5 Days?
             </div>
           </Center>
           <Center>
