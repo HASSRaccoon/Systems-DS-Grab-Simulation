@@ -34,7 +34,7 @@
   margin-bottom: 20px;
   font-weight: bold;
   color:teal;
-  font-size: large;
+  font-size: 30px;
   text-align: center;
   
 }
@@ -52,4 +52,11 @@
   justify-content: center;
   align-items: center;
   margin-bottom: 20px;
+}
+
+.modal-graph{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
 }
