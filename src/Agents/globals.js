@@ -61,7 +61,7 @@ export default class Globals{
     
     registerDriver(driver) {
         this._drivers.push(driver);
-        console.log(`(LOG) registered driver ${driver}`)
+        console.log(`(LOG) registered driver ${driver.id}: `, driver)
       }
     
     unregisterDriver(driver) {

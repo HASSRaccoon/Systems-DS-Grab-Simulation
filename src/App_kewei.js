@@ -10,70 +10,52 @@ import exportFromJSON from 'export-from-json';
 
 function App() {
     //CHANGE PER SIMULATION
-    const DAYS = 1; 
+    const DAYS = 5; 
     const TICKRATE = 1440; //NOTE: 1 tick = 1 minute
     const TICKS = TICKRATE * DAYS;
 
     const NUM_DRIVERS = 10;
-    const NUM_PASSENGERS = 900;
+    const NUM_PASSENGERS = 300;
 
     // const simulationIter = 10; //cannot work as the simulation stores the data
     const EXPORT = true;
 
-    const pathBuilder = new PathFinder(sgJSON, { tolerance: 1e-4 });
+    const pathBuilder = new PathFinder(sgJSON, { tolerance: 1e-5 });
 
-        //CHANGE PER SIMULATION
-
-        // Type A
-        // this.startTime = 1020; //NOTE: 5pm
-        // this.endTime = 240; //NOTE: 4am
-        // this.breakStart = 0; //NOTE: 12am
-        // this.breakEnd = 60; //NOTE: 1am
-
-        // Type B
-        // this.startTime = 420; //NOTE: 7am
-        // this.endTime = 1140; //NOTE: 7pm
-        // this.breakStart = 600; //NOTE: 10am
-        // this.breakEnd = 660; //NOTE: 11am
-        
-        // Type C
-        // this.startTime = 480; //NOTE: 8am
-        // this.endTime = 1080; //NOTE: 6pm
-        // this.breakStart = 660; //NOTE: 10am
-        // this.breakEnd = 720; //NOTE: 11am
+    //CHANGE PER SIMULATION
 
     let drivers= []
     for (let i = 0; i < NUM_DRIVERS; i++) {
 
         // Type A
-        drivers.push( //CHANGE PER SIMULATION
-                { 
-                    id: `A${i}`,
-                    speed: 80,
-                    state: 'searching',
-                    framesToMove: 0,
-                    moveTendency: 0.8,
-                    startTime: 1020, //NOTE: 5pm
-                    endTime: 240, //NOTE: 4am
-                    breakStart: 0, //NOTE: 12am
-                    breakEnd: 60, //NOTE: 1am
-                }
-            );
+        // drivers.push( //CHANGE PER SIMULATION
+        //         { 
+        //             id: `A${i}`,
+        //             speed: 80,
+        //             state: 'searching',
+        //             framesToMove: 0,
+        //             moveRadius: 5,
+        //             startTime: 1020, //NOTE: 5pm
+        //             endTime: 240, //NOTE: 4am
+        //             breakStart: 0, //NOTE: 12am
+        //             breakEnd: 60, //NOTE: 1am
+        //         }
+        //     );
 
         //Type B
-        drivers.push( //CHANGE PER SIMULATION
-                { 
-                    id: `B${i}`,
-                    speed: 90,
-                    state: 'searching',
-                    framesToMove: 0,
-                    moveTendency: 0.8,
-                    startTime: 420, //NOTE: 7am
-                    endTime: 1140, //NOTE: 7pm
-                    breakStart: 600, //NOTE: 10am
-                    breakEnd: 660, //NOTE: 11am                    
-                }
-            );
+        // drivers.push( //CHANGE PER SIMULATION
+        //         { 
+        //             id: `B${i}`,
+        //             speed: 90,
+        //             state: 'searching',
+        //             framesToMove: 0,
+        //             moveRadius: 5,
+        //             startTime: 420, //NOTE: 7am
+        //             endTime: 1140, //NOTE: 7pm
+        //             breakStart: 600, //NOTE: 10am
+        //             breakEnd: 660, //NOTE: 11am                    
+        //         }
+        //     );
 
         //Type C
         drivers.push( //CHANGE PER SIMULATION
@@ -82,13 +64,15 @@ function App() {
                     speed: 70,
                     state: 'searching',
                     framesToMove: 9999999,
-                    moveTendency: 0,
+                    moveRadius: 0,
                     startTime: 480, //NOTE: 8am
                     endTime: 1080, //NOTE: 6pm
                     breakStart: 660, //NOTE: 10am
                     breakEnd: 720, //NOTE: 11am
                 }
             );
+
+
 
         }
 
@@ -144,32 +128,6 @@ function App() {
         return result;
     }
 
-    // function generateRandomCoord() {
-    //     let featureIndex = Math.floor(Math.random() * sgJSON.features.length)
-    //     let coordinateIndex = Math.floor(Math.random() * sgJSON.features[featureIndex].geometry.coordinates.length)
-
-    //     let Pos =
-    //       sgJSON.features[featureIndex]
-    //         .geometry.coordinates[coordinateIndex];
-    //     return Pos;
-    // }
-
-    //trying to generate a random coordinate with a certain distance from the current location
-    // function generateRandomCoordWithDist(distanceKM) { 
-    //     let Pos = this.generateRandomCoord()
-
-    //     let path = this.buildPath(this.currentLocation, Pos);
-    //     let dist = turf.length(path, {units: 'kilometers'});
-
-    //     while (dist < distanceKM) {
-    //         Pos = this.generateRandomCoord()
-    //         path = this.buildPath(this.currentLocation, Pos);
-    //         dist = turf.length(path, {units: 'kilometers'});
-    //     }
-
-    //     return Pos
-    // }
-
     function assignPassenger(driver) {
         console.log('assigning passenger')
         if (passengerLs.length > 0 && driver.state === "searching") {
@@ -184,7 +142,7 @@ function App() {
             let circle = turf.circle(center, radius, options); //create circle
             let passengerLsInRadius = passengerLs.filter(passenger => turf.booleanPointInPolygon(turf.point(passenger.currentLocation), circle)); //filter passenger in circle
 
-            console.log('Passengers in '+radius+"(km) "+ driver.id + ": ",passengerLsInRadius)
+            console.log('Passengers in '+radius+"(km) "+ driver.id + ": ",passengerLsInRadius.length)
             //filter passenger that has shortest distance to driver
             let passengerIndex = null;
             if (passengerLsInRadius.length > 1){
@@ -204,13 +162,16 @@ function App() {
             else if (passengerLsInRadius.length === 1){
                 passengerIndex = 0;
             }
+            else{
+                console.log('no passengers in radius')
+            }
 
             // Assign passenger to driver
             if (passengerIndex !== null){
                 let currentPassenger = passengerLsInRadius[passengerIndex];
                 if (currentPassenger.driver === null){ //NOTE: to avoid reassigning passenger to another driver
-                    driver.passenger = currentPassenger;
-                    currentPassenger.driver = driver;
+                    driver.passenger = currentPassenger; //assign passenger to driver
+                    currentPassenger.driver = driver; //assign driver to passenger
                     passengerLs = passengerLs.filter(passenger => passenger.id !== currentPassenger.id)
                 }
             }
@@ -240,13 +201,32 @@ function App() {
     }
 
     function pathGenerator(driver, location, destination){
-        if (location === destination)return;
+        if (location === destination || destination === null) return;
+        console.log('pathGenerator driver ', driver.id,' loc: ', location, ' dest: ', destination)
         let path = buildPath(location, destination)
         driver.path = path;
-        if (driver.distanceToTravel === 0){
-            driver.distanceToTravel = turf.length(path, {units: 'kilometers'})
+        console.log('pathGenerator driver ', driver.id,' path: ', path)
+        if (driver.distanceToTravel === 0 && (driver.path !== null || driver.path !== undefined)){
+            driver.distanceToTravel = turf.length(path, {units: 'kilometers'});
         }
-        // console.log(driver.state, driver.distanceToTravel)
+
+    }
+    function updateCurrentLoc(driver,location,destination,distance){
+        if (location === destination || destination === null) return;
+
+        if (driver.path !== null || driver.path !== undefined){
+            let path = driver.path;
+            // console.log('Updatecurrentloc driver ', driver.id,' path: ', path)
+            let along = turf.along(path,distance,{units: 'kilometers'});
+
+            console.log('along: ', along.geometry.coordinates);
+            driver.currentLocation = along.geometry.coordinates;
+            console.log('currentLocation: ', driver.currentLocation);
+            if(driver.currentLocation === driver.destination)return;
+            let newPath = buildPath(driver.currentLocation, driver.destination);
+            driver.path = newPath;
+            driver.distanceToTravel = turf.length(path, {units: 'kilometers'});
+        }
     }
 
     function runSim(){
@@ -335,31 +315,61 @@ function App() {
                     }
                     switch (currentDriver.state) {
                         case "searching":
-                            currentDriver.search(currentDriver.passenger, ticks,god);
-                            pathGenerator(currentDriver, currentDriver.currentLocation, currentDriver.destination);
+                            // let hasMoved = currentDriver.search(currentDriver.passenger, ticks, god);
+                            // if (hasMoved){
+                            //     pathGenerator(currentDriver, currentDriver.currentLocation, currentDriver.destination,currentDriver.distancePerTick(currentDriver.speed),true);
+                            // }currentDriver.search(currentDriver.passenger, ticks,god);
+                            let isMoving = currentDriver.search(currentDriver.passenger, ticks, god);
+                            // pathGenerator(currentDriver, currentDriver.currentLocation, currentDriver.destination);
+                            if (isMoving){
+                                updateCurrentLoc(
+                                    currentDriver,
+                                    currentDriver.currentLocation,
+                                    currentDriver.destination, 
+                                    currentDriver.distancePerTick(currentDriver.speed)
+                                    );
+                            }
+                            else{
+                                pathGenerator(
+                                    currentDriver,
+                                    currentDriver.currentLocation,
+                                    currentDriver.destination
+                                    );
+                            }
                             break;
                         case "picking up":
+                            // let hasPicked = currentDriver.pickUp(ticks,god);
+                            // currentDriver.passenger.carArrived();
+                            // if (hasPicked){
+                            //     pathGenerator(currentDriver, currentDriver.currentLocation, currentDriver.destination,currentDriver.distancePerTick(currentDriver.speed),false);
+                            // }
                             currentDriver.pickUp(ticks,god);
                             currentDriver.passenger.carArrived();
                             pathGenerator(currentDriver, currentDriver.currentLocation, currentDriver.destination);
                             break;
                         case "transit":
+                            // let hasReached = currentDriver.transit(ticks,god);
+                            // currentDriver.passenger.transit();
+                            // if (hasReached){
+                            //     pathGenerator(currentDriver, currentDriver.currentLocation, currentDriver.destination,currentDriver.distancePerTick(currentDriver.speed),false);
+                            // }
                             currentDriver.transit(ticks,god)
                             currentDriver.passenger.transit()
                             pathGenerator(currentDriver, currentDriver.currentLocation, currentDriver.destination);
+
                             break;
                         case 'completed':
                             currentDriver.passenger.arrived()
                             currentDriver.completed(god)
                             break;
                         default:
-                            currentDriver.search(currentDriver.passenger)
+                            currentDriver.search(currentDriver.passenger, ticks, god);
                             break;
                     }
                 }
             }
             catch (e){
-                console.log("(LOG ERROR)",e)
+                console.log(e)
             }
             // if (ticks === TICKS - 1) EXPORT = true;
         }
