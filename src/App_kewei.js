@@ -15,7 +15,8 @@ function App() {
     const TICKS = TICKRATE * DAYS;
 
     const NUM_DRIVERS = 10;
-    const NUM_PASSENGERS = 300;
+    const NUM_PASSENGERS = 50;
+    const NUM_PASSENGERS_PEAK = 300;
 
     // const simulationIter = 10; //cannot work as the simulation stores the data
     const EXPORT = true;
@@ -237,8 +238,16 @@ function App() {
             if (ticks % TICKRATE === 0) console.log("(LOG) Day: ", 1+(ticks/TICKRATE)); //log everyday
             
             try{
-                let toGenerate = NUM_PASSENGERS - passengerLs.length 
-                if (passengerLs.length < NUM_PASSENGERS){
+                let isPeak = god.checkPeak(ticks);
+                let toGenerate = 0;
+                if (isPeak){
+                    toGenerate = NUM_PASSENGERS_PEAK - passengerLs.length; 
+                }
+                else{
+                    toGenerate = NUM_PASSENGERS - passengerLs.length; 
+                }
+                console.log('Number of passenger: ', passengerLs.length)
+                if (passengerLs.length < toGenerate){
                     for (let i = 0; i < toGenerate; i++){
                         newPassenger();
                     }
