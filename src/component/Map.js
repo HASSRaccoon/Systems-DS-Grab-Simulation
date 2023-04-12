@@ -1463,12 +1463,29 @@ export default function Map() {
     return () => map.remove();
   }, []);
 
-  const [opened, { open, close }] = useDisclosure(false);
+  const [modalKwOpen, setModalKwOpen] = useState(false);
+  const [modalGraphOpen, setModalGraphOpen] = useState(false);
+
+  const openModalKw = () => {
+    setModalKwOpen(true);
+  };
+
+  const openModalGraph = () => {
+    setModalGraphOpen(true);
+  };
 
   return (
     <>
+      {/* this is the fast forward modal */}
       <Center>
-        <Modal opened={opened} onClose={close}>
+        <Modal
+          opened={modalKwOpen}
+          onClose={() => {
+            setModalKwOpen(false);
+          }}
+          centered
+          size="lg"
+        >
           <Center>
             <div className="modal-header">
               Would You Like to Fast Forward And Compile Data for 0.5 Days?
@@ -1487,6 +1504,49 @@ export default function Map() {
               </Button>
             </Link>
           </div>
+        </Modal>
+      </Center>
+
+      {/* this is the graph modal */}
+      <Center>
+        <Modal
+          opened={modalGraphOpen}
+          onClose={() => {
+            setModalGraphOpen(false);
+          }}
+          centered
+          size="xl"
+        >
+          <div className="modal-header">
+            <span> Live Profit Comparison: </span>
+          </div>
+
+          <div className="modal-graph">
+            <img src="./dummy-graph.jpeg" width="300px"></img>
+          </div>
+
+          <div className="modal-header">
+            <span> Live Distance Comparison: </span>
+          </div>
+
+          <div className="modal-graph">
+            <img src="./dummy-graph.jpeg" width="300px"></img>
+          </div>
+
+          <div className="modal-header">
+            <span> Live Jobs Done Comparison: </span>
+          </div>
+
+          <div className="modal-graph">
+            <img src="./dummy-graph.jpeg" width="300px"></img>
+          </div>
+          {/* <div className='nav-subheader'>
+            <span> Live Profit Comparison: </span>
+        </div>
+
+        <div className='nav-graph'>
+            <img src= './dummy-graph.jpeg'width = '300px' ></img>
+        </div> */}
         </Modal>
       </Center>
 
@@ -1514,7 +1574,7 @@ export default function Map() {
             </Button>
             <div className="small-space-right"></div>
 
-            <Button color="cyan" size="lg" onClick={open}>
+            <Button color="cyan" size="lg" onClick={openModalKw}>
               <IoIcons.IoPlayForwardOutline /> <span></span>
             </Button>
           </div>
@@ -1549,6 +1609,7 @@ export default function Map() {
         weatherlist={weatherlist}
         peakHourlist={peakHourlist}
         createSpecialDriver={createSpecialDriver}
+        openModalGraph={openModalGraph}
       ></Sidebar>
     </>
   );

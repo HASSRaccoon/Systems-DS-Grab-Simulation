@@ -53,7 +53,10 @@ function Sidebar(props) {
               />
             )}
             {renderType === "details" && (
-              <StatusDetails handleRenderDetails={handleRenderDetails} />
+              <StatusDetails 
+              handleRenderDetails={handleRenderDetails}
+              openModalGraph={props.openModalGraph}
+               />
             )}
 
             {/* <SummarizedSidebar

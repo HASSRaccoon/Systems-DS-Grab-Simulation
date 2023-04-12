@@ -1,9 +1,20 @@
 import React from 'react'
 import * as IoIcons from "react-icons/io5";
-import { Button } from "@mantine/core";
+import { Button, Modal, Center } from "@mantine/core";
 import "./Sidebar.css";
+import { useDisclosure } from "@mantine/hooks";
 
 export function StatusDetails(props) {
+    const [opened, { open, close }] = useDisclosure(false);
+    
+
+    // const handleRenderGraphs = () => {
+    //     return(
+
+
+    //     )
+    // }
+
 
 
     return (
@@ -11,8 +22,6 @@ export function StatusDetails(props) {
             <ul className='nav-menu-items'>
                 <div className='nav-text'>
                     <Button onClick={props.handleRenderDetails} color='cyan'><IoIcons.IoArrowBackOutline/> BACK <span></span> </Button>
-                    
-                    
                 </div>
                 <div className='padding-subheader'>
                     <span> </span>
@@ -25,13 +34,7 @@ export function StatusDetails(props) {
                     <span> Live Profit Comparison: </span>
                 </div>
                 <div className='padding-subheader'></div>
-
-                <div className='nav-graph'>
-                    <img src= './dummy-graph.jpeg'width = '300px' ></img>
-                </div>
-
-                <div className='padding-aftergraph'></div>
-
+    
                 <div className='nav-text'>
                         <IoIcons.IoWalletOutline />
                         <span>Your profit: $375</span>
@@ -40,7 +43,17 @@ export function StatusDetails(props) {
                         <IoIcons.IoWalletOutline />
                         <span>Average profit: $382</span>
                 </div>
+                <div className='nav-graph'>
+                    <img src= './dummy-graph.jpeg'width = '300px' ></img>
+                    <Button onClick={props.openModalGraph} color='cyan'>SEE DETAILED GRAPHS<span></span> </Button>
+                </div>
+                <div className='padding-aftergraph'></div>
+
+
+
+                
                 <span></span>
+                
 
                 <div className='nav-subheader'>
                     <span> Globals: </span>
