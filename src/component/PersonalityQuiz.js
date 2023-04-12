@@ -1,5 +1,7 @@
 import React from "react";
 import * as IoIcons from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 // import Button from '@mui/material/Button';
 import {
   TextInput,
@@ -17,6 +19,38 @@ import { ScrollArea } from "@mantine/core";
 import "./Sidebar.css";
 
 export function PersonalityQuiz(props) {
+  // const navigate = useNavigate();
+  // const [workPeriod, setWorkPeriod] = useState([{ start: "1PM", end: "6PM" }]);
+  // const [restPeriod, setRestPeriod] = useState([{ start: "4PM", end: "5PM" }]);
+  // function passtoMap() {
+  //   navigate("/", {
+  //     data: { workPeriod: workPeriod, restPeriod: restPeriod },
+  //   });
+  // }
+
+  console.log(props.createSpecialDriver, "hello what is this");
+
+  // const [startWork, setStartWork] = useState("");
+  // const [endWork, setEndWork] = useState("");
+  // const [startBreak, setStartBreak] = useState("");
+  // const [endBreak, setEndBreak] = useState("");
+  // const [inputspeed, setInputSpeed] = useState(0);
+  // const [behaviour, setBehaviour] = useState("");
+
+  function getStartWork(e) {
+    console.log(e, "hello?");
+    return e;
+  }
+
+  // const [tolerance, setTolerance] = useState(0);
+
+  function getEndWork(e) {}
+  function getStartBreak(e) {}
+  function getEndBreak(e) {}
+  function getInputSpeed(e) {}
+  function getBehaviour(e) {}
+  function getTolerance(e) {}
+
   const form = useForm({
     initialValues: {
       workPeriod: "",
@@ -86,6 +120,7 @@ export function PersonalityQuiz(props) {
               { value: 22, label: "10 PM" },
               { value: 23, label: "11 PM" },
             ]}
+            onChange={(e) => getStartWork(e)}
           />
           <span>to:</span>
           <span> </span>
@@ -272,6 +307,7 @@ export function PersonalityQuiz(props) {
             START SIMULATION<span></span>
           </Button>
         </div>
+        <Button onClick={props.createSpecialDriver()}>CHECK PASSING</Button>
         {/* <div className='nav-button'>
                 <Button variant="contained" color='primary'>see details</Button>
                 </div> */}

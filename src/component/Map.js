@@ -18,12 +18,19 @@ import Sidebar from "./Sidebar.js";
 import { convertLength } from "@turf/turf";
 import "./Map.css";
 import * as IoIcons from "react-icons/io5";
+import { useLocation } from "react-router-dom";
 // --- ---------------------------------- ---
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoieWVva2V3ZWkiLCJhIjoiY2xlcG5wZ3ZmMGUweTNxdGt4ZG1ldGhsYyJ9.HHNGnKUPolWAo5_UYwzCZg";
 
 export default function Map() {
+  // const location = useLocation();
+
+  // const checkWork = location.data.workPeriod;
+  // const checkRest = location.date.restPeriod;
+  // console.log(checkWork, checkRest, "PLEASE PASS");
+
   function generateRandomCoord() {
     const Pos =
       sgJSON.features[Math.floor(Math.random() * sgJSON.features.length)]
@@ -137,6 +144,54 @@ export default function Map() {
   //   endBreak: 1020, //1am
   // });
 
+  const [startWork, setStartWork] = useState("");
+  const [endWork, setEndWork] = useState("");
+  const [startBreak, setStartBreak] = useState("");
+  const [endBreak, setEndBreak] = useState("");
+  const [inputspeed, setInputSpeed] = useState(0);
+  const [behaviour, setBehaviour] = useState("");
+  const [tolerance, setTolerance] = useState(0);
+
+  function createSpecialDriver(
+    startWork,
+    endWork,
+    startBreak,
+    endBreak,
+    speed,
+    behaviour,
+    tolerance
+  ) {
+    setStartWork(startWork);
+    // setEndWork(endWork);
+    // setStartBreak(startBreak);
+    // setEndBreak(endBreak);
+    // setInputSpeed(speed);
+    // setBehaviour(behaviour);
+    // setTolerance(tolerance);
+
+    // //unique driver later to be created by input
+    // let specialdriver = new AnimationDriver({
+    //   id: 10,
+    //   currentLocation: generateRandomCoord(),
+    //   speed: speed,
+    //   defaultspeed: speed,
+    //   destination: generateRandomCoord(),
+    //   distanceWillingToTravel: tolerance,
+    //   path: null,
+    //   ref: null,
+    //   passenger: null,
+    //   searchBehaviour: behaviour,
+    //   startWork: 0, //7am
+    //   endWork: 600, //7pm
+    //   startBreak: 180, //11am
+    //   endBreak: 240, //12am
+    // });
+
+    // driversList.push(specialdriver);
+    console.log("does this pass?");
+    console.log(startWork, "same number?");
+  }
+
   //unique driver later to be created by input
   let specialdriver = new AnimationDriver({
     id: 10,
@@ -149,20 +204,20 @@ export default function Map() {
     ref: null,
     passenger: null,
     searchBehaviour: "Move",
-    startWork: 540, //5pm
-    endWork: 1200, //4am
-    startBreak: 960, //12am
-    endBreak: 1020, //1am
+    startWork: startWork, //5pm
+    endWork: endWork, //4am
+    startBreak: startBreak, //12am
+    endBreak: endBreak, //1am
   });
 
   driversList.push(specialdriver);
 
   let running = false;
 
-  console.log(driversList, "drivers list before");
+  // console.log(driversList, "drivers list before");
   const [drivers, setDrivers] = useState(driversList);
 
-  console.log(drivers, "drivers after");
+  // console.log(drivers, "drivers after");
 
   let passengerListo = [];
 
@@ -237,7 +292,6 @@ export default function Map() {
     }),
   };
 
-  console.log(driverPoints);
   let specialPoint = {
     type: "Feature",
     geometry: {
@@ -735,6 +789,37 @@ export default function Map() {
   let raining = false;
 
   let weatherStatus = "Dry";
+
+  function updateWorkingStatus() {
+    for (let i = 0; i < drivers.length; i++) {
+      const driver = drivers[i];
+      if (
+        driver.timeCounter < driver.endWork &&
+        driver.timeCounter > driver.startWork
+      ) {
+        if (
+          driver.timeCounter < driver.endBreak &&
+          driver.timeCounter > driver.startBreak
+        ) {
+          driver.isWorking = false;
+        } else {
+          driver.isWorking = true;
+        }
+      } else {
+        driver.isWorking = false;
+      }
+    }
+  }
+
+  // startWork: 1380, //7am
+  // endWork: 660, //7pm
+  // startBreak: 120, //10am
+  // endBreak: 180, //11am
+
+  // startWork: 540, //5pm
+  // endWork: 1200, //4am
+  // startBreak: 960, //12am
+  // endBreak: 1020, //1am
 
   function changetoWetWeather(driver) {
     driver.speed = driver.speed * 0.84;
@@ -1463,6 +1548,7 @@ export default function Map() {
         avgjobsdonelist={avgjobsdonelist}
         weatherlist={weatherlist}
         peakHourlist={peakHourlist}
+        createSpecialDriver={createSpecialDriver}
       ></Sidebar>
     </>
   );

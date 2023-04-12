@@ -31,7 +31,10 @@ function Sidebar(props) {
         <nav className="nav-menu active">
           <div>
             {renderType === "quiz" && (
-              <PersonalityQuiz handleRenderQuiz={handleRenderQuiz} />
+              <PersonalityQuiz
+                handleRenderQuiz={handleRenderQuiz}
+                createSpecialDriver={props.createSpecialDriver}
+              />
             )}
             {renderType === "summary" && (
               <SummarizedSidebar
