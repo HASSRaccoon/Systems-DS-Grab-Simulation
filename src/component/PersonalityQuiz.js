@@ -300,7 +300,7 @@ export function PersonalityQuiz(props) {
         <span> </span>
 
         <div className="nav-subheader">
-          <IoIcons.IoHourglassOutline />
+          <IoIcons.IoAccessibilityOutline />
           <span> Your Pickup Tolerance: </span>
         </div>
 
