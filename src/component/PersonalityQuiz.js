@@ -28,28 +28,46 @@ export function PersonalityQuiz(props) {
   //   });
   // }
 
-  console.log(props.createSpecialDriver, "hello what is this");
+  // console.log(props.createSpecialDriver, "hello what is this");
 
-  // const [startWork, setStartWork] = useState("");
-  // const [endWork, setEndWork] = useState("");
-  // const [startBreak, setStartBreak] = useState("");
-  // const [endBreak, setEndBreak] = useState("");
-  // const [inputspeed, setInputSpeed] = useState(0);
-  // const [behaviour, setBehaviour] = useState("");
+  const [startWork, setStartWork] = useState("");
+  const [endWork, setEndWork] = useState("");
+  const [startBreak, setStartBreak] = useState("");
+  const [endBreak, setEndBreak] = useState("");
+  const [inputspeed, setInputSpeed] = useState(0);
+  const [behaviour, setBehaviour] = useState("");
+  const [tolerance, setTolerance] = useState(0);
 
   function getStartWork(e) {
-    console.log(e, "hello?");
-    return e;
+    setStartWork(e);
+    console.log(startWork, "hello 1");
   }
 
-  // const [tolerance, setTolerance] = useState(0);
+  function getEndWork(e) {
+    setEndWork(e);
+    console.log(endWork, "hello 2");
+  }
+  function getStartBreak(e) {
+    setStartBreak(e);
+    console.log(startBreak, "hello 3");
+  }
+  function getEndBreak(e) {
+    setEndBreak(e);
+    console.log(endBreak, "hello 4");
+  }
 
-  function getEndWork(e) {}
-  function getStartBreak(e) {}
-  function getEndBreak(e) {}
-  function getInputSpeed(e) {}
-  function getBehaviour(e) {}
-  function getTolerance(e) {}
+  function getInputSpeed(e) {
+    setInputSpeed(e);
+    console.log(inputspeed, "hello 5");
+  }
+  function getBehaviour(e) {
+    setBehaviour(e);
+    console.log(behaviour, "hello 6");
+  }
+  function getTolerance(e) {
+    setTolerance(e);
+    console.log(tolerance, "hello 7");
+  }
 
   const form = useForm({
     initialValues: {
@@ -153,6 +171,8 @@ export function PersonalityQuiz(props) {
               { value: 22, label: "10 PM" },
               { value: 23, label: "11 PM" },
             ]}
+            onChange={(e) => getEndWork(e)}
+            // onSelect={(e) => getEndWork(e)}
           />
           <span></span>
         </div>
@@ -198,12 +218,14 @@ export function PersonalityQuiz(props) {
               { value: 22, label: "10 PM" },
               { value: 23, label: "11 PM" },
             ]}
+            onChange={(e) => getStartBreak(e)}
           />
           <span>to:</span>
           <span> </span>
 
           <Select
             placeholder="END"
+            onChange={(e) => getEndBreak(e)}
             data={[
               { value: 24, label: "0 AM" },
               { value: 1, label: "1 AM" },
@@ -307,7 +329,7 @@ export function PersonalityQuiz(props) {
             START SIMULATION<span></span>
           </Button>
         </div>
-        <Button onClick={props.createSpecialDriver()}>CHECK PASSING</Button>
+        {/* <Button onClick={props.createSpecialDriver()}>CHECK PASSING</Button> */}
         {/* <div className='nav-button'>
                 <Button variant="contained" color='primary'>see details</Button>
                 </div> */}

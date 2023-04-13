@@ -19,6 +19,7 @@ import { convertLength } from "@turf/turf";
 import "./Map.css";
 import * as IoIcons from "react-icons/io5";
 import { useLocation } from "react-router-dom";
+import { StackedChart } from "./Stackedchart";
 // --- ---------------------------------- ---
 
 mapboxgl.accessToken =
@@ -188,8 +189,6 @@ export default function Map() {
     // });
 
     // driversList.push(specialdriver);
-    console.log("does this pass?");
-    console.log(startWork, "same number?");
   }
 
   //unique driver later to be created by input
@@ -979,10 +978,10 @@ export default function Map() {
       );
       const yourprofit = specialdriver.earnings - yourfuelcost;
       profitlist[0] = yourprofit.toFixed(2);
-      distancelist[0] = specialdriver.totalDistanceTravelled.toFixed(3);
+      distancelist[0] = specialdriver.totalDistanceTravelled.toFixed(1);
 
       const avgjobsdone =
-        (drivers[0].completedJobsdrivers +
+        (drivers[0].completedJobs +
           drivers[1].completedJobs +
           drivers[2].completedJobs) /
         3;
@@ -1007,7 +1006,7 @@ export default function Map() {
           drivers[2].totalDistanceTravelled) /
         3;
       avgprofitlist[0] = avgprofit.toFixed(2);
-      avgdistancelist[0] = avgdistance.toFixed(3);
+      avgdistancelist[0] = avgdistance.toFixed(1);
       weatherlist[0] = weatherStatus;
       peakHourlist[0] = peakStatus;
 
@@ -1522,7 +1521,8 @@ export default function Map() {
           </div>
 
           <div className="modal-graph">
-            <img src="./dummy-graph.jpeg" width="300px"></img>
+            {/* <img src="./dummy-graph.jpeg" width="300px"></img> */}
+            <StackedChart></StackedChart>
           </div>
 
           <div className="modal-header">
@@ -1530,7 +1530,8 @@ export default function Map() {
           </div>
 
           <div className="modal-graph">
-            <img src="./dummy-graph.jpeg" width="300px"></img>
+            {/* <img src="./dummy-graph.jpeg" width="300px"></img> */}
+            <StackedChart></StackedChart>
           </div>
 
           <div className="modal-header">
@@ -1538,7 +1539,8 @@ export default function Map() {
           </div>
 
           <div className="modal-graph">
-            <img src="./dummy-graph.jpeg" width="300px"></img>
+            {/* <img src="./dummy-graph.jpeg" width="300px"></img> */}
+            <StackedChart></StackedChart>
           </div>
           {/* <div className='nav-subheader'>
             <span> Live Profit Comparison: </span>

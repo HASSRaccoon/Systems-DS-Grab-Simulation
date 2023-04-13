@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@faker-js/faker": "^7.6.0",
     "@mantine/core": "^6.0.4",
     "@mantine/form": "^6.0.6",
     "@mantine/hooks": "^6.0.4",
@@ -16,6 +17,7 @@
     "leaflet": "^1.9.3",
     "mapbox-gl": "^2.13.0",
     "react": "^18.2.0",
+    "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.8.0",
     "react-leaflet": "^4.2.1",
