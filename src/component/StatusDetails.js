@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import * as IoIcons from "react-icons/io5";
 import { Button, Modal, Center } from "@mantine/core";
 import "./Sidebar.css";
@@ -6,6 +6,23 @@ import { useDisclosure } from "@mantine/hooks";
 import { StackedChart } from "./Stackedchart";
 export function StatusDetails(props) {
   const [opened, { open, close }] = useDisclosure(false);
+  const [time, setTime] = useState(0);
+  const [weatherStatus, setWeather] = useState("Dry");
+  const [peakHour, setPeakHour] = useState("Yes");
+  const [avgprofit, setAvgProfit] = useState(0);
+  const [profit, setProfit] = useState(0);
+  setInterval(() => {
+    const currentHour = props.peakHourlist[0];
+    setPeakHour(currentHour);
+    const currentWeather = props.weatherlist[0];
+    setWeather(currentWeather);
+    const currentTime = props.timelist[0];
+    setTime(currentTime);
+    const currentProfit = props.profitlist[0];
+    setProfit(currentProfit);
+    const currentAvgProfit = props.avgprofitlist[0];
+    setAvgProfit(currentAvgProfit);
+  }, 1000);
 
   // const handleRenderGraphs = () => {
   //     return(
@@ -35,11 +52,11 @@ export function StatusDetails(props) {
 
         <div className="nav-text">
           <IoIcons.IoWalletOutline />
-          <span>Your profit: $375</span>
+          <span>Your profit: {profit}</span>
         </div>
         <div className="nav-text">
           <IoIcons.IoWalletOutline />
-          <span>Average profit: $382</span>
+          <span>Average profit: {avgprofit}</span>
         </div>
         <div className="nav-graph">
           <img src="./dummy-graph.jpeg" width="300px"></img>
@@ -64,19 +81,19 @@ export function StatusDetails(props) {
         <div className="nav-text">
           <div>
             <IoIcons.IoTimeOutline />
-            <span>Time: 6:25 PM</span>
+            <span>Time: {time}</span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoAlarmOutline />
-            <span>Peak hour: True</span>
+            <span>Peak hour: {peakHour}</span>
           </div>
         </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoRainyOutline />
-            <span>Weather: Dry</span>
+            <span>Weather: {weatherStatus}</span>
           </div>
         </div>
         <div className="nav-text">
@@ -123,7 +140,7 @@ export function StatusDetails(props) {
                     <span> </span>
                 </div> */}
 
-        <div className="nav-subheader">
+        {/* <div className="nav-subheader">
           <span> Passengers: </span>
         </div>
         <div className="nav-text">
@@ -137,7 +154,7 @@ export function StatusDetails(props) {
         <div className="nav-text">
           <IoIcons.IoCarSportOutline />
           <span>Transit: 3</span>
-        </div>
+        </div> */}
       </ul>
     </div>
   );

@@ -21,8 +21,6 @@ export function SummarizedSidebar(props) {
   const [peakHour, setPeakHour] = useState("Yes");
 
   setInterval(() => {
-    // console.log(props.timelist[0], "in sidebar");
-    // time = props.timelist[0];
     const currentTime = props.timelist[0];
     setTime(currentTime);
     const currentState = props.statelist[0];
@@ -45,6 +43,7 @@ export function SummarizedSidebar(props) {
     setWeather(currentWeather);
     const currentHour = props.peakHourlist[0];
     setPeakHour(currentHour);
+
     // weatherStatus={props.weatherStatus}
 
     // console.log(time, "update time in sidebar");

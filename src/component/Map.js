@@ -20,6 +20,7 @@ import "./Map.css";
 import * as IoIcons from "react-icons/io5";
 import { useLocation } from "react-router-dom";
 import { StackedChart } from "./Stackedchart";
+// import StackedChart from "./Stackedchart";
 // --- ---------------------------------- ---
 
 mapboxgl.accessToken =
@@ -688,20 +689,6 @@ export default function Map() {
     return lineDistance;
   }
 
-  function getFares(distance, speed) {
-    // const time = esttimeTaken(distance, speed);
-    //time = distance/speed
-  }
-
-  function dateToTicks(date) {
-    const epochOffset = 621355968000000000;
-    const ticksPerMillisecond = 10000;
-
-    const ticks = date.getTime() * ticksPerMillisecond + epochOffset;
-
-    return ticks;
-  }
-
   let isRunning = false;
   // const [isRunning, setisRunning] = useState(false);
 
@@ -942,16 +929,6 @@ export default function Map() {
     }
   }
 
-  //maybe check these
-
-  // useEffect(() => {
-  //   const currentTime = drivers[0].timeCounter;
-  //   setTime(currentTime);
-  //   const driver = drivers[0];
-  //   console.log("THIS CAN PRINT");
-  //   console.log(time, "what time now");
-  //   console.log(drivers[0].timeLog, "log");
-  // }, [drivers]);
   let timelist = [];
   let statelist = [];
   let speedlist = [];
@@ -963,8 +940,7 @@ export default function Map() {
   let avgdistancelist = [];
   let weatherlist = [];
   let peakHourlist = [];
-
-  //damn manual but nvm first
+  let profits = 0;
 
   function updateStats() {
     setInterval(() => {
@@ -978,6 +954,8 @@ export default function Map() {
       );
       const yourprofit = specialdriver.earnings - yourfuelcost;
       profitlist[0] = yourprofit.toFixed(2);
+      profits = yourprofit.toFixed(2);
+      // console.log(profits, "hello can this change?");
       distancelist[0] = specialdriver.totalDistanceTravelled.toFixed(1);
 
       const avgjobsdone =
@@ -1015,6 +993,7 @@ export default function Map() {
       // console.log(time, "update time");
       // setState(drivers[0].state);
       // setjobsDone(drivers[0].completedJobs);
+      // console.log("this is running");
     }, 500);
   }
 
@@ -1201,35 +1180,6 @@ export default function Map() {
     // animatepassenger(driver);
 
     setTimeout(() => {
-      //need to debug passenger exit
-      // console.log(driver.id, driver.passenger);
-      // console.log(passengers.length, "before remove passenger");
-      // for (let i = 0; i < passengers.length; i++) {
-      //   if (driver.passenger === passengers[i]) {
-      //     console.log("check 1 passed");
-      //     const passenger = passengers[i];
-      //     const id = passenger.id;
-      //     console.log(id, "id to search for");
-      //     console.log(passengerPoints);
-      //     for (let k = 0; k < passengerPoints.features.length; i++) {
-      //       if (passengerPoints.features[k].properties.id === id) {
-      //         console.log("check 2 passed");
-      //         passengerPoints.features.splice(k, 1);
-      //         console.log(passengerPoints, "check correct passenger image");
-      //         map.getSource("passengers").setData(passengerPoints);
-      //       }
-      //       break;
-      //     }
-      //     const newpassengers = passengers.splice(i, 1);
-      //     setPassengers(newpassengers);
-      //   }
-      // }
-      // console.log(passengers.length, "passengers after remove passenger");
-      // console.log(
-      //   passengerPoints.length,
-      //   "PassengerPoints after remove passenger"
-      // );
-
       for (let i = 0; i < passengerPoints.features.length; i++) {
         if (passengerPoints.features[i].properties.id === driver.passenger.id) {
           console.log(
@@ -1275,8 +1225,6 @@ export default function Map() {
       driver.Log[driver.completedJobs]["transit"]["earning"] = earning;
       driver.earnings = driver.earnings + earning;
 
-      // const fare = god.fareCalculation(transitDistance, )
-      //  const profit = god.profitCalculation(fare, fuel)
       console.log("Transit Log", driver.id, driver.Log);
       driver.completed();
       console.log(driver.currentLocation, "current loc");
@@ -1522,7 +1470,13 @@ export default function Map() {
 
           <div className="modal-graph">
             {/* <img src="./dummy-graph.jpeg" width="300px"></img> */}
-            <StackedChart></StackedChart>
+            <StackedChart
+              // profitdata={profitlist}
+              // profits={profits}
+              // options={options}
+              // profits={state.profits}
+              variable={profitlist}
+            ></StackedChart>
           </div>
 
           <div className="modal-header">
@@ -1531,7 +1485,7 @@ export default function Map() {
 
           <div className="modal-graph">
             {/* <img src="./dummy-graph.jpeg" width="300px"></img> */}
-            <StackedChart></StackedChart>
+            <StackedChart variable={distancelist}></StackedChart>
           </div>
 
           <div className="modal-header">
@@ -1540,7 +1494,7 @@ export default function Map() {
 
           <div className="modal-graph">
             {/* <img src="./dummy-graph.jpeg" width="300px"></img> */}
-            <StackedChart></StackedChart>
+            <StackedChart variable={jobsdonelist}></StackedChart>
           </div>
           {/* <div className='nav-subheader'>
             <span> Live Profit Comparison: </span>

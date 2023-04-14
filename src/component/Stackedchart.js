@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,56 +11,78 @@ import {
 import { Bar } from "react-chartjs-2";
 import { faker } from "@faker-js/faker";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+export function StackedChart(props) {
+  ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+  );
 
-export const options = {
-  plugins: {
-    title: {
-      display: true,
-      text: "Chart.js Bar Chart - Stacked",
-    },
-  },
-  responsive: true,
-  scales: {
-    x: {
-      stacked: true,
-    },
-    y: {
-      stacked: true,
-    },
-  },
-};
+  const [test, setTest] = useState(50);
 
-const labels = ["January", "February", "March", "April", "May", "June", "July"];
+  setInterval(() => {
+    const random = (Math.random() * 100).toFixed(2);
+    setTest(random);
+  }, 3000);
 
-export const data = {
-  labels,
-  datasets: [
-    {
-      label: "Dataset 1",
-      data: labels.map(() => faker.datatype.number({ min: -1000, max: 1000 })),
-      backgroundColor: "rgb(255, 99, 132)",
-    },
-    {
-      label: "Dataset 2",
-      data: labels.map(() => faker.datatype.number({ min: -1000, max: 1000 })),
-      backgroundColor: "rgb(75, 192, 192)",
-    },
-    {
-      label: "Dataset 3",
-      data: labels.map(() => faker.datatype.number({ min: -1000, max: 1000 })),
-      backgroundColor: "rgb(53, 162, 235)",
-    },
-  ],
-};
+  setInterval(() => {
+    // console.log(props.variable, "update?");
+    // console.log(props.variable[0], "update?");
+    // setVariable(props.variable[0]);
+  }, 3000);
 
-export function StackedChart() {
+  const [variable, setVariable] = useState(0);
+
+  const labels = ["You", "Type A Driver", "Type B Driver", "Type C Driver"];
+
+  let data = {
+    labels,
+    datasets: [
+      {
+        label: "temp",
+        data: [variable, 60, 70, 80],
+        backgroundColor: "rgb(53, 162, 235)",
+      },
+    ],
+  };
+
+  const options = {
+    plugins: {
+      title: {
+        display: true,
+        text: "Chart.js Bar Chart - Stacked",
+      },
+    },
+    responsive: true,
+    scales: {
+      x: {
+        stacked: true,
+      },
+      y: {
+        stacked: true,
+      },
+    },
+  };
+
+  //   const [profit, setProfit] = useState(0);
+  //   setInterval(() => {
+  //     let currentProfit = props.profits;
+  //     setProfit(currentProfit);
+  //     console.log(profit, "check");
+  //   }, 1000);
+  //   useEffect(() => {
+  //     setProfit(props.profitdata[0]);
+  //   }, [props.profitdata]);
+  //   console.log(props.profitdata, "hiiffffi");
+  //   console.log(profit, "hiii");
+  //   useEffect(() => {
+  //   setProfit(props.profitdata[0]);
+  //     console.log(props);
+  //     console.log(props.profits);
+  //   }, [props]);
+
   return <Bar options={options} data={data} />;
 }

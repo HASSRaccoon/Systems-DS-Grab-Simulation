@@ -53,10 +53,15 @@ function Sidebar(props) {
               />
             )}
             {renderType === "details" && (
-              <StatusDetails 
-              handleRenderDetails={handleRenderDetails}
-              openModalGraph={props.openModalGraph}
-               />
+              <StatusDetails
+                profitlist={props.profitlist}
+                avgprofitlist={props.avgprofitlist}
+                peakHourlist={props.peakHourlist}
+                timelist={props.timelist}
+                weatherlist={props.weatherlist}
+                handleRenderDetails={handleRenderDetails}
+                openModalGraph={props.openModalGraph}
+              />
             )}
 
             {/* <SummarizedSidebar
