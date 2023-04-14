@@ -8,7 +8,7 @@ import PathFinder, { pathToGeoJSON } from "geojson-path-finder";
 import { Link } from "react-router-dom";
 import mapboxgl from "mapbox-gl";
 import caricon from "../public/grabcar.png";
-import { Button, Modal, Box, LoadingOverlay, Center } from "@mantine/core";
+import { Button, Modal, Box, Overlay, Center, Slider } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 // import { Center } from "@mantine/core";
 import AnimationDriver from "../agents/AnimationDriver.js";
@@ -1412,6 +1412,7 @@ export default function Map() {
 
   const [modalKwOpen, setModalKwOpen] = useState(false);
   const [modalGraphOpen, setModalGraphOpen] = useState(false);
+  const [visible, setVisible] = useState(true);
 
   const openModalKw = () => {
     setModalKwOpen(true);
@@ -1435,7 +1436,7 @@ export default function Map() {
         >
           <Center>
             <div className="modal-header">
-              Would You Like to Fast Forward And Compile Data for 0.5 Days?
+              Would You Like to Fast Forward And Compile Data?
             </div>
           </Center>
           <Center>
@@ -1443,6 +1444,25 @@ export default function Map() {
               Compiling data will take a few seconds.
             </div>
           </Center>
+          <Center>
+            <div className="modal-subheader">
+              Fast forward for how many days?
+            </div>
+          </Center>
+          <Center>
+            <div className="modal-slider">
+              <Slider color="cyan"
+              defaultValue={1}
+              min={1}
+              max={31}
+              marks={[
+                { value: 1, label: "1day" },
+                { value: 31, label: "31 days" },
+              ]}>
+              </Slider>
+            </div>
+          </Center>
+          
           <div className="modal-button">
             <Link to="/fastforward">
               <Button color="cyan" size="lg" onClick={stopAnimation}>
@@ -1507,6 +1527,12 @@ export default function Map() {
       </Center>
 
       <div className="map-container" ref={mapContainer} />
+
+      <div className='map-overlay'>
+        {visible && <Overlay color="#000" opacity={0.75} style={{right:350, top:70}} />}
+      </div> 
+
+      
       <div>
         {/* <div className="map-container" ref={mapContainer} /> */}
         <div className="topbar">
@@ -1566,6 +1592,8 @@ export default function Map() {
         peakHourlist={peakHourlist}
         createSpecialDriver={createSpecialDriver}
         openModalGraph={openModalGraph}
+        visible={visible}
+        setVisible={setVisible}
       ></Sidebar>
     </>
   );

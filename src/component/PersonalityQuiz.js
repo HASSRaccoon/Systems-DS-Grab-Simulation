@@ -300,7 +300,7 @@ export function PersonalityQuiz(props) {
         <span> </span>
 
         <div className="nav-subheader">
-          <IoIcons.IoHourglassOutline />
+          <IoIcons.IoAccessibilityOutline />
           <span> Your Pickup Tolerance: </span>
         </div>
 
@@ -312,10 +312,12 @@ export function PersonalityQuiz(props) {
         <div className="nav-slider">
           <span></span>
           <Slider
+          min={0}
+          max={10}
             marks={[
               { value: 0, label: "0 Km" },
-              { value: 50, label: "5 Km" },
-              { value: 100, label: "10 Km" },
+              { value: 5, label: "5 Km" },
+              { value: 10, label: "10 Km" },
             ]}
           />
         </div>
