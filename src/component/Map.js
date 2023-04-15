@@ -8,7 +8,7 @@ import PathFinder, { pathToGeoJSON } from "geojson-path-finder";
 import { Link } from "react-router-dom";
 import mapboxgl from "mapbox-gl";
 import caricon from "../public/grabcar.png";
-import { Button, Modal, Box, Overlay, Center, Slider } from "@mantine/core";
+import { Button, Modal, Box, Overlay, Center, Slider, Select } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 // import { Center } from "@mantine/core";
 import AnimationDriver from "../agents/AnimationDriver.js";
@@ -1498,6 +1498,83 @@ export default function Map() {
           </Center>
           <Center>
             <div className="modal-subheader">
+              Which driver type would you like to simulate?
+            </div>
+          </Center>
+          <Center>
+            <div className="modal-slider">
+              <Select
+              placeholder="Select Driver Type"
+              color="cyan"
+              size="lg"
+              data={[
+                { value: "A", label: "Driver Type A" },
+                { value: "B", label: "Driver Type B" },
+                { value: "C", label: "Driver Type C" },
+              ]}
+              />
+            </div>
+          </Center>
+
+          <Center>
+            <div className="modal-subheader">
+              How many drivers would you like to simulate?
+            </div>
+          </Center>
+          <Center>
+            <div className="modal-slider">
+              <Slider color="cyan"
+              defaultValue={1}
+              min={1}
+              max={300}
+              marks={[
+                { value: 1, label: "1 driver" },
+                { value: 300, label: "300 drivers" },
+              ]}>
+              </Slider>
+            </div>
+          </Center>
+
+          <Center>
+            <div className="modal-subheader">
+              How many non-peak hours passengers would you like to simulate?
+            </div>
+          </Center>
+          <Center>
+            <div className="modal-slider">
+              <Slider color="cyan"
+              defaultValue={1}
+              min={1}
+              max={300}
+              marks={[
+                { value: 1, label: "1 passenger" },
+                { value: 300, label: "300 passengers" },
+              ]}>
+              </Slider>
+            </div>
+          </Center>
+          
+          <Center>
+            <div className="modal-subheader">
+            How many peak hours passengers would you like to simulate?
+            </div>
+          </Center>
+          <Center>
+            <div className="modal-slider">
+              <Slider color="cyan"
+              defaultValue={1}
+              min={1}
+              max={300}
+              marks={[
+                { value: 1, label: "1 passenger" },
+                { value: 300, label: "300 passengers" },
+              ]}>
+              </Slider>
+            </div>
+          </Center>
+
+          <Center>
+            <div className="modal-subheader">
               Fast forward for how many days?
             </div>
           </Center>
@@ -1508,7 +1585,7 @@ export default function Map() {
               min={1}
               max={31}
               marks={[
-                { value: 1, label: "1day" },
+                { value: 1, label: "1 day" },
                 { value: 31, label: "31 days" },
               ]}>
               </Slider>

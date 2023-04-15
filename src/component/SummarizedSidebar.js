@@ -89,6 +89,19 @@ export function SummarizedSidebar(props) {
             <span>Weather: {weatherStatus}</span>
           </div>
         </div>
+         <div className="nav-text">
+          <div>
+            <IoIcons.IoFlashOutline />
+            <span>Fuel Cost: $0.22/Km</span>
+          </div>
+        </div>
+
+        <div className="nav-text">
+          <div>
+            <IoIcons.IoWalletOutline />
+            <span>Average Fare: $1.53/Km</span>
+          </div>
+        </div>
         <div className="nav-text">
           <div>
             <IoIcons.IoPerson />
@@ -198,7 +211,7 @@ export function SummarizedSidebar(props) {
           </div>
         </div>
         <div className="details-button">
-          <Button color="cyan" onClick={props.handleRenderSummary}>
+          <Button color="cyan" onClick={props.openModalGraph}>
             SEE DETAILS<span></span>
           </Button>
         </div>

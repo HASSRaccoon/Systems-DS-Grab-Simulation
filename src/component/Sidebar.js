@@ -53,6 +53,7 @@ function Sidebar(props) {
                 weatherlist={props.weatherlist}
                 peakHourlist={props.peakHourlist}
                 handleRenderSummary={handleRenderSummary}
+                openModalGraph={props.openModalGraph}
               />
             )}
             {renderType === "details" && (
