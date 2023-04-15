@@ -62,7 +62,7 @@ export default class Driver {
 
         if (this.passenger){ // if passenger found
             this.speedLs.push(0);
-            this.time += 1;
+            // this.time += 1;
             let fuelCost = globals.fuelcostCalculation(this.distance)
             this.tripFuelCost += fuelCost;
             this.tripDistance += this.distance;
@@ -267,6 +267,12 @@ export default class Driver {
         console.log(`${this.id}'s log`)
         console.log(this.log)
     }
+
+    // break(){
+    //     this.state = 'break';
+    //     this.breakTime = 0;
+    //     this.breakLocation = this.currentLocation;
+    // }
 
     distancePerTick(speed){
         return speed / 60;

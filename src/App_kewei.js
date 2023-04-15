@@ -10,13 +10,14 @@ import exportFromJSON from 'export-from-json';
 
 function App() {
     //CHANGE PER SIMULATION
-    const DAYS = 5; 
+    const DAYS = 1; 
     const TICKRATE = 1440; //NOTE: 1 tick = 1 minute
     const TICKS = TICKRATE * DAYS;
 
-    const NUM_DRIVERS = 10;
+    const NUM_DRIVERS = 5;
     const NUM_PASSENGERS = 50;
     const NUM_PASSENGERS_PEAK = 300;
+    const PROB_PASSENGERS_CANCEL = 0.05;
 
     // const simulationIter = 10; //cannot work as the simulation stores the data
     const EXPORT = true;
@@ -26,24 +27,25 @@ function App() {
     //CHANGE PER SIMULATION
 
     let drivers= []
+    const jsonName = "Grabbie Simulation Data"
     for (let i = 0; i < NUM_DRIVERS; i++) {
 
         // Type A
-        // drivers.push( //CHANGE PER SIMULATION
-        //         { 
-        //             id: `A${i}`,
-        //             speed: 80,
-        //             state: 'searching',
-        //             framesToMove: 0,
-        //             moveRadius: 5,
-        //             startTime: 1020, //NOTE: 5pm
-        //             endTime: 240, //NOTE: 4am
-        //             breakStart: 0, //NOTE: 12am
-        //             breakEnd: 60, //NOTE: 1am
-        //         }
-        //     );
+        drivers.push( //CHANGE PER SIMULATION
+                { 
+                    id: `A${i}`,
+                    speed: 80,
+                    state: 'searching',
+                    framesToMove: 0,
+                    moveRadius: 5,
+                    startTime: 1020, //NOTE: 5pm
+                    endTime: 240, //NOTE: 4am
+                    breakStart: 0, //NOTE: 12am
+                    breakEnd: 60, //NOTE: 1am
+                }
+            );
 
-        //Type B
+        // //Type B
         // drivers.push( //CHANGE PER SIMULATION
         //         { 
         //             id: `B${i}`,
@@ -58,21 +60,20 @@ function App() {
         //         }
         //     );
 
-        //Type C
-        drivers.push( //CHANGE PER SIMULATION
-                { 
-                    id: `C${i}`,
-                    speed: 70,
-                    state: 'searching',
-                    framesToMove: 9999999,
-                    moveRadius: 0,
-                    startTime: 480, //NOTE: 8am
-                    endTime: 1080, //NOTE: 6pm
-                    breakStart: 660, //NOTE: 10am
-                    breakEnd: 720, //NOTE: 11am
-                }
-            );
-
+        // //Type C
+        // drivers.push( //CHANGE PER SIMULATION
+        //         { 
+        //             id: `C${i}`,
+        //             speed: 70,
+        //             state: 'searching',
+        //             framesToMove: 9999999,
+        //             moveRadius: 0,
+        //             startTime: 480, //NOTE: 8am
+        //             endTime: 1080, //NOTE: 6pm
+        //             breakStart: 660, //NOTE: 10am
+        //             breakEnd: 720, //NOTE: 11am
+        //         }
+        //     );
 
 
         }
@@ -130,7 +131,7 @@ function App() {
     }
 
     function assignPassenger(driver) {
-        console.log('assigning passenger')
+        // console.log('assigning passenger')
         if (passengerLs.length > 0 && driver.state === "searching") {
             
             let radius = 0;
@@ -143,7 +144,7 @@ function App() {
             let circle = turf.circle(center, radius, options); //create circle
             let passengerLsInRadius = passengerLs.filter(passenger => turf.booleanPointInPolygon(turf.point(passenger.currentLocation), circle)); //filter passenger in circle
 
-            console.log('Passengers in '+radius+"(km) "+ driver.id + ": ",passengerLsInRadius.length)
+            // console.log('Passengers in '+radius+"(km) "+ driver.id + ": ",passengerLsInRadius.length)
             //filter passenger that has shortest distance to driver
             let passengerIndex = null;
             if (passengerLsInRadius.length > 1){
@@ -164,7 +165,7 @@ function App() {
                 passengerIndex = 0;
             }
             else{
-                console.log('no passengers in radius')
+                console.log('Driver', driver.id,'no passengers in radius')
             }
 
             // Assign passenger to driver
@@ -196,33 +197,39 @@ function App() {
     function newPassenger(){
         let passenger = new Passenger({
             id: "passenger" + generateString(7),
-            cancelTendency: Math.floor(Math.random())*10,
+            cancelTendency: Math.floor(Math.random()*10),
         })
         passengerLs.push(passenger)
     }
 
     function pathGenerator(driver, location, destination){
         if (location === destination || destination === null) return;
-        console.log('pathGenerator driver ', driver.id,' loc: ', location, ' dest: ', destination)
+        // console.log('pathGenerator driver ', driver.id,' loc: ', location, ' dest: ', destination)
         let path = buildPath(location, destination)
         driver.path = path;
-        console.log('pathGenerator driver ', driver.id,' path: ', path)
-        if (driver.distanceToTravel === 0 && (driver.path !== null || driver.path !== undefined)){
-            driver.distanceToTravel = turf.length(path, {units: 'kilometers'});
+        // console.log('pathGenerator driver ', driver.id,' path: ', path)
+        if (driver.distanceToTravel === 0 && driver.path !== null && driver.path !== 'undefined' && driver.path !== undefined){
+            try{
+                driver.distanceToTravel = turf.length(path, {units: 'kilometers'});
+            }
+            catch(err){
+                console.log('pathGenerator driver ', driver.id,' path: ', path, ' currentlocation: ', driver.currentLocation, ' destination: ', driver.destination)
+                console.log('(LOG ERROR) pathGenerator: ', err)
+            }
         }
 
     }
     function updateCurrentLoc(driver,location,destination,distance){
         if (location === destination || destination === null) return;
 
-        if (driver.path !== null || driver.path !== undefined){
+        if (driver.path !== null && driver.path !== undefined &&  driver.path !== 'undefined'){
             let path = driver.path;
             // console.log('Updatecurrentloc driver ', driver.id,' path: ', path)
             let along = turf.along(path,distance,{units: 'kilometers'});
 
-            console.log('along: ', along.geometry.coordinates);
+            // console.log('along: ', along.geometry.coordinates);
             driver.currentLocation = along.geometry.coordinates;
-            console.log('currentLocation: ', driver.currentLocation);
+            // console.log('currentLocation: ', driver.currentLocation);
             if(driver.currentLocation === driver.destination)return;
             let newPath = buildPath(driver.currentLocation, driver.destination);
             driver.path = newPath;
@@ -230,13 +237,28 @@ function App() {
         }
     }
 
+    let driverBucket = []; //NOTE: bucket to store drivers that are available to be assigned to passenger
+
+    function getRandomFromBucket() {
+        var randomIndex = Math.floor(Math.random()*driverBucket.length);
+        return driverBucket.splice(randomIndex, 1)[0];
+     }
+
+    // --------------------------------- RUN SIMULATION --------------------------------- //
     function runSim(){
-        // --------------------------------- RUN SIMULATION --------------------------------- //
         const startDate = new Date(); //NOTE: start time of simulation
+
+    
+
         console.log("(LOG) Start Time: ", startDate.toLocaleTimeString());
         for (let ticks = 0; ticks < TICKS ; ticks++) {
+            console.log('Tick: ', ticks)
             if (ticks % TICKRATE === 0) console.log("(LOG) Day: ", 1+(ticks/TICKRATE)); //log everyday
-            
+
+            for (var i = 0; i < god.drivers.length; i++) { // push drivers to bucket every tick
+                driverBucket.push(i);
+            }
+
             try{
                 let isPeak = god.checkPeak(ticks);
                 let toGenerate = 0;
@@ -262,59 +284,68 @@ function App() {
                     }
                     
                 }
-                // for (let i = 0; i < passengerLs.length; i++){ //NOTE: passenger cancelling
-                //     passengerLs[i].waitingTime += 1;
-                //     if (passengerLs[i].waitingTime >= passengerLs[i].cancelTendency){
-                //         let cancelRate = Math.random();
-                //         if (cancelRate > 0.9){
-                //             passengerLs[i].cancel()
-                //             if (passengerLs[i].driver !== null){
-                //                 passengerLs[i].driver.passenger = null;
-                //                 passengerLs[i].driver.cancelledJobs += 1;
-                //                 passengerLs[i].driver.state = "searching";
-                //             }
-                //             else{ //DEBUG: for debug purpose
-                //                 cancelled += 1;
-                //             }
-                //         passengerLs = passengerLs.filter(passenger => passenger.id !== passengerLs[i].id)
-                //         }
-                //     }
-                // }
-                for (let i = 0; i < god.drivers.length; i++) { //NOTE: loop for each driver
-                    let currentDriver = god.drivers[i];
-                    if (currentDriver.breakStart < currentDriver.breakEnd ){
-                        if (ticks % 1440 >= currentDriver.breakStart && ticks % 1440 <= currentDriver.breakEnd){ //NOTE: if driver on duty, assign passenger
-                            console.log('break ' + currentDriver.id, ticks)
-                            currentDriver.time = 0;
-                            currentDriver.distance = 0;
-                            break;
+                for (let i = 0; i < passengerLs.length; i++){ //NOTE: passenger cancelling
+                    passengerLs[i].waitingTime += 1;
+                    if (passengerLs[i].waitingTime >= passengerLs[i].cancelTendency){
+                        let cancelRate = Math.random();
+                        if (cancelRate > (1-PROB_PASSENGERS_CANCEL) && passengerLs[i].state === "waiting"){ 
+                            passengerLs[i].cancel();
+                            // if (passengerLs[i].driver !== null){
+                            //     passengerLs[i].driver.passenger = null;
+                            //     passengerLs[i].driver.cancelledJobs += 1;
+                            //     passengerLs[i].driver.state = "searching";
+                            // }
+                            // else{ //DEBUG: for debug purpose
+                            //     cancelled += 1;
+                            //     console.log('cancelled: ', cancelled)
+                            // }
+                            passengerLs = passengerLs.filter(passenger => passenger.id !== passengerLs[i].id);
                         }
                     }
-                    else{
-                        if (ticks % 1440 >= currentDriver.breakStart && ticks % 1440 <= currentDriver.breakEnd){ //NOTE: if driver on duty, assign passenger
-                            console.log('break ' + currentDriver.id, ticks)
+                }
+                for (let j = 0; j < god.drivers.length; j++) { //NOTE: loop for each driver
+                    let ran_index = getRandomFromBucket(); // NOTE: randomize driver order
+
+                    let currentDriver = god.drivers[ran_index];
+                    if (currentDriver.breakStart < currentDriver.breakEnd ){ //NOTE: if break is within the day
+                        if ((ticks % 1440 >= currentDriver.breakStart) && (ticks % 1440 <= currentDriver.breakEnd) && currentDriver.state === 'searching'){ //NOTE: Only if driver is no longer on duty
+                            console.log('break ' + currentDriver.id, ticks, 'within day')
                             currentDriver.time = 0;
                             currentDriver.distance = 0;
-                            break;
+                            continue;
                         }
                     }
-                    if (currentDriver.startTime < currentDriver.endTime){
+                    else{ //NOTE: if break is across midnight
+                        if ((ticks % 1440 <= currentDriver.breakStart) && (ticks % 1440 >= currentDriver.breakEnd) && currentDriver.state === 'searching'){ //NOTE: Only if driver is no longer on duty
+                            console.log('break ' + currentDriver.id, ticks, 'across days')
+                            currentDriver.time = 0;
+                            currentDriver.distance = 0;
+                            continue;
+                        }
+                    }
+                    if (currentDriver.startTime < currentDriver.endTime){ // working hours are within the day
                         if (ticks % 1440 >= currentDriver.startTime && ticks % 1440 <= currentDriver.endTime){ //NOTE: if driver on duty, assign passenger
                             if (currentDriver.state === 'searching' && !currentDriver.passenger){
                                 assignPassenger(currentDriver);
                             }
                         }
                         else{
-                            currentDriver.time = 0;
-                            currentDriver.distance = 0;
-                            break;
+                            if (currentDriver.state === 'searching'){
+                                console.log('break ' + currentDriver.id, ticks, 'not on duty')
+                                currentDriver.time = 0;
+                                currentDriver.distance = 0;
+                                continue;
+                            }
                         }
                     }
-                    else{
-                        if (ticks % 1440 <= currentDriver.startTime && ticks % 1440 >= currentDriver.endTime){ //NOTE: if driver on duty, assign passenger
-                            currentDriver.time = 0;
-                            currentDriver.distance = 0;
-                            break;
+                    else{ // working hours are across midnight
+                        if (ticks % 1440 <= currentDriver.startTime && ticks % 1440 >= currentDriver.endTime){
+                            if (currentDriver.state === 'searching'){
+                                console.log('break ' + currentDriver.id, ticks, 'not on duty')
+                                currentDriver.time = 0;
+                                currentDriver.distance = 0;
+                                continue;
+                            }
                         }
                         else{
                             if (currentDriver.state === 'searching' && !currentDriver.passenger){
@@ -378,7 +409,7 @@ function App() {
                 }
             }
             catch (e){
-                console.log(e)
+                console.log('(LOG ERROR) Main loop: ', e)
             }
             // if (ticks === TICKS - 1) EXPORT = true;
         }
@@ -400,10 +431,10 @@ function App() {
             console.log(`(LOG) Sim Completed: Exporting Data..`);
             
             // console.log("drivers:",god.drivers);
-            let data = Object.values(driverlogs); // extract value from array object https://github.com/zheeeng/export-from-json/issues/110
+            let jsonData = Object.values(driverlogs); // extract value from array object https://github.com/zheeeng/export-from-json/issues/110
             // console.log("data:",data); 
-            const filename = "10C_5Days"; // set filename for export (NOT WORKING :( )
-            exportFromJSON({ data, filename, exportType });
+
+            exportFromJSON({ data: jsonData, fileName: jsonName, exportType: exportFromJSON.types.json });
 
         }
         else{
@@ -412,7 +443,6 @@ function App() {
         
         //get current timing
         let endDate = new Date();
-    
         console.log("(LOG) End Time: ", endDate.toLocaleTimeString());
         //get total compute time in minutes
         console.log("(LOG) Total Time: ", (endDate.getTime() - startDate.getTime()) / 60000, "minutes");
