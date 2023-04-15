@@ -93,7 +93,7 @@ export default class Driver {
             this.state = 'picking up';
             this.path = null;
             this.distanceToTravel = 0;
-
+            console.log(`Driver ${this.id} in transit to pickup passenger`);
             return false; //NOTE: indicate that driver did not move because passenger is found
 
         }
@@ -180,7 +180,7 @@ export default class Driver {
 
             this.initialLocation = this.endLocation
             this.endLocation = null
-
+            console.log(`Driver ${this.id} in transit to passenger destination`);
             this.state = 'transit';
             this.destination = this.passenger.destination;
             this.speedLs = [];
@@ -232,7 +232,7 @@ export default class Driver {
             this.speedLs = [];
 
             this.initialLocation = this.endLocation
-
+            console.log(`Driver ${this.id} completed trip`);
             this.state = 'completed';
             this.currentLocation = this.endLocation;
             this.path = null;
@@ -251,21 +251,20 @@ export default class Driver {
             'fare': this.tripFare,
             'profit': profits
         }
-
         this.state = 'searching';
         this.completedJobs += 1;
         this.passenger = null;
         this.destination = null;
-
+        
         this.searchLocation = this.currentLocation;
         
         this.endLocation = null
         this.speedLs = [];
         this.resetTripVariables();
+        console.log(`Driver ${this.id} searching for passenger`);
         
         this.log[`${this.completedJobs}`] = {...this.jobLog}
-        console.log(`${this.id}'s log`)
-        console.log(this.log)
+        console.log(`Driver ${this.id}'s log`, this.log)
     }
 
     // break(){

@@ -27,7 +27,7 @@ function App() {
     //CHANGE PER SIMULATION
 
     let drivers= []
-    const jsonName = "Grabbie Simulation Data"
+    const jsonName = "Grabie_Simulation_Output"
     for (let i = 0; i < NUM_DRIVERS; i++) {
 
         // Type A
@@ -426,9 +426,7 @@ function App() {
         console.log('driverlogs:',driverlogs)
     // ------------------------------- EXPORT JSON CODE -------------------------------
         if (EXPORT === true){
-
-            let exportType = exportFromJSON.types.json; // set output type
-            console.log(`(LOG) Sim Completed: Exporting Data..`);
+            console.log(`(LOG) Sim Completed: Exporting Data as`, jsonName);
             
             // console.log("drivers:",god.drivers);
             let jsonData = Object.values(driverlogs); // extract value from array object https://github.com/zheeeng/export-from-json/issues/110
