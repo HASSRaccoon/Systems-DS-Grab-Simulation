@@ -139,23 +139,24 @@ export default function Map() {
     });
   }
 
-  //existing
-  // let driver1 = new AnimationDriver({
-  //   id: 1,
-  //   currentLocation: generateRandomCoord(),
-  //   speed: 80,
-  //   defaultspeed: 80,
-  //   destination: generateRandomCoord(),
-  //   distanceWillingToTravel: 5,
-  //   path: null,
-  //   ref: null,
-  //   passenger: null,
-  //   searchBehaviour: "Move",
-  //   startWork: 540, //5pm
-  //   endWork: 1200, //4am
-  //   startBreak: 960, //12am
-  //   endBreak: 1020, //1am
-  // });
+  let specialdriver = new AnimationDriver({
+    id: 10,
+    currentLocation: generateRandomCoord(),
+    speed: location.state.inputspeed,
+    defaultspeed: location.state.inputspeed,
+    destination: generateRandomCoord(),
+    distanceWillingToTravel: location.state.tolerance,
+    path: null,
+    ref: null,
+    passenger: null,
+    searchBehaviour: location.state.behaviour,
+    startWork: location.state.startWork, //5pm
+    endWork: location.state.endWork, //4am
+    startBreak: location.state.startBreak, //12am
+    endBreak: location.state.endBreak, //1am
+  });
+
+  // driversList.push(specialdriver);
 
   const [startWork, setStartWork] = useState("");
   const [endWork, setEndWork] = useState("");
@@ -175,88 +176,37 @@ export default function Map() {
     tolerance
   ) {
     setStartWork(startWork);
-    // setEndWork(endWork);
-    // setStartBreak(startBreak);
-    // setEndBreak(endBreak);
-    // setInputSpeed(speed);
-    // setBehaviour(behaviour);
-    // setTolerance(tolerance);
-
-    // //unique driver later to be created by input
-    // let specialdriver = new AnimationDriver({
-    //   id: 10,
-    //   currentLocation: generateRandomCoord(),
-    //   speed: speed,
-    //   defaultspeed: speed,
-    //   destination: generateRandomCoord(),
-    //   distanceWillingToTravel: tolerance,
-    //   path: null,
-    //   ref: null,
-    //   passenger: null,
-    //   searchBehaviour: behaviour,
-    //   startWork: 0, //7am
-    //   endWork: 600, //7pm
-    //   startBreak: 180, //11am
-    //   endBreak: 240, //12am
-    // });
-
-    // driversList.push(specialdriver);
   }
-
-  //unique driver later to be created by input
-  // let specialdriver = new AnimationDriver({
-  //   id: 10,
-  //   currentLocation: generateRandomCoord(),
-  //   speed: 60,
-  //   defaultspeed: 60,
-  //   destination: generateRandomCoord(),
-  //   distanceWillingToTravel: 5,
-  //   path: null,
-  //   ref: null,
-  //   passenger: null,
-  //   searchBehaviour: "Move",
-  //   startWork: startWork, //5pm
-  //   endWork: endWork, //4am
-  //   startBreak: startBreak, //12am
-  //   endBreak: endBreak, //1am
-  // });
-
-  // if (createdDriver === true) {
-  // }
-  let specialdriver = new AnimationDriver({
-    id: 10,
-    currentLocation: generateRandomCoord(),
-    speed: location.state.inputspeed,
-    defaultspeed: location.state.inputspeed,
-    destination: generateRandomCoord(),
-    distanceWillingToTravel: location.state.tolerance,
-    path: null,
-    ref: null,
-    passenger: null,
-    searchBehaviour: location.state.behaviour,
-    startWork: location.state.startWork, //5pm
-    endWork: location.state.endWork, //4am
-    startBreak: location.state.startBreak, //12am
-    endBreak: location.state.endBreak, //1am
-  });
-
-  driversList.push(specialdriver);
-  console.log(specialdriver, "hello");
-  console.log(driversList, "check entry");
-
-  let running = false;
-
-  // console.log(driversList, "drivers list before");
-  const [drivers, setDrivers] = useState(driversList);
 
   useEffect(() => {
     console.log("check if change");
-    console.log(createdDriver);
-    if (createdDriver === true) {
-    }
+
+    let specialdriver = new AnimationDriver({
+      id: 10,
+      currentLocation: generateRandomCoord(),
+      speed: location.state.inputspeed,
+      defaultspeed: location.state.inputspeed,
+      destination: generateRandomCoord(),
+      distanceWillingToTravel: location.state.tolerance,
+      path: null,
+      ref: null,
+      passenger: null,
+      searchBehaviour: location.state.behaviour,
+      startWork: location.state.startWork, //5pm
+      endWork: location.state.endWork, //4am
+      startBreak: location.state.startBreak, //12am
+      endBreak: location.state.endBreak, //1am
+    });
+
+    driversList.push(specialdriver);
+    console.log(drivers, "check this");
   }, [location]);
 
-  // console.log(drivers, "drivers after");
+  let running = false;
+
+  const [drivers, setDrivers] = useState(driversList);
+
+  console.log(drivers, "drivers after");
 
   let passengerListo = [];
 

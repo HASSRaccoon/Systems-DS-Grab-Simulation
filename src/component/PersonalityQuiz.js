@@ -42,7 +42,7 @@ export function PersonalityQuiz(props) {
   }
   // console.log(props.createSpecialDriver, "hello what is this");
 
-  const [startWork, setStartWork] = useState("yes bitch");
+  const [startWork, setStartWork] = useState("");
   const [endWork, setEndWork] = useState("");
   const [startBreak, setStartBreak] = useState("");
   const [endBreak, setEndBreak] = useState("");
