@@ -1182,30 +1182,30 @@ export default function Map() {
     setTimeout(() => {
       for (let i = 0; i < passengerPoints.features.length; i++) {
         if (passengerPoints.features[i].properties.id === driver.passenger.id) {
-          console.log(
-            "before removal, remaining passengers: ",
-            passengerPoints.features.length
-          );
+          // console.log(
+          //   "before removal, remaining passengers: ",
+          //   passengerPoints.features.length
+          // );
           const victimSoul = passengers.splice(i, 1); //remove passenger from computation first? but this is still in transit?
-          console.log(
-            "passenger " + victimSoul[0].id + " removed from computation"
-          );
+          // console.log(
+          //   "passenger " + victimSoul[0].id + " removed from computation"
+          // );
           const victimFace = passengerPoints.features.splice(i, 1); //remove passenger from map first? but this is still in transit?
-          console.log(
-            "passenger " + victimFace[0].properties.id + " removed from map"
-          );
-          console.log(
-            "after removal, remaining passengers: ",
-            passengerPoints.features.length
-          );
-          console.log(
-            "passenger points (list of psng noted on map): ",
-            passengerPoints.features
-          );
-          console.log(
-            "passenger list (list of psng in computation): ",
-            passengers
-          );
+          // console.log(
+          //   "passenger " + victimFace[0].properties.id + " removed from map"
+          // );
+          // console.log(
+          //   "after removal, remaining passengers: ",
+          //   passengerPoints.features.length
+          // );
+          // console.log(
+          //   "passenger points (list of psng noted on map): ",
+          //   passengerPoints.features
+          // );
+          // console.log(
+          //   "passenger list (list of psng in computation): ",
+          //   passengers
+          // );
           map.getSource("passengers").setData(passengerPoints);
           // console.log("how many times have i been looped through? ", i);
         }
@@ -1451,18 +1451,19 @@ export default function Map() {
           </Center>
           <Center>
             <div className="modal-slider">
-              <Slider color="cyan"
-              defaultValue={1}
-              min={1}
-              max={31}
-              marks={[
-                { value: 1, label: "1day" },
-                { value: 31, label: "31 days" },
-              ]}>
-              </Slider>
+              <Slider
+                color="cyan"
+                defaultValue={1}
+                min={1}
+                max={31}
+                marks={[
+                  { value: 1, label: "1day" },
+                  { value: 31, label: "31 days" },
+                ]}
+              ></Slider>
             </div>
           </Center>
-          
+
           <div className="modal-button">
             <Link to="/fastforward">
               <Button color="cyan" size="lg" onClick={stopAnimation}>
@@ -1495,6 +1496,8 @@ export default function Map() {
               // profits={profits}
               // options={options}
               // profits={state.profits}
+              profitlist={profitlist}
+              profits={profits}
               variable={profitlist}
             ></StackedChart>
           </div>
@@ -1505,7 +1508,11 @@ export default function Map() {
 
           <div className="modal-graph">
             {/* <img src="./dummy-graph.jpeg" width="300px"></img> */}
-            <StackedChart variable={distancelist}></StackedChart>
+            <StackedChart
+              profitlist={profitlist}
+              variable={distancelist}
+              profits={profits}
+            ></StackedChart>
           </div>
 
           <div className="modal-header">
@@ -1514,7 +1521,11 @@ export default function Map() {
 
           <div className="modal-graph">
             {/* <img src="./dummy-graph.jpeg" width="300px"></img> */}
-            <StackedChart variable={jobsdonelist}></StackedChart>
+            <StackedChart
+              profitlist={profitlist}
+              profits={profits}
+              variable={jobsdonelist}
+            ></StackedChart>
           </div>
           {/* <div className='nav-subheader'>
             <span> Live Profit Comparison: </span>
@@ -1528,11 +1539,16 @@ export default function Map() {
 
       <div className="map-container" ref={mapContainer} />
 
-      <div className='map-overlay'>
-        {visible && <Overlay color="#000" opacity={0.75} style={{right:350, top:70}} />}
-      </div> 
+      <div className="map-overlay">
+        {visible && (
+          <Overlay
+            color="#000"
+            opacity={0.75}
+            style={{ right: 350, top: 70 }}
+          />
+        )}
+      </div>
 
-      
       <div>
         {/* <div className="map-container" ref={mapContainer} /> */}
         <div className="topbar">

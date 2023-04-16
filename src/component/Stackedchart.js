@@ -22,32 +22,67 @@ export function StackedChart(props) {
   );
 
   const [test, setTest] = useState(50);
+  const [profit, setProfit] = useState(0);
 
   setInterval(() => {
     const random = (Math.random() * 100).toFixed(2);
     setTest(random);
   }, 3000);
 
-  setInterval(() => {
-    // console.log(props.variable, "update?");
-    // console.log(props.variable[0], "update?");
-    // setVariable(props.variable[0]);
-  }, 3000);
+  //   setInterval(() => {
+  //     const currentProfit = props.profitlist[0];
+  //     setProfit(currentProfit);
+  //     console.log(profit, "checking");
+  //   }, 3000);
+
+  //   setInterval(() => {
+  //     setData({
+  //       labels: ["You", "Type A Driver", "Type B Driver", "Type C Driver"],
+  //       datasets: [
+  //         {
+  //           label: "Profit",
+  //           data: [props.profitlist[0], 10, 60, 50],
+  //           backgroundColor: "rgb(53, 162, 235)",
+  //         },
+  //         //   {
+  //         //     label: props.variable,
+  //         //     data: [10, 20, 30, 40],
+  //         //     backgroundColor: "rgb(255, 99, 132)",
+  //         //   },
+  //       ],
+  //     });
+  //   }, 1000);
 
   const [variable, setVariable] = useState(0);
 
-  const labels = ["You", "Type A Driver", "Type B Driver", "Type C Driver"];
+  //   const labels = ["You", "Type A Driver", "Type B Driver", "Type C Driver"];
 
-  let data = {
-    labels,
+  //   let data = {
+  //     labels,
+  //     datasets: [
+  //       {
+  //         label: "temp",
+  //         data: [test, 60, 70, 80],
+  //         backgroundColor: "rgb(53, 162, 235)",
+  //       },
+  //     ],
+  //   };
+
+  const [data, setData] = useState({
+    labels: ["You", "Type A Driver", "Type B Driver", "Type C Driver"],
     datasets: [
       {
-        label: "temp",
-        data: [variable, 60, 70, 80],
+        label: "Profit",
+        data: [props.profitlist[0], 10, 60, 50],
         backgroundColor: "rgb(53, 162, 235)",
       },
+      //   {
+      //     label: props.variable,
+      //     data: [10, 20, 30, 40],
+      //     backgroundColor: "rgb(255, 99, 132)",
+      //   },
     ],
-  };
+  });
 
   const options = {
     plugins: {

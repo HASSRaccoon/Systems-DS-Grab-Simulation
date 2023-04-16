@@ -59,7 +59,8 @@ export function StatusDetails(props) {
           <span>Average profit: {avgprofit}</span>
         </div>
         <div className="nav-graph">
-          <img src="./dummy-graph.jpeg" width="300px"></img>
+          {/* <img src="./dummy-graph.jpeg" width="300px"></img> */}
+          {/* <StackedChart></StackedChart> */}
           <Button onClick={props.openModalGraph} color="cyan">
             SEE DETAILED GRAPHS<span></span>{" "}
           </Button>
