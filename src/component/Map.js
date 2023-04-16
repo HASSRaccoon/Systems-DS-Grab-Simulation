@@ -182,16 +182,16 @@ export default function Map() {
     console.log(createdDriver, "true?");
     if (location.state != null) {
       console.log("only print later");
+      // specialdriver
+      specialdriver.speed = location.state.inputspeed;
+      specialdriver.defaultspeed = location.state.inputspeed;
+      specialdriver.startWork = location.state.startWork;
+      specialdriver.endWork = location.state.endWork;
+      specialdriver.startBreak = location.state.startBreak;
+      specialdriver.endBreak = location.state.endBreak;
 
-      drivers[9].speed = location.state.inputspeed;
-      drivers[9].defaultspeed = location.state.inputspeed;
-      drivers[9].startWork = location.state.startWork;
-      drivers[9].endWork = location.state.endWork;
-      drivers[9].startBreak = location.state.startBreak;
-      drivers[9].endBreak = location.state.endBreak;
-
-      drivers[9].searchBehaviour = location.state.behaviour;
-      drivers[9].distanceWillingToTravel = location.state.tolerance;
+      specialdriver.searchBehaviour = location.state.behaviour;
+      specialdriver.distanceWillingToTravel = location.state.tolerance;
       // let driver = new AnimationDriver({
       //   id: 11,
       //   currentLocation: generateRandomCoord(),
