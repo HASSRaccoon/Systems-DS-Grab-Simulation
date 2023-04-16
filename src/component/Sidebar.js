@@ -15,7 +15,7 @@ function Sidebar(props) {
 
   const handleRenderQuiz = () => {
     setRenderType("summary");
-    props.setVisible((v) => !v)
+    props.setVisible((v) => !v);
   };
 
   const handleRenderSummary = () => {
@@ -36,6 +36,7 @@ function Sidebar(props) {
                 handleRenderQuiz={handleRenderQuiz}
                 createSpecialDriver={props.createSpecialDriver}
                 visible={props.visible}
+                handlecreatedDriver={props.handlecreatedDriver}
                 setVisible={props.setVisible}
               />
             )}

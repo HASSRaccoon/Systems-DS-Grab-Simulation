@@ -27,6 +27,7 @@ export function StackedChart(props) {
   setInterval(() => {
     const random = (Math.random() * 100).toFixed(2);
     setTest(random);
+    console.log(props);
   }, 3000);
 
   //   setInterval(() => {

@@ -37,6 +37,13 @@ mapboxgl.accessToken =
   "pk.eyJ1IjoieWVva2V3ZWkiLCJhIjoiY2xlcG5wZ3ZmMGUweTNxdGt4ZG1ldGhsYyJ9.HHNGnKUPolWAo5_UYwzCZg";
 
 export default function Map() {
+  let createdDriver = false;
+  function handlecreatedDriver() {
+    createdDriver = true;
+  }
+  const location = useLocation();
+  console.log(location);
+  console.log(location.state); // this works!
   function generateRandomCoord() {
     const Pos =
       sgJSON.features[Math.floor(Math.random() * sgJSON.features.length)]
@@ -197,29 +204,57 @@ export default function Map() {
   }
 
   //unique driver later to be created by input
+  // let specialdriver = new AnimationDriver({
+  //   id: 10,
+  //   currentLocation: generateRandomCoord(),
+  //   speed: 60,
+  //   defaultspeed: 60,
+  //   destination: generateRandomCoord(),
+  //   distanceWillingToTravel: 5,
+  //   path: null,
+  //   ref: null,
+  //   passenger: null,
+  //   searchBehaviour: "Move",
+  //   startWork: startWork, //5pm
+  //   endWork: endWork, //4am
+  //   startBreak: startBreak, //12am
+  //   endBreak: endBreak, //1am
+  // });
+
+  // if (createdDriver === true) {
+  // }
   let specialdriver = new AnimationDriver({
     id: 10,
     currentLocation: generateRandomCoord(),
-    speed: 60,
-    defaultspeed: 60,
+    speed: location.state.inputspeed,
+    defaultspeed: location.state.inputspeed,
     destination: generateRandomCoord(),
-    distanceWillingToTravel: 5,
+    distanceWillingToTravel: location.state.tolerance,
     path: null,
     ref: null,
     passenger: null,
-    searchBehaviour: "Move",
-    startWork: startWork, //5pm
-    endWork: endWork, //4am
-    startBreak: startBreak, //12am
-    endBreak: endBreak, //1am
+    searchBehaviour: location.state.behaviour,
+    startWork: location.state.startWork, //5pm
+    endWork: location.state.endWork, //4am
+    startBreak: location.state.startBreak, //12am
+    endBreak: location.state.endBreak, //1am
   });
 
   driversList.push(specialdriver);
+  console.log(specialdriver, "hello");
+  console.log(driversList, "check entry");
 
   let running = false;
 
   // console.log(driversList, "drivers list before");
   const [drivers, setDrivers] = useState(driversList);
+
+  useEffect(() => {
+    console.log("check if change");
+    console.log(createdDriver);
+    if (createdDriver === true) {
+    }
+  }, [location]);
 
   // console.log(drivers, "drivers after");
 
@@ -1341,27 +1376,6 @@ export default function Map() {
             },
           });
 
-          map.addSource("myroute", {
-            type: "geojson",
-            data: specialPath,
-          });
-          //driver
-          // map.addSource("driverpoint", {
-          //   type: "geojson",
-          //   data: driverpoint,
-          // });
-
-          map.addLayer({
-            id: "myroute",
-            source: "myroute",
-            type: "line",
-            paint: {
-              "line-width": 4,
-              // "line-color": "#FFFFFF",
-              "line-color": "#F1295B",
-            },
-          });
-
           //show all driver current locations
           map.addSource("drivers", {
             type: "geojson",
@@ -1412,6 +1426,22 @@ export default function Map() {
               "icon-rotation-alignment": "map",
               "icon-allow-overlap": true,
               "icon-ignore-placement": true,
+            },
+          });
+
+          map.addSource("myroute", {
+            type: "geojson",
+            data: specialPath,
+          });
+
+          map.addLayer({
+            id: "myroute",
+            source: "myroute",
+            type: "line",
+            paint: {
+              "line-width": 4,
+              // "line-color": "#FFFFFF",
+              "line-color": "#F1295B",
             },
           });
 
@@ -1467,6 +1497,7 @@ export default function Map() {
   };
 
   const openModalGraph = () => {
+    // stopAnimation();
     setModalGraphOpen(true);
   };
 
@@ -1743,6 +1774,7 @@ export default function Map() {
         openModalGraph={openModalGraph}
         visible={visible}
         setVisible={setVisible}
+        handlecreatedDriver={handlecreatedDriver}
       ></Sidebar>
     </>
   );

@@ -1,7 +1,7 @@
 import React from "react";
 import * as IoIcons from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 // import Button from '@mui/material/Button';
 import {
   TextInput,
@@ -19,24 +19,36 @@ import { ScrollArea } from "@mantine/core";
 import "./Sidebar.css";
 
 export function PersonalityQuiz(props) {
-  // const navigate = useNavigate();
-  // const [workPeriod, setWorkPeriod] = useState([{ start: "1PM", end: "6PM" }]);
-  // const [restPeriod, setRestPeriod] = useState([{ start: "4PM", end: "5PM" }]);
-  // function passtoMap() {
-  //   navigate("/", {
-  //     data: { workPeriod: workPeriod, restPeriod: restPeriod },
-  //   });
-  // }
+  const navigate = useNavigate();
 
+  function passtoMap() {
+    navigate("/", {
+      state: {
+        startWork: startWork,
+        endWork: endWork,
+        startBreak: startBreak,
+        endBreak: endBreak,
+        inputspeed: inputspeed,
+        behaviour: behaviour,
+        tolerance: tolerance,
+      },
+    });
+  }
+
+  function handlestart() {
+    props.handlecreatedDriver();
+    passtoMap();
+    props.handleRenderQuiz();
+  }
   // console.log(props.createSpecialDriver, "hello what is this");
 
-  const [startWork, setStartWork] = useState("");
+  const [startWork, setStartWork] = useState("yes bitch");
   const [endWork, setEndWork] = useState("");
   const [startBreak, setStartBreak] = useState("");
   const [endBreak, setEndBreak] = useState("");
-  const [inputspeed, setInputSpeed] = useState(0);
+  const [inputspeed, setInputSpeed] = useState("");
   const [behaviour, setBehaviour] = useState("");
-  const [tolerance, setTolerance] = useState(0);
+  const [tolerance, setTolerance] = useState("");
 
   function getStartWork(e) {
     setStartWork(e);
@@ -68,6 +80,10 @@ export function PersonalityQuiz(props) {
     setTolerance(e);
     console.log(tolerance, "hello 7");
   }
+
+  useEffect(() => {
+    console.log(tolerance);
+  }, [tolerance]);
 
   const form = useForm({
     initialValues: {
@@ -274,6 +290,7 @@ export function PersonalityQuiz(props) {
               { value: 50, label: "50Km/h" },
               { value: 100, label: "100Km/h" },
             ]}
+            onChange={(e) => getInputSpeed(e)}
           />
         </div>
         <div className="nav-desc"></div>
@@ -292,9 +309,10 @@ export function PersonalityQuiz(props) {
           <Select
             placeholder="choose one"
             data={[
-              { value: "wait", label: "wait on the spot" },
-              { value: "drive", label: "drive around" },
+              { value: "Wait", label: "wait on the spot" },
+              { value: "Move", label: "drive around" },
             ]}
+            onChange={(e) => getBehaviour(e)}
           />
         </div>
         <span> </span>
@@ -312,13 +330,14 @@ export function PersonalityQuiz(props) {
         <div className="nav-slider">
           <span></span>
           <Slider
-          min={0}
-          max={10}
+            min={0}
+            max={10}
             marks={[
               { value: 0, label: "0 Km" },
               { value: 5, label: "5 Km" },
               { value: 10, label: "10 Km" },
             ]}
+            onChange={(e) => getTolerance(e)}
           />
         </div>
 
@@ -327,7 +346,8 @@ export function PersonalityQuiz(props) {
         <span> </span>
 
         <div className="start-button">
-          <Button color="cyan" onClick={props.handleRenderQuiz}>
+          {/* <Button color="cyan" onClick={props.handleRenderQuiz}> */}
+          <Button color="cyan" onClick={handlestart}>
             START SIMULATION<span></span>
           </Button>
         </div>
