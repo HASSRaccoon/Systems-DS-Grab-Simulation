@@ -21,13 +21,13 @@ export function StackedChart(props) {
     Legend
   );
 
-  const [test, setTest] = useState(50);
+  const [test, setTest] = useState(0);
   const [profit, setProfit] = useState(0);
 
   setInterval(() => {
-    const random = (Math.random() * 100).toFixed(2);
+    const random = (Math.random() * 100).toFixed(1);
     setTest(random);
-    console.log(props);
+    console.log(random);
   }, 3000);
 
   //   setInterval(() => {
@@ -56,40 +56,40 @@ export function StackedChart(props) {
 
   const [variable, setVariable] = useState(0);
 
-  //   const labels = ["You", "Type A Driver", "Type B Driver", "Type C Driver"];
+  const labels = ["You", "Type A Driver", "Type B Driver", "Type C Driver"];
 
-  //   let data = {
-  //     labels,
-  //     datasets: [
-  //       {
-  //         label: "temp",
-  //         data: [test, 60, 70, 80],
-  //         backgroundColor: "rgb(53, 162, 235)",
-  //       },
-  //     ],
-  //   };
-
-  const [data, setData] = useState({
-    labels: ["You", "Type A Driver", "Type B Driver", "Type C Driver"],
+  let data = {
+    labels,
     datasets: [
       {
-        label: "Profit",
-        data: [props.profitlist[0], 10, 60, 50],
+        label: props.label,
+        data: [test, 0.8 * test, 0.7 * test, 1.2 * test],
         backgroundColor: "rgb(53, 162, 235)",
       },
-      //   {
-      //     label: props.variable,
-      //     data: [10, 20, 30, 40],
-      //     backgroundColor: "rgb(255, 99, 132)",
-      //   },
     ],
-  });
+  };
+
+  // const [data, setData] = useState({
+  //   labels: ["You", "Type A Driver", "Type B Driver", "Type C Driver"],
+  //   datasets: [
+  //     {
+  //       label: "Profit",
+  //       data: [test, 100, 45, 70],
+  //       backgroundColor: "rgb(53, 162, 235)",
+  //     },
+  //     //   {
+  //     //     label: props.variable,
+  //     //     data: [10, 20, 30, 40],
+  //     //     backgroundColor: "rgb(255, 99, 132)",
+  //     //   },
+  //   ],
+  // });
 
   const options = {
     plugins: {
       title: {
         display: true,
-        text: "Chart.js Bar Chart - Stacked",
+        // text: "Chart.js Bar Chart - Stacked",
       },
     },
     responsive: true,

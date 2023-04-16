@@ -1626,6 +1626,7 @@ export default function Map() {
               profitlist={profitlist}
               profits={profits}
               variable={profitlist}
+              label={"Profit"}
             ></StackedChart>
           </div>
 
@@ -1639,6 +1640,7 @@ export default function Map() {
               profitlist={profitlist}
               variable={distancelist}
               profits={profits}
+              label={"Distanced Travelled"}
             ></StackedChart>
           </div>
 
@@ -1652,6 +1654,7 @@ export default function Map() {
               profitlist={profitlist}
               profits={profits}
               variable={jobsdonelist}
+              label={"Jobs Done"}
             ></StackedChart>
           </div>
           {/* <div className='nav-subheader'>

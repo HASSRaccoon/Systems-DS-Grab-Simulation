@@ -42,6 +42,7 @@ function Sidebar(props) {
             )}
             {renderType === "summary" && (
               <SummarizedSidebar
+                label={props.label}
                 statelist={props.statelist}
                 timelist={props.timelist}
                 speedlist={props.speedlist}
