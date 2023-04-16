@@ -5,19 +5,30 @@ import Globals from "./agents/Globals.js";
 import sgJSON from "./road-network.json";
 import * as turf from "@turf/turf";
 import PathFinder, { pathToGeoJSON } from "geojson-path-finder";
-
+import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import exportFromJSON from "export-from-json";
 import "./App.css";
 
 export default function App_ruiyang() {
-  const DAYS = 1;
+  const location = useLocation();
+  console.log(location, "hellooooo");
+  const navigate = useNavigate();
+  const inputDriverType = location.state.drivertype;
+  const inputNumDrivers = location.state.numDrivers;
+  const inputNumPassengersPeak = location.state.numPassengersPeak;
+  const inputNumPassengersNPeak = location.state.numPassengersNPeak;
+  const inputFFW = location.state.ffwdays;
+
+  const DAYS = inputFFW; //1
   const TICKRATE = 1440; //NOTE: 1 tick = 1 minute
   const TICKS = TICKRATE * DAYS;
 
-  const NUM_DRIVERS = 5;
-  const NUM_PASSENGERS = 50;
-  const NUM_PASSENGERS_PEAK = 300;
+  const NUM_DRIVERS = inputNumDrivers; //5
+  const NUM_PASSENGERS = inputNumPassengersNPeak; //50
+  const NUM_PASSENGERS_PEAK = inputNumPassengersPeak; //300
   const PROB_PASSENGERS_CANCEL = 0.05;
+  const DRIVER_TYPE = inputDriverType;
 
   // const simulationIter = 10; //cannot work as the simulation stores the data
   const EXPORT = true;

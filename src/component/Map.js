@@ -6,6 +6,7 @@ import sgJSON from "./../data/road-network.json";
 import * as turf from "@turf/turf";
 import PathFinder, { pathToGeoJSON } from "geojson-path-finder";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import mapboxgl from "mapbox-gl";
 import caricon from "../public/grabcar.png";
 import {
@@ -28,6 +29,7 @@ import "./Map.css";
 import * as IoIcons from "react-icons/io5";
 import { useLocation } from "react-router-dom";
 import { StackedChart } from "./Stackedchart";
+
 // import StackedChart from "./Stackedchart";
 // --- ---------------------------------- ---
 
@@ -35,12 +37,6 @@ mapboxgl.accessToken =
   "pk.eyJ1IjoieWVva2V3ZWkiLCJhIjoiY2xlcG5wZ3ZmMGUweTNxdGt4ZG1ldGhsYyJ9.HHNGnKUPolWAo5_UYwzCZg";
 
 export default function Map() {
-  // const location = useLocation();
-
-  // const checkWork = location.data.workPeriod;
-  // const checkRest = location.date.restPeriod;
-  // console.log(checkWork, checkRest, "PLEASE PASS");
-
   function generateRandomCoord() {
     const Pos =
       sgJSON.features[Math.floor(Math.random() * sgJSON.features.length)]
@@ -1007,6 +1003,50 @@ export default function Map() {
 
   updateStats();
 
+  const navigate = useNavigate();
+  const [drivertype, setDriverType] = useState("");
+  const [numDrivers, setNumDrivers] = useState(0);
+  const [numPassengersPeak, setNumPassengersPeak] = useState(0);
+  const [numPassengersNPeak, setNumPassengersNPeak] = useState(0);
+  const [ffwdays, setFFWDays] = useState(0);
+
+  function getdrivertype(e) {
+    setDriverType(e);
+  }
+  function getFFWdays(e) {
+    console.log(e, "hello????");
+    const value = e;
+    setFFWDays(value);
+    // console.log(ffwdays, "hello?");
+  }
+
+  useEffect(() => {
+    console.log(ffwdays);
+  }, [ffwdays]);
+
+  function getdrivers(e) {
+    setNumDrivers(e);
+  }
+  function getpassengers(e) {
+    setNumPassengersPeak(e);
+  }
+  function getNPpassengers(e) {
+    setNumPassengersNPeak(e);
+  }
+
+  function handleFFW() {
+    stopAnimation();
+    navigate("/fastforward", {
+      state: {
+        drivertype: drivertype,
+        numDrivers: numDrivers,
+        numPassengersPeak: numPassengersPeak,
+        numPassengersNPeak: numPassengersNPeak,
+        ffwdays: ffwdays,
+      },
+    });
+  }
+
   function handleSearch(driver) {
     const initialTime = driver.timeCounter;
     driver.Log[driver.completedJobs] = {};
@@ -1468,6 +1508,7 @@ export default function Map() {
                   { value: "B", label: "Driver Type B" },
                   { value: "C", label: "Driver Type C" },
                 ]}
+                onChange={(e) => getdrivertype(e)}
               />
             </div>
           </Center>
@@ -1488,6 +1529,7 @@ export default function Map() {
                   { value: 1, label: "1 driver" },
                   { value: 300, label: "300 drivers" },
                 ]}
+                onChange={(e) => getdrivers(e)}
               ></Slider>
             </div>
           </Center>
@@ -1508,6 +1550,7 @@ export default function Map() {
                   { value: 1, label: "1 passenger" },
                   { value: 300, label: "300 passengers" },
                 ]}
+                onChange={(e) => getNPpassengers(e)}
               ></Slider>
             </div>
           </Center>
@@ -1528,6 +1571,7 @@ export default function Map() {
                   { value: 1, label: "1 passenger" },
                   { value: 300, label: "300 passengers" },
                 ]}
+                onChange={(e) => getpassengers(e)}
               ></Slider>
             </div>
           </Center>
@@ -1548,17 +1592,18 @@ export default function Map() {
                   { value: 1, label: "1 day" },
                   { value: 31, label: "31 days" },
                 ]}
+                onChange={(e) => getFFWdays(e)}
               ></Slider>
             </div>
           </Center>
 
           <div className="modal-button">
-            <Link to="/fastforward">
-              <Button color="cyan" size="lg" onClick={stopAnimation}>
-                <IoIcons.IoCheckmarkOutline />
-                <span></span>
-              </Button>
-            </Link>
+            {/* <Link to="/fastforward"> */}
+            <Button color="cyan" size="lg" onClick={handleFFW}>
+              <IoIcons.IoCheckmarkOutline />
+              <span></span>
+            </Button>
+            {/* </Link> */}
           </div>
         </Modal>
       </Center>
