@@ -61,7 +61,7 @@ export default class Globals{
     
     registerDriver(driver) {
         this._drivers.push(driver);
-        console.log(`registered driver ${driver}`)
+        console.log(`(LOG) registered driver ${driver.id}: `, driver)
       }
     
     unregisterDriver(driver) {
@@ -120,7 +120,7 @@ export default class Globals{
       const fare =
         3.5 + this.pricePerKm * distance + this.pricePerMinute * minutes;
       const finalfare =
-        this.checkPeak(tick) === false ? fare * this.peakFareMultiplier : fare;
+        this.checkPeak(tick) === true ? fare * this.peakFareMultiplier : fare;
       return ((finalfare*(1-this.commissionReduction)) - this.platformFee);
     }
 
