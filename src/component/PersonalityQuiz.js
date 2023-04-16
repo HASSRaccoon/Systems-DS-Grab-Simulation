@@ -36,8 +36,8 @@ export function PersonalityQuiz(props) {
   }
 
   function handlestart() {
-    props.handlecreatedDriver();
     passtoMap();
+    props.handlecreatedDriver();
     props.handleRenderQuiz();
   }
   // console.log(props.createSpecialDriver, "hello what is this");

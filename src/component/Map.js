@@ -37,10 +37,6 @@ mapboxgl.accessToken =
   "pk.eyJ1IjoieWVva2V3ZWkiLCJhIjoiY2xlcG5wZ3ZmMGUweTNxdGt4ZG1ldGhsYyJ9.HHNGnKUPolWAo5_UYwzCZg";
 
 export default function Map() {
-  let createdDriver = false;
-  function handlecreatedDriver() {
-    createdDriver = true;
-  }
   const location = useLocation();
   console.log(location);
   console.log(location.state); // this works!
@@ -142,22 +138,25 @@ export default function Map() {
   let specialdriver = new AnimationDriver({
     id: 10,
     currentLocation: generateRandomCoord(),
-    speed: location.state.inputspeed,
-    defaultspeed: location.state.inputspeed,
+    speed: 90,
+    defaultspeed: 90,
     destination: generateRandomCoord(),
-    distanceWillingToTravel: location.state.tolerance,
+    distanceWillingToTravel: 5,
     path: null,
     ref: null,
     passenger: null,
-    searchBehaviour: location.state.behaviour,
-    startWork: location.state.startWork, //5pm
-    endWork: location.state.endWork, //4am
-    startBreak: location.state.startBreak, //12am
-    endBreak: location.state.endBreak, //1am
+    searchBehaviour: "Move",
+    startWork: 0, //5pm
+    endWork: 600, //4am
+    startBreak: 180, //12am
+    endBreak: 240, //1am
   });
 
-  // driversList.push(specialdriver);
-
+  driversList.push(specialdriver);
+  let createdDriver = false;
+  function handlecreatedDriver() {
+    createdDriver = true;
+  }
   const [startWork, setStartWork] = useState("");
   const [endWork, setEndWork] = useState("");
   const [startBreak, setStartBreak] = useState("");
@@ -180,25 +179,39 @@ export default function Map() {
 
   useEffect(() => {
     console.log("check if change");
+    console.log(createdDriver, "true?");
+    if (location.state != null) {
+      console.log("only print later");
 
-    let specialdriver = new AnimationDriver({
-      id: 10,
-      currentLocation: generateRandomCoord(),
-      speed: location.state.inputspeed,
-      defaultspeed: location.state.inputspeed,
-      destination: generateRandomCoord(),
-      distanceWillingToTravel: location.state.tolerance,
-      path: null,
-      ref: null,
-      passenger: null,
-      searchBehaviour: location.state.behaviour,
-      startWork: location.state.startWork, //5pm
-      endWork: location.state.endWork, //4am
-      startBreak: location.state.startBreak, //12am
-      endBreak: location.state.endBreak, //1am
-    });
+      drivers[9].speed = location.state.inputspeed;
+      drivers[9].defaultspeed = location.state.inputspeed;
+      drivers[9].startWork = location.state.startWork;
+      drivers[9].endWork = location.state.endWork;
+      drivers[9].startBreak = location.state.startBreak;
+      drivers[9].endBreak = location.state.endBreak;
 
-    driversList.push(specialdriver);
+      drivers[9].searchBehaviour = location.state.behaviour;
+      drivers[9].distanceWillingToTravel = location.state.tolerance;
+      // let driver = new AnimationDriver({
+      //   id: 11,
+      //   currentLocation: generateRandomCoord(),
+      //   speed: location.state.inputspeed,
+      //   defaultspeed: location.state.inputspeed,
+      //   destination: generateRandomCoord(),
+      //   distanceWillingToTravel: location.state.tolerance,
+      //   path: null,
+      //   ref: null,
+      //   passenger: null,
+      //   searchBehaviour: location.state.behaviour,
+      //   startWork: location.state.startWork, //5pm
+      //   endWork: location.state.endWork, //4am
+      //   startBreak: location.state.startBreak, //12am
+      //   endBreak: location.state.endBreak, //1am
+      // });
+      // driversList.push(driver);
+      // setDrivers(driversList);
+    }
+
     console.log(drivers, "check this");
   }, [location]);
 
