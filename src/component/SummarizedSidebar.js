@@ -143,10 +143,10 @@ export function SummarizedSidebar(props) {
             <span>Wait behavior: Wait</span>
           </div>
         </div>
-        <div className="nav-text">
+        {/* <div className="nav-text">
           <IoIcons.IoAccessibilityOutline />
           <span>Pickup tolerance: 5 Km</span>
-        </div>
+        </div> */}
 
         {/* <div className='nav-button'>
                 <Button variant="contained" color='primary'>see details</Button>

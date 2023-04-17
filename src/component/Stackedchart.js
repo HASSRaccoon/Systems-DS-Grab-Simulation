@@ -21,14 +21,27 @@ export function StackedChart(props) {
     Legend
   );
 
-  const [test, setTest] = useState(0);
+  const [test1, setTest1] = useState(0);
+  const [test2, setTest2] = useState(0);
+  const [test3, setTest3] = useState(0);
+  const [test4, setTest4] = useState(0);
   const [profit, setProfit] = useState(0);
 
   setInterval(() => {
-    const random = (Math.random() * 100).toFixed(1);
-    setTest(random);
-    console.log(random);
-  }, 3000);
+    //  + test,
+    // + (Math.random() * 100).toFixed(1)
+
+    const random1 = Math.floor(Math.random() * 10 + 1);
+    const random2 = Math.floor(Math.random() * 10 + 1);
+    const random3 = Math.floor(Math.random() * 10 + 1);
+    const random4 = Math.floor(Math.random() * 10 + 1);
+    // const increase = (Math.random() * 100).toFixed(1);
+    setTest1(test1 + random1);
+    setTest2(test2 + random2);
+    setTest3(test3 + random3);
+    setTest4(test4 + random4);
+    // console.log(random);
+  }, 1000);
 
   //   setInterval(() => {
   //     const currentProfit = props.profitlist[0];
@@ -57,13 +70,16 @@ export function StackedChart(props) {
   const [variable, setVariable] = useState(0);
 
   const labels = ["You", "Type A Driver", "Type B Driver", "Type C Driver"];
-
+  // Math.floor(Math.random() * 10 + 1) + test,
+  // Math.floor(Math.random() * 10 + 1) + test,
+  // Math.floor(Math.random() * 10 + 1) + test,
+  // Math.floor(Math.random() * 10 + 1) + test,
   let data = {
     labels,
     datasets: [
       {
         label: props.label,
-        data: [test, 0.8 * test, 0.7 * test, 1.2 * test],
+        data: [test1, test2, test3, test4],
         backgroundColor: "rgb(53, 162, 235)",
       },
     ],
