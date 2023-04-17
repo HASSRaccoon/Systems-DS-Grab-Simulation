@@ -317,7 +317,7 @@ export function PersonalityQuiz(props) {
         </div>
         <span> </span>
 
-        <div className="nav-subheader">
+        {/* <div className="nav-subheader">
           <IoIcons.IoAccessibilityOutline />
           <span> Your Pickup Tolerance: </span>
         </div>
@@ -325,9 +325,9 @@ export function PersonalityQuiz(props) {
         <div className="nav-smallspace"></div>
         <div className="nav-desc">
           <span>Maximum distance you're willing to travel to pickup: </span>
-        </div>
-        <div className="small-space"></div>
-        <div className="nav-slider">
+        </div> */}
+        {/* <div className="small-space"></div> */}
+        {/* <div className="nav-slider">
           <span></span>
           <Slider
             min={0}
@@ -339,11 +339,11 @@ export function PersonalityQuiz(props) {
             ]}
             onChange={(e) => getTolerance(e)}
           />
-        </div>
-
+        </div> */}
+        {/* 
         <span> </span>
 
-        <span> </span>
+        <span> </span> */}
 
         <div className="start-button">
           {/* <Button color="cyan" onClick={props.handleRenderQuiz}> */}
