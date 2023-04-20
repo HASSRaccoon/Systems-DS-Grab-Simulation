@@ -1,15 +1,15 @@
-import logo from "./logo.svg";
+// import logo from "./logo.svg";
 import "./App.css";
 import React from "react";
-import Screen from "./pages/Screen";
+// import Screen from "./pages/Screen";
 import Map from "./component/Map";
-import Grabies from "./agents/Grabies";
-import Sidebar from "./component/Sidebar";
-import * as IoIcons from "react-icons/io5";
+// import Grabies from "./agents/Grabies";
+// import Sidebar from "./component/Sidebar";
+// import * as IoIcons from "react-icons/io5";
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { StatusDetails } from "./component/StatusDetails";
-import { SummarizedSidebar } from "./component/SummarizedSidebar";
+// import { StatusDetails } from "./component/StatusDetails";
+// import { SummarizedSidebar } from "./component/SummarizedSidebar";
 // import App_kewei from "./App_kewei";
 // import { App_kewei } from "./App_kewei";
 import App_ruiyang from "./App_ruiyang";

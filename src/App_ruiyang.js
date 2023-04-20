@@ -1,19 +1,20 @@
-import Driver from "./agents/Driver.js";
-import Passenger from "./agents/Passenger.js";
-import Globals from "./agents/Globals.js";
+import Driver from "./Agents/driver.js";
+import Passenger from "./Agents/passenger.js";
+import Globals from "./Agents/globals.js";
 
-import sgJSON from "./road-network.json";
+import sgJSON from "./data/road-network.json";
 import * as turf from "@turf/turf";
 import PathFinder, { pathToGeoJSON } from "geojson-path-finder";
 import { useLocation } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import exportFromJSON from "export-from-json";
 import "./App.css";
 
 export default function App_ruiyang() {
   const location = useLocation();
-  console.log(location, "hellooooo");
-  const navigate = useNavigate();
+  console.log("Fast Forward Days: ", location.state.ffwdays);
+  console.log("Driver Type: ", location.state.drivertype);
+  // const navigate = useNavigate();
   const inputDriverType = location.state.drivertype;
   const inputNumDrivers = location.state.numDrivers;
   const inputNumPassengersPeak = location.state.numPassengersPeak;
@@ -40,73 +41,75 @@ export default function App_ruiyang() {
   let drivers = [];
   const jsonName = "Grabie_Simulation_Output";
   for (let i = 0; i < NUM_DRIVERS; i++) {
-    // Type A
-    drivers.push(
-      //CHANGE PER SIMULATION
-      {
-        id: `A${i}`,
-        speed: 80,
-        state: "searching",
-        framesToMove: 0,
-        moveRadius: 5,
-        startTime: 1020, //NOTE: 5pm
-        endTime: 240, //NOTE: 4am
-        breakStart: 0, //NOTE: 12am
-        breakEnd: 60, //NOTE: 1am
-      }
-    );
-
+    if (DRIVER_TYPE === "A") {
+      // Type A
+      drivers.push(
+        //CHANGE PER SIMULATION
+        {
+          id: `A${i}`,
+          speed: 80,
+          state: "searching",
+          framesToMove: 0,
+          moveRadius: 5,
+          startTime: 1020, //NOTE: 5pm
+          endTime: 240, //NOTE: 4am
+          breakStart: 0, //NOTE: 12am
+          breakEnd: 60, //NOTE: 1am
+        }
+      );
+    } else if (DRIVER_TYPE === "B") {
     // //Type B
-    // drivers.push( //CHANGE PER SIMULATION
-    //         {
-    //             id: `B${i}`,
-    //             speed: 90,
-    //             state: 'searching',
-    //             framesToMove: 0,
-    //             moveRadius: 5,
-    //             startTime: 420, //NOTE: 7am
-    //             endTime: 1140, //NOTE: 7pm
-    //             breakStart: 600, //NOTE: 10am
-    //             breakEnd: 660, //NOTE: 11am
-    //         }
-    //     );
-
-    // //Type C
-    // drivers.push( //CHANGE PER SIMULATION
-    //         {
-    //             id: `C${i}`,
-    //             speed: 70,
-    //             state: 'searching',
-    //             framesToMove: 9999999,
-    //             moveRadius: 0,
-    //             startTime: 480, //NOTE: 8am
-    //             endTime: 1080, //NOTE: 6pm
-    //             breakStart: 660, //NOTE: 10am
-    //             breakEnd: 720, //NOTE: 11am
-    //         }
-    //     );
+      drivers.push( //CHANGE PER SIMULATION
+              {
+                  id: `B${i}`,
+                  speed: 90,
+                  state: 'searching',
+                  framesToMove: 0,
+                  moveRadius: 5,
+                  startTime: 420, //NOTE: 7am
+                  endTime: 1140, //NOTE: 7pm
+                  breakStart: 600, //NOTE: 10am
+                  breakEnd: 660, //NOTE: 11am
+              }
+          );
+    } else if (DRIVER_TYPE === "C") {
+      // //Type C
+      drivers.push( //CHANGE PER SIMULATION
+              {
+                  id: `C${i}`,
+                  speed: 70,
+                  state: 'searching',
+                  framesToMove: 9999999,
+                  moveRadius: 0,
+                  startTime: 480, //NOTE: 8am
+                  endTime: 1080, //NOTE: 6pm
+                  breakStart: 660, //NOTE: 10am
+                  breakEnd: 720, //NOTE: 11am
+              }
+          );
+    }   
   }
-
-  let passengers = [
-    {
-      id: "passenger1",
-      cancelTendency: 1000,
-      // currentLocation: generateRandomCoord(),
-      // destination: generateRandomCoord(),
-    },
-    {
-      id: "passenger2",
-      cancelTendency: 1000,
-    },
-    {
-      id: "passenger3",
-      cancelTendency: 1000,
-    },
-    {
-      id: "passenger4",
-      cancelTendency: 1000,
-    },
-  ];
+  // Testing: passenger spawns
+  // let passengers = [
+  //   {
+  //     id: "passenger1",
+  //     cancelTendency: 1000,
+  //     // currentLocation: generateRandomCoord(),
+  //     // destination: generateRandomCoord(),
+  //   },
+  //   {
+  //     id: "passenger2",
+  //     cancelTendency: 1000,
+  //   },
+  //   {
+  //     id: "passenger3",
+  //     cancelTendency: 1000,
+  //   },
+  //   {
+  //     id: "passenger4",
+  //     cancelTendency: 1000,
+  //   },
+  // ];
 
   let god = new Globals();
   let passengerLs = [];
@@ -117,7 +120,7 @@ export default function App_ruiyang() {
   // drivers.map((driver) => driverLs.push(new Driver(driver)));
   drivers.map((driver) => god.registerDriver(new Driver(driver)));
 
-  passengers.map((passenger) => passengerLs.push(new Passenger(passenger)));
+  // passengers.map((passenger) => passengerLs.push(new Passenger(passenger)));
 
   function buildPath(start, end) {
     const path = pathToGeoJSON(
@@ -139,7 +142,7 @@ export default function App_ruiyang() {
     return result;
   }
 
-  function assignPassenger(driver) {
+  function assignPassenger(driver) { //Assign passenger to driver if driver is searching
     // console.log('assigning passenger')
     if (passengerLs.length > 0 && driver.state === "searching") {
       let radius = 0;
@@ -209,20 +212,8 @@ export default function App_ruiyang() {
     }
   }
 
-  // Old assignPassenger function
-  // function assignPassenger(driver) { //TODO: need to assign nearest passenger instead of random assignment
-  //     if (passengerLs.length > 0 && driver.state === "searching") {
-  //         let passengerIndex = Math.floor(Math.random() * passengerLs.length); //DEBUG: assigning random passenger part
-  //         let currentPassenger = passengerLs[passengerIndex];
-  //         if (currentPassenger.driver === null){ //NOTE: to avoid reassigning passenger to another driver
-  //             driver.passenger = currentPassenger;
-  //             currentPassenger.driver = driver;
-  //             passengerLs = passengerLs.filter(passenger => passenger.id !== currentPassenger.id)
-  //         }
-  //     }
-  // }
 
-  function newPassenger() {
+  function newPassenger() { //Generate new passenger
     let passenger = new Passenger({
       id: "passenger" + generateString(7),
       cancelTendency: Math.floor(Math.random() * 10),
@@ -230,7 +221,7 @@ export default function App_ruiyang() {
     passengerLs.push(passenger);
   }
 
-  function pathGenerator(driver, location, destination) {
+  function pathGenerator(driver, location, destination) { //Generate path for driver
     if (location === destination || destination === null) return;
     // console.log('pathGenerator driver ', driver.id,' loc: ', location, ' dest: ', destination)
     let path = buildPath(location, destination);
@@ -259,7 +250,7 @@ export default function App_ruiyang() {
       }
     }
   }
-  function updateCurrentLoc(driver, location, destination, distance) {
+  function updateCurrentLoc(driver, location, destination, distance) { //Update driver's current location
     if (location === destination || destination === null) return;
 
     if (
@@ -283,7 +274,7 @@ export default function App_ruiyang() {
 
   let driverBucket = []; //NOTE: bucket to store drivers that are available to be assigned to passenger
 
-  function getRandomFromBucket() {
+  function getRandomFromBucket() { //Get random driver from bucket
     var randomIndex = Math.floor(Math.random() * driverBucket.length);
     return driverBucket.splice(randomIndex, 1)[0];
   }
@@ -328,7 +319,7 @@ export default function App_ruiyang() {
           }
         }
         for (let i = 0; i < passengerLs.length; i++) {
-          //NOTE: passenger cancelling
+          //NOTE: passenger cancelling behaviour
           passengerLs[i].waitingTime += 1;
           if (passengerLs[i].waitingTime >= passengerLs[i].cancelTendency) {
             let cancelRate = Math.random();

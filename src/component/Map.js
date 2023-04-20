@@ -20,9 +20,9 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 // import { Center } from "@mantine/core";
-import AnimationDriver from "../agents/AnimationDriver.js";
-import AnimationPassenger from "../agents/AnimationPassenger.js";
-import Globals from "../agents/Globals.js";
+import AnimationDriver from "../Agents/AnimationDriver.js";
+import AnimationPassenger from "../Agents/AnimationPassenger.js";
+import Globals from "../Agents/globals.js";
 import Sidebar from "./Sidebar.js";
 import { convertLength } from "@turf/turf";
 import "./Map.css";
@@ -41,9 +41,13 @@ export default function Map() {
   console.log(location);
   console.log(location.state); // this works!
   function generateRandomCoord() {
-    const Pos =
-      sgJSON.features[Math.floor(Math.random() * sgJSON.features.length)]
-        .geometry.coordinates[0];
+    let featureIndex = Math.floor(Math.random() * sgJSON.features.length);
+    let coordinateIndex = Math.floor(
+      Math.random() * sgJSON.features[featureIndex].geometry.coordinates.length
+    );
+
+    let Pos =
+      sgJSON.features[featureIndex].geometry.coordinates[coordinateIndex];
     return Pos;
   }
 
@@ -1518,10 +1522,10 @@ export default function Map() {
                 color="cyan"
                 defaultValue={1}
                 min={1}
-                max={300}
+                max={50}
                 marks={[
                   { value: 1, label: "1 driver" },
-                  { value: 300, label: "300 drivers" },
+                  { value: 50, label: "50 drivers" },
                 ]}
                 onChange={(e) => getdrivers(e)}
               ></Slider>

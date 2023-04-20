@@ -1,4 +1,4 @@
-import sgJSON from "./road-network.json";
+import sgJSON from "./../data/road-network.json";
 
 export default class Passenger {
   constructor(props) {
