@@ -2,15 +2,16 @@ import React from "react";
 import styles from "./styles.module.css";
 import { moveTo } from "./move.js";
 
-export default class Passenger {
+export default class AnimationPassenger {
   constructor(props) {
+    this.id = props.id;
     this.state = "waiting";
     this.currentLocation = props.currentLocation;
     this.destination = props.destination;
     this.waitingTime = 0;
     this.driver = null;
     this.ref = props.ref;
-    this.id = props.id;
+    this.cancelTendency = props.cancelTendency;
     this.counter = 0;
     this.agentType = "passenger";
 
@@ -18,10 +19,19 @@ export default class Passenger {
     // console.log(`Passenger appear at ${this.appearTime}`);
   }
 
-  // do we need a state for car not arrived yet?
-
-  carArrived(timestamp, driver) {
-    this.driver = driver;
+  wait() {
+    console.log("wait");
+  }
+  // carArrived(timestamp, driver){
+  //     this.driver = driver;
+  //     this.state = 'transit';
+  //     if (this.driver.currentLocation == this.currentLocation){
+  //         this.waitingTime = timestamp - this.appearTime;
+  //         console.log(`Passenger waiting time: ${this.waitingTime}`)
+  //         this.state = 'transit';
+  //     }
+  // }
+  carArrived(timestamp) {
     this.state = "transit";
     if (this.driver.currentLocation == this.currentLocation) {
       this.waitingTime = timestamp - this.appearTime;
@@ -34,16 +44,15 @@ export default class Passenger {
     console.log(
       `passenger current location when transit: ${this.currentLocation}`
     );
-    moveTo(
-      this.ref.current,
-      this.currentLocation,
-      this.destination,
-      this.ref,
-      this.driver.speed
-    );
+    moveTo(this.ref.current, this.currentLocation, this.destination, this.ref);
   }
   arrived() {
     this.state = "arrived";
+    this.ref.current.remove(); // remove from map
+  }
+  cancel() {
+    console.log("passenger cancelled");
+    // this.driver.passenger = null;
     this.ref.current.remove(); // remove from map
   }
 }

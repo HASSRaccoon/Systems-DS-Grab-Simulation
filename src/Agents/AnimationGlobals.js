@@ -1,4 +1,4 @@
-export default class Globals {
+export default class AnimationGlobals {
   constructor() {
     // INPUTS
     this._raining = false;

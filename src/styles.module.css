@@ -1,0 +1,25 @@
+.App {
+  text-align: center;
+}
+
+.driver {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: rgb(75, 223, 85);
+}
+
+.passenger {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: rgb(75, 193, 223);
+}
+
+.arena {
+  background-color: gainsboro;
+  height: 200px;
+  width: 200px;
+}

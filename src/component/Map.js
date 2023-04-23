@@ -5,23 +5,49 @@ import React, { useEffect, useRef, useState } from "react";
 import sgJSON from "./../data/road-network.json";
 import * as turf from "@turf/turf";
 import PathFinder, { pathToGeoJSON } from "geojson-path-finder";
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import mapboxgl from "mapbox-gl";
 import caricon from "../public/grabcar.png";
-import { Button } from "@mantine/core";
+import {
+  Button,
+  Modal,
+  Box,
+  Overlay,
+  Center,
+  Slider,
+  Select,
+} from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 // import { Center } from "@mantine/core";
-import Driver from "../agents/Driver.js";
-import Passenger from "../agents/Passenger.js";
-import Globals from "../agents/Globals.js";
+import AnimationDriver from "../Agents/AnimationDriver.js";
+import AnimationPassenger from "../Agents/AnimationPassenger.js";
+import Globals from "../Agents/globals.js";
+import Sidebar from "./Sidebar.js";
+import { convertLength } from "@turf/turf";
+import "./Map.css";
+import * as IoIcons from "react-icons/io5";
+import { useLocation } from "react-router-dom";
+import { StackedChart } from "./Stackedchart";
+
+// import StackedChart from "./Stackedchart";
 // --- ---------------------------------- ---
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoieWVva2V3ZWkiLCJhIjoiY2xlcG5wZ3ZmMGUweTNxdGt4ZG1ldGhsYyJ9.HHNGnKUPolWAo5_UYwzCZg";
 
 export default function Map() {
+  const location = useLocation();
+  console.log(location);
+  console.log(location.state); // this works!
   function generateRandomCoord() {
-    const Pos =
-      sgJSON.features[Math.floor(Math.random() * sgJSON.features.length)]
-        .geometry.coordinates[0];
+    let featureIndex = Math.floor(Math.random() * sgJSON.features.length);
+    let coordinateIndex = Math.floor(
+      Math.random() * sgJSON.features[featureIndex].geometry.coordinates.length
+    );
+
+    let Pos =
+      sgJSON.features[featureIndex].geometry.coordinates[coordinateIndex];
     return Pos;
   }
 
@@ -93,46 +119,159 @@ export default function Map() {
   const spawnProbability = 0.5;
 
   let god = new Globals();
-  // console.log(god.checkPeak(new Date())); //check peak hour
-  // console.log("fares",god.fareCalculation(0.5,4,new Date())); //check raining
 
-  // console.log("profit", god.profitCalculation(70, 44.5));
+  let driversList = [];
 
-  let driver1 = new Driver({
-    id: 1,
+  // type A drivers
+  for (let i = 0; i < 3; i++) {
+    driversList[i] = new AnimationDriver({
+      id: i + 1,
+      currentLocation: generateRandomCoord(),
+      speed: 80,
+      defaultspeed: 80,
+      destination: generateRandomCoord(),
+      distanceWillingToTravel: 5,
+      path: null,
+      ref: null,
+      passenger: null,
+      searchBehaviour: "Move",
+      startWork: 540, //5pm
+      endWork: 1200, //4am
+      startBreak: 960, //12am
+      endBreak: 1020, //1am
+    });
+  }
+
+  //type B drivers
+  for (let i = 0; i < 3; i++) {
+    driversList[i + 3] = new AnimationDriver({
+      id: i + 4,
+      currentLocation: generateRandomCoord(),
+      speed: 90,
+      defaultspeed: 90,
+      destination: generateRandomCoord(),
+      distanceWillingToTravel: 3,
+      path: null,
+      ref: null,
+      passenger: null,
+      searchBehaviour: "Move",
+      startWork: 1380, //7am
+      endWork: 660, //7pm
+      startBreak: 120, //10am
+      endBreak: 180, //11am
+    });
+  }
+
+  //type C drivers
+  for (let i = 0; i < 3; i++) {
+    driversList[i + 6] = new AnimationDriver({
+      id: i + 7,
+      currentLocation: generateRandomCoord(),
+      speed: 70,
+      defaultspeed: 70,
+      destination: generateRandomCoord(),
+      distanceWillingToTravel: 6,
+      path: null,
+      ref: null,
+      passenger: null,
+      searchBehaviour: "Wait",
+      startWork: 0, //7am
+      endWork: 600, //7pm
+      startBreak: 180, //11am
+      endBreak: 240, //12am
+    });
+  }
+
+  let specialdriver = new AnimationDriver({
+    id: 10,
     currentLocation: generateRandomCoord(),
-    speed: 50,
+    speed: 90,
+    defaultspeed: 90,
     destination: generateRandomCoord(),
+    distanceWillingToTravel: 5,
     path: null,
     ref: null,
+    passenger: null,
+    searchBehaviour: "Move",
+    startWork: 0, //5pm
+    endWork: 600, //4am
+    startBreak: 180, //12am
+    endBreak: 240, //1am
   });
 
-  let driver2 = new Driver({
-    id: 2,
-    currentLocation: generateRandomCoord(),
-    speed: 70,
-    destination: generateRandomCoord(),
-    path: null,
-    ref: null,
-  });
+  driversList.push(specialdriver);
+  let createdDriver = false;
+  function handlecreatedDriver() {
+    createdDriver = true;
+  }
+  const [startWork, setStartWork] = useState("");
+  const [endWork, setEndWork] = useState("");
+  const [startBreak, setStartBreak] = useState("");
+  const [endBreak, setEndBreak] = useState("");
+  const [inputspeed, setInputSpeed] = useState(0);
+  const [behaviour, setBehaviour] = useState("");
+  const [tolerance, setTolerance] = useState(0);
 
-  let driver3 = new Driver({
-    id: 3,
-    currentLocation: generateRandomCoord(),
-    speed: 80,
-    destination: generateRandomCoord(),
-    path: null,
-    ref: null,
-  });
+  function createSpecialDriver(
+    startWork,
+    endWork,
+    startBreak,
+    endBreak,
+    speed,
+    behaviour,
+    tolerance
+  ) {
+    setStartWork(startWork);
+  }
+
+  useEffect(() => {
+    console.log("check if change");
+    console.log(createdDriver, "true?");
+    if (location.state != null) {
+      console.log("only print later");
+      // specialdriver
+      specialdriver.speed = location.state.inputspeed;
+      specialdriver.defaultspeed = location.state.inputspeed;
+      specialdriver.startWork = location.state.startWork;
+      specialdriver.endWork = location.state.endWork;
+      specialdriver.startBreak = location.state.startBreak;
+      specialdriver.endBreak = location.state.endBreak;
+
+      specialdriver.searchBehaviour = location.state.behaviour;
+      specialdriver.distanceWillingToTravel = location.state.tolerance;
+      // let driver = new AnimationDriver({
+      //   id: 11,
+      //   currentLocation: generateRandomCoord(),
+      //   speed: location.state.inputspeed,
+      //   defaultspeed: location.state.inputspeed,
+      //   destination: generateRandomCoord(),
+      //   distanceWillingToTravel: location.state.tolerance,
+      //   path: null,
+      //   ref: null,
+      //   passenger: null,
+      //   searchBehaviour: location.state.behaviour,
+      //   startWork: location.state.startWork, //5pm
+      //   endWork: location.state.endWork, //4am
+      //   startBreak: location.state.startBreak, //12am
+      //   endBreak: location.state.endBreak, //1am
+      // });
+      // driversList.push(driver);
+      // setDrivers(driversList);
+    }
+
+    console.log(drivers, "check this");
+  }, [location]);
 
   let running = false;
 
-  const [drivers, setDrivers] = useState([driver1, driver2, driver3]);
+  const [drivers, setDrivers] = useState(driversList);
+
+  console.log(drivers, "drivers after");
 
   let passengerListo = [];
 
-  for (let i = 0; i < 20; i++) {
-    passengerListo[i] = new Passenger({
+  for (let i = 0; i < 150; i++) {
+    passengerListo[i] = new AnimationPassenger({
       id: i,
       ref: null,
       destination: generateRandomCoord(),
@@ -152,7 +291,7 @@ export default function Map() {
   }
 
   function spawnPassenger() {
-    let p = new Passenger({
+    let p = new AnimationPassenger({
       id: passengers.length + 1,
       ref: null,
       destination: generateRandomCoord(),
@@ -164,26 +303,27 @@ export default function Map() {
     // console.log(passengers);
   }
 
-  const numPassengers = 10;
-
   const pathBuilder = new PathFinder(sgJSON, { tolerance: 1e-4 });
 
   const mapContainer = useRef(null);
   const [map, setMap] = useState(null);
   const [lng, setLng] = useState(103.807);
   const [lat, setLat] = useState(1.37);
-  const [zoom, setZoom] = useState(10.5);
+  const [zoom, setZoom] = useState(11.5);
 
   //default paths on init
   for (let i = 0; i < drivers.length; i++) {
     const driver = drivers[i];
-    // console.log(driver.id);
+    // console.log(driver.currentLocation, driver.destination, "hello");
+    // driver.currentLocation = generateRandomCoord();
+    // driver.destination = generateRandomCoord();
     driver.path = buildPath(driver.currentLocation, driver.destination);
-    // const steps = (100 - driver.speed) * 5;
-    //replace steps with speed next time
-    // processPath(driver.path, steps);
-    // console.log(drivers[driver.id - 1], "got path?");
   }
+
+  specialdriver.path = buildPath(
+    specialdriver.currentLocation,
+    specialdriver.destination
+  );
 
   let driverPoints = {
     type: "FeatureCollection",
@@ -201,6 +341,17 @@ export default function Map() {
     }),
   };
 
+  let specialPoint = {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: specialdriver.currentLocation,
+    },
+    properties: {
+      id: specialdriver.id,
+    },
+  };
+
   let passengerPoints = {
     type: "FeatureCollection",
     features: passengers.map((passenger) => {
@@ -216,7 +367,8 @@ export default function Map() {
       };
     }),
   };
-
+  // console.log(specialdriver, "special");
+  //problem at 187
   let driverPaths = {
     type: "FeatureCollection",
     features: drivers.map((driver) => {
@@ -235,9 +387,31 @@ export default function Map() {
     }),
   };
 
+<<<<<<< HEAD
   
   function goodMorning(driver){
     // check if driver is starting his day
+=======
+  let specialPath = {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: specialdriver.path.geometry.coordinates,
+    },
+    properties: {
+      id: specialdriver.id,
+      weight: specialdriver.path.properties.weight,
+      edgeDatas: specialdriver.path.properties.edgeDatas,
+    },
+  };
+
+  // console.log(drivers, "initial drivers");
+  // console.log(driverPaths, "initial paths");
+  // console.log(specialPath, "initial paths");
+
+  function animatespecialdriver(driver) {
+    // console.log(driver.currentSteps, "steps in animate");
+>>>>>>> a8d7982f2f81ac453d8eb43d2ba30ce272a44cd8
     if (driver.timeCounter === 0) {
       console.log("start of the day");
       console.log("driver starting from ", driver.currentLocation);
@@ -283,39 +457,87 @@ export default function Map() {
       running = false;
       return;
     }
-
-    driverPoints.features[driver.id - 1].geometry.coordinates =
+    // if (driver.id === 4) {
+    specialPoint.geometry.coordinates =
       driver.path.geometry.coordinates[driver.counter];
+    // } else {
+    //   driverPoints.features[driver.id - 1].geometry.coordinates =
+    //     driver.path.geometry.coordinates[driver.counter];
+    // }
+    // driverPoints.features[driver.id - 1].geometry.coordinates =
+    //   driver.path.geometry.coordinates[driver.counter];
     //update currentLocation is here
     driver.currentLocation = driver.path.geometry.coordinates[driver.counter];
-    driverPoints.features[driver.id - 1].properties.bearing = turf.bearing(
+    // if (driver.id === 4) {
+    specialPoint.properties.bearing = turf.bearing(
       turf.point(start),
       turf.point(end)
     );
+    // } else {
+    //   driverPoints.features[driver.id - 1].properties.bearing = turf.bearing(
+    //     turf.point(start),
+    //     turf.point(end)
+    //   );
+    // }
 
-    map.getSource("drivers").setData(driverPoints);
+    // driverPoints.features[driver.id - 1].properties.bearing = turf.bearing(
+    //   turf.point(start),
+    //   turf.point(end)
+    // );
+    // if (driver.id === 4) {
+    map.getSource("me").setData(specialPoint);
+    // } else {
+    //   map.getSource("drivers").setData(driverPoints);
+    // }
+    // map.getSource("drivers").setData(driverPoints);
 
     // if (driver.counter < driver.currentSteps) {
       // requestAnimationFrame(() => animatedriver(driver, steps));
       // animationId = requestAnimationFrame(() => animatedriver(driver, steps));
       // const animationId = requestAnimationFrame(() => animatedriver(driver));
       // animationIds.push(animationId);
+<<<<<<< HEAD
     const animationId = requestAnimationFrame(() => animatedriver(driver));
     animationIds[driver.id - 1].push(animationId);
     // }
     // console.log(driver.counter, driver.currentLocation);
+=======
+      //error
+      const animationId = requestAnimationFrame(() =>
+        animatespecialdriver(driver)
+      );
+      animationIds[driver.id - 1].push(animationId);
+    }
+    // console.log(driver.counter, driver.currentLocation);
+    driver.counter = driver.counter + 1;
+>>>>>>> a8d7982f2f81ac453d8eb43d2ba30ce272a44cd8
 
     // maybe need to move this out
     driver.counter = driver.counter + 1;
     driver.timeCounter = driver.timeCounter + 1;
+<<<<<<< HEAD
 
     // TIMECOUNTER INITIALISATION WAS HERE -----------
     // if (driver.counter === driver.currentSteps + 1) {
     try {
       driver.timeLog[thisTime]["distance travelled"] =
+=======
+    // if (driver.id === 1) {
+    //   setTime(time);
+    // }
+    driver.timeLog[driver.timeCounter] = {};
+    driver.timeLog[driver.timeCounter]["state"] = driver.state;
+    driver.timeLog[driver.timeCounter]["distance travelled"] =
+      driver.distancePerStep;
+    driver.timeLog[driver.timeCounter]["time passed"] = 1;
+    driver.timeLog[driver.timeCounter]["speed"] = driver.speed;
+    if (driver.counter === driver.currentSteps + 1) {
+      driver.timeLog[driver.timeCounter]["distance travelled"] =
+>>>>>>> a8d7982f2f81ac453d8eb43d2ba30ce272a44cd8
         driver.currentLeftoverDistance;
       driver.timeLog[thisTime]["time passed"] =
         driver.currentLeftoverTime;
+<<<<<<< HEAD
     // driver.timeLog[thisTime]["leftover distance"] =
     //   driver.currentLeftoverDistance;
     // driver.timeLog[thisTime]["leftover time"] =
@@ -327,6 +549,20 @@ export default function Map() {
       console.log(driver.timeCounter, "time counter that failed");
       console.log(driver.timeLog, "time log that failed");
     }
+=======
+    }
+
+    driver.totalDistanceTravelled =
+      driver.totalDistanceTravelled +
+      driver.timeLog[driver.timeCounter]["distance travelled"];
+
+    driver.totalFuelCosts =
+      driver.totalFuelCosts +
+      getFuelCost(driver.timeLog[driver.timeCounter]["distance travelled"]);
+
+    // if (driver.id === 1) {
+    //   setTime(driver.timeCounter);
+>>>>>>> a8d7982f2f81ac453d8eb43d2ba30ce272a44cd8
     // }
     // console.log(driver.id, driver.timeLog, "time log per frame");
     if (driver.timeCounter === 1440) {
@@ -340,7 +576,119 @@ export default function Map() {
     // console.log(driver.currentLocation, driver.counter);
   }
 
-  let animationIds = new Array(drivers.length).fill([]);
+  function animatedriver(driver) {
+    // console.log(driver.currentSteps, "steps in animate");
+    if (driver.timeCounter === 0) {
+      console.log("start of the day");
+      console.log("driver starting from ", driver.currentLocation);
+    }
+
+    // console.log(driver.timeLog, "hello");
+
+    const start =
+      driver.path.geometry.coordinates[
+        driver.counter >= driver.currentSteps
+          ? driver.counter - 1
+          : driver.counter
+      ];
+    const end =
+      driver.path.geometry.coordinates[
+        driver.counter >= driver.currentSteps
+          ? driver.counter
+          : driver.counter + 1
+      ];
+
+    if (!start || !end) {
+      running = false;
+      return;
+    }
+    // if (driver.id === 4) {
+    //   specialPoint.geometry.coordinates =
+    //     driver.path.geometry.coordinates[driver.counter];
+    // } else {
+
+    // }
+    driverPoints.features[driver.id - 1].geometry.coordinates =
+      driver.path.geometry.coordinates[driver.counter];
+
+    //update currentLocation is here
+    driver.currentLocation = driver.path.geometry.coordinates[driver.counter];
+    // if (driver.id === 4) {
+    //   specialPoint.properties.bearing = turf.bearing(
+    //     turf.point(start),
+    //     turf.point(end)
+    //   );
+    // } else {
+    //   driverPoints.features[driver.id - 1].properties.bearing = turf.bearing(
+    //     turf.point(start),
+    //     turf.point(end)
+    //   );
+    // }
+
+    driverPoints.features[driver.id - 1].properties.bearing = turf.bearing(
+      turf.point(start),
+      turf.point(end)
+    );
+    // if (driver.id === 4) {
+    //   map.getSource("me").setData(specialPoint);
+    // } else {
+    //   map.getSource("drivers").setData(driverPoints);
+    // }
+    map.getSource("drivers").setData(driverPoints);
+
+    if (driver.counter < driver.currentSteps) {
+      // requestAnimationFrame(() => animatedriver(driver, steps));
+      // animationId = requestAnimationFrame(() => animatedriver(driver, steps));
+      // const animationId = requestAnimationFrame(() => animatedriver(driver));
+      // animationIds.push(animationId);
+      //error
+      const animationId = requestAnimationFrame(() => animatedriver(driver));
+      animationIds[driver.id - 1].push(animationId);
+    }
+    // console.log(driver.counter, driver.currentLocation);
+    driver.counter = driver.counter + 1;
+
+    driver.timeCounter = driver.timeCounter + 1;
+    // if (driver.id === 1) {
+    //   setTime(time);
+    // }
+    driver.timeLog[driver.timeCounter] = {};
+    driver.timeLog[driver.timeCounter]["state"] = driver.state;
+    driver.timeLog[driver.timeCounter]["distance travelled"] =
+      driver.distancePerStep;
+    driver.timeLog[driver.timeCounter]["time passed"] = 1;
+    driver.timeLog[driver.timeCounter]["speed"] = driver.speed;
+    if (driver.counter === driver.currentSteps + 1) {
+      driver.timeLog[driver.timeCounter]["distance travelled"] =
+        driver.currentLeftoverDistance;
+      driver.timeLog[driver.timeCounter]["time passed"] =
+        driver.currentLeftoverTime;
+    }
+
+    driver.totalDistanceTravelled =
+      driver.totalDistanceTravelled +
+      driver.timeLog[driver.timeCounter]["distance travelled"];
+
+    driver.totalFuelCosts =
+      driver.totalFuelCosts +
+      getFuelCost(driver.timeLog[driver.timeCounter]["distance travelled"]);
+
+    // if (driver.id === 1) {
+    //   setTime(driver.timeCounter);
+    // }
+    // console.log(driver.id, driver.timeLog, "time log per frame");
+    if (driver.timeCounter === 1440) {
+      console.log("end of the day");
+      console.log("driver reached destination at ", driver.currentLocation);
+    }
+
+    // if (driver.counter === steps) {
+    // console.log(driver.currentLocation, "last");
+    // }
+    // console.log(driver.currentLocation, driver.counter);
+  }
+
+  let animationIds = new Array(drivers.length + 1).fill([]);
 
   function animatepassenger(driver) {
     const start =
@@ -360,9 +708,20 @@ export default function Map() {
       running = false;
       return;
     }
-
+    // const passenger = driver.passenger;
+    //check
+    // passengerPoints.features[passenger.id - 1].geometry.coordinates =
+    //   driver.path.geometry.coordinates[driver.passenger.counter];
     passengerPoints.features[driver.id - 1].geometry.coordinates =
       driver.path.geometry.coordinates[driver.passenger.counter];
+
+    // passengerPoints.features[driver.passenger.id - 1].geometry.coordinates =
+    //   driver.path.geometry.coordinates[driver.passenger.counter];
+    // passengerPoints.features[driver.passenger.id - 1].properties.bearing =
+    // turf.bearing(turf.point(start), turf.point(end));
+
+    // passengerPoints.features[passenger.id - 1].properties.bearing =
+    //   turf.bearing(turf.point(start), turf.point(end));
 
     passengerPoints.features[driver.id - 1].properties.bearing = turf.bearing(
       turf.point(start),
@@ -372,6 +731,7 @@ export default function Map() {
     map.getSource("passengers").setData(passengerPoints);
 
     if (driver.passenger.counter < driver.currentSteps) {
+      //error
       // requestAnimationFrame(() => animatepassenger(driver, steps));
       const animationId = requestAnimationFrame(() => animatepassenger(driver));
       animationIds.push(animationId);
@@ -383,81 +743,218 @@ export default function Map() {
     driver.passenger.counter = driver.passenger.counter + 1;
   }
 
+  function animatespecialpassenger(driver) {
+    const start =
+      driver.path.geometry.coordinates[
+        driver.passenger.counter >= driver.currentSteps
+          ? driver.passenger.counter - 1
+          : driver.passenger.counter
+      ];
+    const end =
+      driver.path.geometry.coordinates[
+        driver.passenger.counter >= driver.currentSteps
+          ? driver.passenger.counter
+          : driver.passenger.counter + 1
+      ];
+
+    if (!start || !end) {
+      running = false;
+      return;
+    }
+    const passenger = driver.passenger;
+    passengerPoints.features[passenger.id - 1].geometry.coordinates =
+      driver.path.geometry.coordinates[driver.passenger.counter];
+
+    // passengerPoints.features[driver.passenger.id - 1].geometry.coordinates =
+    //   driver.path.geometry.coordinates[driver.passenger.counter];
+    // passengerPoints.features[driver.passenger.id - 1].properties.bearing =
+    // turf.bearing(turf.point(start), turf.point(end));
+
+    passengerPoints.features[passenger.id - 1].properties.bearing =
+      turf.bearing(turf.point(start), turf.point(end));
+
+    map.getSource("passengers").setData(passengerPoints);
+
+    if (driver.passenger.counter < driver.currentSteps) {
+      //error
+      // requestAnimationFrame(() => animatepassenger(driver, steps));
+      const animationId = requestAnimationFrame(() =>
+        animatespecialpassenger(driver)
+      );
+      animationIds.push(animationId);
+
+      // const animationId = requestAnimationFrame(() => animatedriver(driver));
+      // animationIds[driver.id - 1].push(animationId);
+    }
+
+    driver.passenger.counter = driver.passenger.counter + 1;
+  }
+
   function getDistance(path) {
     const lineDistance = turf.length(path);
-    const distance = lineDistance.toFixed(2); //eugene: might take out? unless better to have 2dp
-    return distance;
+    // const distance = lineDistance.toFixed(2); //eugene: might take out? unless better to have 2dp
+    return lineDistance;
   }
 
-  // const distance = 2;
-  // const irldistance = 40;
-  // const speed = 70;
-  // const computertimetaken = 5;
-
-  // esttimeTaken(irldistance, speed);
-
-  function getFares(distance, speed) {
-    // const time = esttimeTaken(distance, speed);
-    //time = distance/speed
-  }
-
-  // const d = new Date();
-
-  // console.log(d, "Date when load");
-  function dateToTicks(date) {
-    const epochOffset = 621355968000000000;
-    const ticksPerMillisecond = 10000;
-
-    const ticks = date.getTime() * ticksPerMillisecond + epochOffset;
-
-    return ticks;
-  }
-
-  // function calculateEarning(driver) {}
-
-  // function startGlobalTime() {}
-  // let animationId;
   let isRunning = false;
-  // function debugStart() {
-  //   const driver = drivers[1];
-  //   const steps = (100 - driver.speed) * 5;
-  //   animatedriver(driver, steps);
-  //   isRunning = true;
-  // }
-  // function debugPause() {
-  //   if (animationId) {
-  //     // const driver = drivers[1];
-  //     // const steps = (100 - driver.speed) * 5;
-  //     cancelAnimationFrame(animationId);
-  //     isRunning = false;
-  //   }
-  // }
-  // function debugContinue() {
-  //   // if (isPaused) {
-  //   isRunning = true;
-  //   const driver = drivers[1];
-  //   const steps = (100 - driver.speed) * 5;
-  //   animatedriver(driver, steps);
-  //   // }
-  // }
+  // const [isRunning, setisRunning] = useState(false);
 
   function getFuelCost(distance) {
     const rateperkm = 22.54 / 100;
     const fuelcostperdist = distance * rateperkm;
     //22.54 per 100km
     //22.54/100 per km
-    return fuelcostperdist;
+    return fuelcostperdist.toFixed(2);
   }
 
   function startAnimation() {
     isRunning = true;
+    // setisRunning(true);
+    console.log(isRunning, "true");
     for (let i = 0; i < drivers.length; i++) {
       let driver = drivers[i];
       driver.counter = 0;
       
       goodMorning(driver);
     }
+    handleSearch(specialdriver);
   }
+
+  //without fuelcost
+  function earningCalculation(distance, timetaken) {
+    if (peakHour === true) {
+      const earning =
+        (3.5 + 0.5 * distance + 0.16 * timetaken) * 1.5 * 0.8 - 0.3;
+      return earning.toFixed(2);
+    } else {
+      const earning = (3.5 + 0.5 * distance + 0.16 * timetaken) * 0.8 - 0.3;
+      return earning.toFixed(2);
+    }
+  }
+
+  //time = 0 is 8am
+  //time = 120 is 10am
+  //time = 540 is 5pm
+  //time = 720 is 8pm
+  //time = 1440 is midnight, day is completed
+  //peakHour default is true bc we start at 8am
+  let peakHour = true;
+  let peakStatus = "Yes";
+  let day = 1;
+
+  function updatepeakHour() {
+    setInterval(() => {
+      if (drivers[0].timeCounter >= 0 && drivers[0].timeCounter < 121) {
+        peakHour = true;
+        peakStatus = "Yes";
+      } else if (drivers[0].timeCounter > 120 && drivers[0].timeCounter < 541) {
+        peakHour = false;
+        peakStatus = "No";
+      } else if (drivers[0].timeCounter > 540 && drivers[0].timeCounter < 721) {
+        peakHour = true;
+        peakStatus = "Yes";
+      } else if (
+        drivers[0].timeCounter > 1380 &&
+        drivers[0].timeCounter < 1441
+      ) {
+        peakHour = true;
+        peakStatus = "Yes";
+      } else {
+        peakHour = false;
+        peakStatus = "No";
+      }
+      // console.log(peakHour, "checking peakHour");
+    }, 1000);
+  }
+
+  function updateDay() {
+    setInterval(() => {
+      if (drivers[0].timeCounter >= 1440) {
+      }
+      for (let i = 0; i < drivers.length; i++) {
+        const driver = drivers[i];
+        driver.timeCounter = 0;
+      }
+      day = day + 1;
+    }, 500);
+  }
+
+  let raining = false;
+
+  let weatherStatus = "Dry";
+
+  function updateWorkingStatus() {
+    for (let i = 0; i < drivers.length; i++) {
+      const driver = drivers[i];
+      if (
+        driver.timeCounter < driver.endWork &&
+        driver.timeCounter > driver.startWork
+      ) {
+        if (
+          driver.timeCounter < driver.endBreak &&
+          driver.timeCounter > driver.startBreak
+        ) {
+          driver.isWorking = false;
+        } else {
+          driver.isWorking = true;
+        }
+      } else {
+        driver.isWorking = false;
+      }
+    }
+  }
+
+  // startWork: 1380, //7am
+  // endWork: 660, //7pm
+  // startBreak: 120, //10am
+  // endBreak: 180, //11am
+
+  // startWork: 540, //5pm
+  // endWork: 1200, //4am
+  // startBreak: 960, //12am
+  // endBreak: 1020, //1am
+
+  function changetoWetWeather(driver) {
+    driver.speed = driver.speed * 0.84;
+    weatherStatus = "Wet";
+    // console.log("wet weather");
+  }
+  function changetoDryWeather(driver) {
+    driver.speed = driver.defaultspeed;
+    weatherStatus = "Dry";
+    // console.log("dry weather");
+  }
+
+  function weatherEffects() {
+    setInterval(() => {
+      //only change weather every hour?
+      if (drivers[0].timeCounter % 60 === 0) {
+        if (Math.random() < 0.5) {
+          if (raining === false) {
+            raining = true;
+            for (let i = 0; i < drivers.length; i++) {
+              const driver = drivers[i];
+              changetoWetWeather(driver);
+            }
+          } else {
+            raining = true;
+          }
+        } else {
+          raining = false;
+          for (let i = 0; i < drivers.length; i++) {
+            const driver = drivers[i];
+            changetoDryWeather(driver);
+          }
+        }
+      }
+      // console.log(drivers[1].speed, "see if this changes");
+      // console.log(weatherStatus, "wet or dry");
+    }, 1000);
+  }
+
+  updatepeakHour();
+  updateDay();
+  weatherEffects();
 
   function startDriver() {
     let driver = drivers[0];
@@ -468,6 +965,7 @@ export default function Map() {
   function stopAnimation() {
     console.log(animationIds, "animation ids");
     animationIds.forEach((id) => cancelAnimationFrame(id));
+    // setisRunning(false);
     isRunning = false;
   }
 
@@ -485,7 +983,7 @@ export default function Map() {
       for (let i = 0; i < drivers.length; i++) {
         let driver = drivers[i];
         animatedriver(driver); // eugene: this func might be a deeper call, might be more similar to startAnimation instead, where you call handle<state> for each driver instead
-
+        // setisRunning(true);
         //eugene: might be better for continueAnimation to just toggle a boolean that the main loop is listening to, so continueAnimation is just a toggle, and it does not have any logic on its own
       }
     }
@@ -502,29 +1000,166 @@ export default function Map() {
   }
 
   function distanceperStep(speed, steps, distance, driver) {
-    console.log(driver.state, distance, "distance");
-
-    console.log(steps, "steps");
     const speedpermin = speed / 60;
-    console.log(speedpermin, "distanceperstep");
+
     const leftoverdistance = distance - speedpermin * (steps - 1);
-    console.log(leftoverdistance, "leftoverdistance");
+
     driver.currentLeftoverDistance = leftoverdistance;
-    // const distperstep = 0;
+
     return speedpermin;
   }
 
   function esttimeTaken(distance, speed) {
     const estimatedTimeMin = (distance / speed) * 60;
-    console.log(estimatedTimeMin, "est time taken");
+
     return estimatedTimeMin;
     //time = distance/speed
+  }
+
+  function assignPassenger(driver) {
+    for (let i = 0; i < passengers.length; i++) {
+      const passenger = passengers[i];
+      const path = buildPath(passenger.currentLocation, driver.currentLocation);
+      const distance = getDistance(path);
+
+      if (
+        driver.distanceWillingToTravel > distance &&
+        //maybe this
+        passenger.driver === null
+        // driver.passenger === null
+      ) {
+        driver.passenger = passenger;
+        passenger.driver = driver;
+        // console.log(driver.passenger, "passenger assigned");
+        break;
+      }
+    }
+  }
+
+  let timelist = [];
+  let statelist = [];
+  let speedlist = [];
+  let jobsdonelist = [];
+  let profitlist = [];
+  let distancelist = [];
+  let avgjobsdonelist = [];
+  let avgprofitlist = [];
+  let avgdistancelist = [];
+  let weatherlist = [];
+  let peakHourlist = [];
+  let profits = 0;
+
+  function updateStats() {
+    setInterval(() => {
+      // console.log(specialdriver.timeCounter, "timecounter");
+      timelist[0] = specialdriver.timeCounter;
+      statelist[0] = specialdriver.state;
+      speedlist[0] = specialdriver.speed;
+      jobsdonelist[0] = specialdriver.completedJobs;
+      const yourfuelcost = getFuelCost(
+        specialdriver.totalDistanceTravelled.toFixed(3)
+      );
+      const yourprofit = specialdriver.earnings - yourfuelcost;
+      profitlist[0] = yourprofit.toFixed(2);
+      profits = yourprofit.toFixed(2);
+      // console.log(profits, "hello can this change?");
+      distancelist[0] = specialdriver.totalDistanceTravelled.toFixed(1);
+
+      const avgjobsdone =
+        (drivers[0].completedJobs +
+          drivers[1].completedJobs +
+          drivers[2].completedJobs) /
+        3;
+      avgjobsdonelist[0] = avgjobsdone.toFixed(1);
+
+      const d1fuelcost = getFuelCost(
+        drivers[0].totalDistanceTravelled.toFixed(3)
+      );
+      const d2fuelcost = getFuelCost(
+        drivers[1].totalDistanceTravelled.toFixed(3)
+      );
+      const d3fuelcost = getFuelCost(
+        drivers[2].totalDistanceTravelled.toFixed(3)
+      );
+      const d1profit = drivers[0].earnings - d1fuelcost;
+      const d2profit = drivers[1].earnings - d2fuelcost;
+      const d3profit = drivers[2].earnings - d3fuelcost;
+      const avgprofit = (d1profit + d2profit + d3profit) / 3;
+      const avgdistance =
+        (drivers[0].totalDistanceTravelled +
+          drivers[1].totalDistanceTravelled +
+          drivers[2].totalDistanceTravelled) /
+        3;
+      avgprofitlist[0] = avgprofit.toFixed(2);
+      avgdistancelist[0] = avgdistance.toFixed(1);
+      weatherlist[0] = weatherStatus;
+      peakHourlist[0] = peakStatus;
+
+      // const currentTime = drivers[0].timeCounter;
+      // setTime(currentTime);
+      // console.log(time, "update time");
+      // setState(drivers[0].state);
+      // setjobsDone(drivers[0].completedJobs);
+      // console.log("this is running");
+    }, 500);
+  }
+
+  updateStats();
+
+  const navigate = useNavigate();
+  const [drivertype, setDriverType] = useState("");
+  const [numDrivers, setNumDrivers] = useState(0);
+  const [numPassengersPeak, setNumPassengersPeak] = useState(0);
+  const [numPassengersNPeak, setNumPassengersNPeak] = useState(0);
+  const [ffwdays, setFFWDays] = useState(0);
+
+  function getdrivertype(e) {
+    setDriverType(e);
+  }
+  function getFFWdays(e) {
+    console.log(e, "hello????");
+    const value = e;
+    setFFWDays(value);
+    // console.log(ffwdays, "hello?");
+  }
+
+  useEffect(() => {
+    console.log(ffwdays);
+  }, [ffwdays]);
+
+  function getdrivers(e) {
+    setNumDrivers(e);
+  }
+  function getpassengers(e) {
+    setNumPassengersPeak(e);
+  }
+  function getNPpassengers(e) {
+    setNumPassengersNPeak(e);
+  }
+
+  function handleFFW() {
+    stopAnimation();
+    navigate("/fastforward", {
+      state: {
+        drivertype: drivertype,
+        numDrivers: numDrivers,
+        numPassengersPeak: numPassengersPeak,
+        numPassengersNPeak: numPassengersNPeak,
+        ffwdays: ffwdays,
+      },
+    });
   }
 
   function handleSearch(driver) {
     //initialising variables
     const initialTime = driver.timeCounter;
+<<<<<<< HEAD
     const initialLocation = driver.currentLocation;
+=======
+    driver.Log[driver.completedJobs] = {};
+    driver.Log[driver.completedJobs]["searching"] = {};
+    // const initialLocation = driver.currentLocation;
+>>>>>>> a8d7982f2f81ac453d8eb43d2ba30ce272a44cd8
     const initialDistance = getDistance(driver.path);
     const estTimeMin = esttimeTaken(initialDistance, driver.speed);
 
@@ -543,7 +1178,15 @@ export default function Map() {
       initialDistance,
       driver
     );
+    driver.counter = 0;
 
+    if (driver.id === 4) {
+      animatespecialdriver(driver);
+    } else {
+      animatedriver(driver);
+    }
+
+<<<<<<< HEAD
     //actual searching responsibility, found and assigned passenger to driver
     if (passengers.length > 1 && driver.state === "searching") {
       driver.passenger = passengers[driver.id]; //assigned passenger to driver
@@ -551,10 +1194,19 @@ export default function Map() {
 
       console.log("this is the passengers array: ", passengers);
       console.log("driver id you are checking: ", driver.id, ", which translates to the passenger he is carrying by his id: ", driver.passenger.id);
+=======
+    let getPassengerTime = 0;
+    //if still have passengers on map and searching
+    if (passengers.length > 0 && driver.state === "searching") {
+      //if passenger no driver, and dis to passenger < willingness to travel
+      assignPassenger(driver);
+>>>>>>> a8d7982f2f81ac453d8eb43d2ba30ce272a44cd8
 
+      // console.log(driver.id, driver.passenger, "found");
       getPassengerTime = driver.timeCounter;
       driver.Log[driver.completedJobs]["searching"]["timeFound"] =
         getPassengerTime;
+<<<<<<< HEAD
     }
     else {
       //TODO: if no passengers, then driver should be assigned to a searching location (or not) and then the cycle can push driver to move around within handleSearch, otherwise we are animating otherwise picking up path in searching, which can be confusion
@@ -617,6 +1269,27 @@ export default function Map() {
     
     //affecting the driver object, doing this first to execute search's given path
     // this builds the path from the driver's stale/completed location to the passenger's location
+=======
+    }
+    driver.search(driver.passenger);
+    //may need to update
+
+    driver.Log[driver.completedJobs]["searching"]["distance"] =
+      driver.timeLog[driver.timeCounter]["distance travelled"];
+    driver.Log[driver.completedJobs]["searching"]["fuel cost"] = getFuelCost(
+      driver.timeLog[driver.timeCounter]["distance travelled"]
+    );
+    driver.Log[driver.completedJobs]["searching"]["duration"] =
+      getPassengerTime - initialTime;
+
+    // driver.totalDistanceTravelled =
+    //   driver.totalDistanceTravelled +
+    //   driver.timeLog[driver.timeCounter]["distance travelled"];
+
+    console.log(driver.id, driver.Log, "Searching Log");
+
+    //have new dest, so build new path there
+>>>>>>> a8d7982f2f81ac453d8eb43d2ba30ce272a44cd8
     driver.path = buildPath(driver.currentLocation, driver.destination);
     const newdistance = getDistance(driver.path);
     const newestTimeMin = esttimeTaken(newdistance, driver.speed);
@@ -632,6 +1305,7 @@ export default function Map() {
       newdistance,
       driver
     );
+<<<<<<< HEAD
     driverPaths.features[driver.id - 1] = driver.path;
     
     // ---------now picking up is complete, bottom is largely logging of picking up activity---------
@@ -697,6 +1371,32 @@ export default function Map() {
       // console.log(driver.currentLocation === driver.destination, "pls be true");
       // if (driver.currentLocation === driver.destination) {
       // console.log("CHECK PASSED");
+=======
+    if (driver.id === 4) {
+      specialPath = driver.path;
+    } else {
+      driverPaths.features[driver.id - 1] = driver.path;
+    }
+    // driverPaths.features[driver.id - 1] = driver.path;
+
+    if (driver.state === "picking up" && driver.passenger != null) {
+      handlePickup(driver);
+    }
+  }
+
+  function handlePickup(driver) {
+    const initialTime = driver.timeCounter;
+    driver.Log[driver.completedJobs]["pickingup"] = {};
+    if (driver.id === 4) {
+      map.getSource("myroute").setData(specialPath);
+      // console.log(specialPath)
+    } else {
+      map.getSource("routes").setData(driverPaths);
+    }
+    // map.getSource("routes").setData(driverPaths);
+
+    setTimeout(() => {
+>>>>>>> a8d7982f2f81ac453d8eb43d2ba30ce272a44cd8
       // let whilepickupcheckcounter = 0
       // while (
       //   driver.currentLocation[0].toFixed(4) !==
@@ -710,16 +1410,59 @@ export default function Map() {
       //   console.log("while pickup, check number of times current location and destination don't match: ", whilepickupcheckcounter);
       //   break;
       // }
+<<<<<<< HEAD
+=======
+      console.log(
+        driver.currentLocation,
+        driver.destination,
+        "driver not arrive"
+      );
+      driver.currentLocation = driver.destination;
+      console.log(
+        driver.currentLocation,
+        driver.destination,
+        " make driver arrive"
+      );
+      driver.pickUp();
+      console.log(
+        driver.currentLocation,
+        driver.destination,
+        "driver new dest"
+      );
+      const finishTime = driver.timeCounter;
+      driver.Log[driver.completedJobs]["pickingup"]["duration"] =
+        finishTime - initialTime;
+      const pickupDistance = getDistance(driver.path);
+      driver.Log[driver.completedJobs]["pickingup"]["distance"] =
+        pickupDistance;
+      // driver.totalDistanceTravelled =
+      //   driver.totalDistanceTravelled + pickupDistance;
+      driver.Log[driver.completedJobs]["pickingup"]["fuel cost"] =
+        getFuelCost(pickupDistance);
+      console.log(driver.id, driver.Log, "Pick Up Log");
+      if (driver.state === "transit" && isRunning === true) {
+        // driver.totalTicks = startDateTicks;
+        console.log("Call Transit");
+        handleTransit(driver);
+      }
+>>>>>>> a8d7982f2f81ac453d8eb43d2ba30ce272a44cd8
       // }
     // }, 3000);
   }
+  // function handleFFW() {
+
+  // }
 
   function handleTransit(driver) {
     //start time
     const initialTime = driver.timeCounter;
+<<<<<<< HEAD
     
     //affecting the driver object
     // this builds the path from the driver's picked up location with the passenger to the passenger's destination
+=======
+    driver.Log[driver.completedJobs]["transit"] = {};
+>>>>>>> a8d7982f2f81ac453d8eb43d2ba30ce272a44cd8
     driver.path = buildPath(driver.currentLocation, driver.destination);
     const distance = getDistance(driver.path);
     const estTimeMin = esttimeTaken(distance, driver.speed);
@@ -736,6 +1479,7 @@ export default function Map() {
       driver
     );
 
+<<<<<<< HEAD
     driverPaths.features[driver.id - 1] = driver.path;
     map.getSource("routes").setData(driverPaths);
     driver.counter = 0;
@@ -795,23 +1539,120 @@ export default function Map() {
           console.log("after removal, remaining passengers: ", passengerPoints.features.length);
           console.log("passenger points (list of psng noted on map): ", passengerPoints.features);
           console.log("passenger list (list of psng in computation): ", passengers);
+=======
+    if (driver.id === 4) {
+      specialPath = driver.path;
+    } else {
+      driverPaths.features[driver.id - 1] = driver.path;
+    }
+    // driverPaths.features[driver.id - 1] = driver.path;
+    // console.log(driverPaths, "why cannot getsource");
+    if (driver.id === 4) {
+      map.getSource("myroute").setData(specialPath);
+    } else {
+      map.getSource("routes").setData(driverPaths);
+    }
+    // map.getSource("routes").setData(driverPaths);
+    driver.counter = 0;
+    driver.passenger.counter = 0;
+    if (driver.id === 4) {
+      animatespecialdriver(driver);
+      animatespecialpassenger(driver);
+    } else {
+      animatedriver(driver);
+      animatepassenger(driver);
+    }
+    // animatedriver(driver);
+    // animatepassenger(driver);
+
+    setTimeout(() => {
+      for (let i = 0; i < passengerPoints.features.length; i++) {
+        if (passengerPoints.features[i].properties.id === driver.passenger.id) {
+          // console.log(
+          //   "before removal, remaining passengers: ",
+          //   passengerPoints.features.length
+          // );
+          const victimSoul = passengers.splice(i, 1); //remove passenger from computation first? but this is still in transit?
+          // console.log(
+          //   "passenger " + victimSoul[0].id + " removed from computation"
+          // );
+          const victimFace = passengerPoints.features.splice(i, 1); //remove passenger from map first? but this is still in transit?
+          // console.log(
+          //   "passenger " + victimFace[0].properties.id + " removed from map"
+          // );
+          // console.log(
+          //   "after removal, remaining passengers: ",
+          //   passengerPoints.features.length
+          // );
+          // console.log(
+          //   "passenger points (list of psng noted on map): ",
+          //   passengerPoints.features
+          // );
+          // console.log(
+          //   "passenger list (list of psng in computation): ",
+          //   passengers
+          // );
+>>>>>>> a8d7982f2f81ac453d8eb43d2ba30ce272a44cd8
           map.getSource("passengers").setData(passengerPoints);
         }
+<<<<<<< HEAD
+=======
+        break;
+        // break;
+>>>>>>> a8d7982f2f81ac453d8eb43d2ba30ce272a44cd8
       }
     driver.completed(); //assigned the next state "complete" state to driver, announce in console
 
+<<<<<<< HEAD
     //preparing to move to the next state
     if (driver.state === "searching" && isRunning === true) {
       // driver.totalTicks = startDateTicks;
       console.log("driver", driver.id, "is now searching");
       handleSearch(driver);
     }
+=======
+      const finishTime = driver.timeCounter;
+      driver.Log[driver.completedJobs]["transit"]["duration"] =
+        finishTime - initialTime;
+      const transitDistance = getDistance(driver.path);
+      driver.Log[driver.completedJobs]["transit"]["distance"] = transitDistance;
+      driver.Log[driver.completedJobs]["transit"]["fuel cost"] =
+        getFuelCost(transitDistance);
+
+      const earning = earningCalculation(transitDistance, estTimeMin);
+      driver.Log[driver.completedJobs]["transit"]["earning"] = earning;
+      driver.earnings = driver.earnings + earning;
+
+      console.log("Transit Log", driver.id, driver.Log);
+      driver.completed();
+      console.log(driver.currentLocation, "current loc");
+      console.log(driver.destination, "before");
+      driver.destination = generateRandomCoord();
+      // driver.destination = generateRandomCoord();
+      console.log(driver.destination, "after");
+      driver.path = buildPath(driver.currentLocation, driver.destination);
+      //error
+      processPath(driver.path);
+      if (driver.id === 4) {
+        specialPath = driver.path;
+        map.getSource("myroute").setData(specialPath);
+      } else {
+        driverPaths.features[driver.id - 1] = driver.path;
+        map.getSource("routes").setData(driverPaths);
+      }
+
+      // driverPaths.features[driver.id - 1] = driver.path;
+      // map.getSource("routes").setData(driverPaths);
+      handleSearch(driver);
+    }, 3000);
+>>>>>>> a8d7982f2f81ac453d8eb43d2ba30ce272a44cd8
   }
 
   useEffect(() => {
     const map = new mapboxgl.Map({
       container: mapContainer.current,
-      style: "mapbox://styles/mapbox/streets-v11",
+      // style: "mapbox://styles/mapbox/streets-v11",
+      style: "mapbox://styles/mapbox/navigation-guidance-night-v3",
       center: [lng, lat],
       zoom: zoom,
     });
@@ -819,7 +1660,11 @@ export default function Map() {
     map.on("load", function () {
       // Add an image to use as a custom marker
       map.loadImage(
-        "https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png",
+        // "https://freesvg.org/img/165649513901300-transport-car-sedan-green.png",
+        // "https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Eo_circle_green_blank.svg/2048px-Eo_circle_green_blank.svg.png",
+        // "https://docs.mapbox.com/mapbox-gl-js/assets/car-15.png",
+        // "mapbox://sprites/mapbox/streets-v11?access_token=pk.eyJ1IjoieWVva2V3ZWkiLCJhIjoiY2xlcG5wZ3ZmMGUweTNxdGt4ZG1ldGhsYyJ9.HHNGnKUPolWAo5_UYwzCZg",
         function (error, image) {
           if (error) throw error;
           map.addImage("custom-marker", image);
@@ -841,7 +1686,9 @@ export default function Map() {
             type: "line",
             paint: {
               "line-width": 4,
-              "line-color": "#F1295B",
+              // "line-color": "#F1295B",
+              // "line-color": "#00FF00",
+              "line-color": "#449e48",
             },
           });
 
@@ -861,11 +1708,56 @@ export default function Map() {
               // To add a new image to the style at runtime see
               // https://docs.mapbox.com/mapbox-gl-js/example/add-image/
               "icon-image": "custom-marker",
-              "icon-size": 0.5,
+              "icon-size": 0.02,
               "icon-rotate": ["get", "bearing"],
               "icon-rotation-alignment": "map",
               "icon-allow-overlap": true,
               "icon-ignore-placement": true,
+            },
+          });
+
+          map.loadImage(
+            // "https://docs.mapbox.com/mapbox-gl-js/assets/cat.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Red_Circle%28small%29.svg/2048px-Red_Circle%28small%29.svg.png",
+            // "https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Light_Blue_Circle.svg/768px-Light_Blue_Circle.svg.png",
+            (error, image) => {
+              if (error) throw error;
+
+              // Add the image to the map style.
+              map.addImage("special", image);
+            }
+          );
+          map.addSource("me", {
+            type: "geojson",
+            data: specialPoint,
+          });
+          map.addLayer({
+            id: "me",
+            source: "me",
+            type: "symbol",
+            layout: {
+              "icon-image": "special",
+              "icon-size": 0.02,
+              "icon-rotate": ["get", "bearing"],
+              "icon-rotation-alignment": "map",
+              "icon-allow-overlap": true,
+              "icon-ignore-placement": true,
+            },
+          });
+
+          map.addSource("myroute", {
+            type: "geojson",
+            data: specialPath,
+          });
+
+          map.addLayer({
+            id: "myroute",
+            source: "myroute",
+            type: "line",
+            paint: {
+              "line-width": 4,
+              // "line-color": "#FFFFFF",
+              "line-color": "#F1295B",
             },
           });
 
@@ -876,7 +1768,8 @@ export default function Map() {
           });
 
           map.loadImage(
-            "https://docs.mapbox.com/mapbox-gl-js/assets/cat.png",
+            // "https://docs.mapbox.com/mapbox-gl-js/assets/cat.png",
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Light_Blue_Circle.svg/768px-Light_Blue_Circle.svg.png",
             (error, image) => {
               if (error) throw error;
 
@@ -895,7 +1788,7 @@ export default function Map() {
               // To add a new image to the style at runtime see
               // https://docs.mapbox.com/mapbox-gl-js/example/add-image/
               "icon-image": "cat",
-              "icon-size": 0.08,
+              "icon-size": 0.02,
               "icon-rotate": ["get", "bearing"],
               "icon-rotation-alignment": "map",
               "icon-allow-overlap": true,
@@ -911,23 +1804,297 @@ export default function Map() {
     return () => map.remove();
   }, []);
 
+  const [modalKwOpen, setModalKwOpen] = useState(false);
+  const [modalGraphOpen, setModalGraphOpen] = useState(false);
+  const [visible, setVisible] = useState(true);
+
+  const openModalKw = () => {
+    setModalKwOpen(true);
+  };
+
+  const openModalGraph = () => {
+    // stopAnimation();
+    setModalGraphOpen(true);
+  };
+
   return (
     <>
-      <div>
-        <div className="map-container" ref={mapContainer} />
-        <Button onClick={startDriver}> Debug start driver</Button>
-        <Button onClick={stopDriver}> Debug stop driver </Button>
-        {/* <Center> */}
-        <Button onClick={continueDriver}> Debug continue driver</Button>
-        {/* </Center> */}
+      {/* this is the fast forward modal */}
+      <Center>
+        <Modal
+          opened={modalKwOpen}
+          onClose={() => {
+            setModalKwOpen(false);
+          }}
+          centered
+          size="lg"
+        >
+          <Center>
+            <div className="modal-header">
+              Would You Like to Fast Forward And Compile Data?
+            </div>
+          </Center>
+          <Center>
+            <div className="modal-text">
+              Compiling data will take a few seconds.
+            </div>
+          </Center>
+          <Center>
+            <div className="modal-subheader">
+              Which driver type would you like to simulate?
+            </div>
+          </Center>
+          <Center>
+            <div className="modal-slider">
+              <Select
+                placeholder="Select Driver Type"
+                color="cyan"
+                size="lg"
+                data={[
+                  { value: "A", label: "Driver Type A" },
+                  { value: "B", label: "Driver Type B" },
+                  { value: "C", label: "Driver Type C" },
+                ]}
+                onChange={(e) => getdrivertype(e)}
+              />
+            </div>
+          </Center>
 
-        <Button onClick={spawnPassenger}>Spawn Passenger</Button>
-        <Button onClick={startAnimation}>Start Animation</Button>
-        <Button onClick={stopAnimation}>Stop Animation</Button>
-        <Button onClick={continueAnimation}>Continue Animation</Button>
-        <div> No. of drivers : {drivers.length}</div>
-        <div> No. of passengers : {passengers.length}</div>
+          <Center>
+            <div className="modal-subheader">
+              How many drivers would you like to simulate?
+            </div>
+          </Center>
+          <Center>
+            <div className="modal-slider">
+              <Slider
+                color="cyan"
+                defaultValue={1}
+                min={1}
+                max={50}
+                marks={[
+                  { value: 1, label: "1 driver" },
+                  { value: 50, label: "50 drivers" },
+                ]}
+                onChange={(e) => getdrivers(e)}
+              ></Slider>
+            </div>
+          </Center>
+
+          <Center>
+            <div className="modal-subheader">
+              How many non-peak hours passengers would you like to simulate?
+            </div>
+          </Center>
+          <Center>
+            <div className="modal-slider">
+              <Slider
+                color="cyan"
+                defaultValue={1}
+                min={1}
+                max={300}
+                marks={[
+                  { value: 1, label: "1 passenger" },
+                  { value: 300, label: "300 passengers" },
+                ]}
+                onChange={(e) => getNPpassengers(e)}
+              ></Slider>
+            </div>
+          </Center>
+
+          <Center>
+            <div className="modal-subheader">
+              How many peak hours passengers would you like to simulate?
+            </div>
+          </Center>
+          <Center>
+            <div className="modal-slider">
+              <Slider
+                color="cyan"
+                defaultValue={1}
+                min={1}
+                max={300}
+                marks={[
+                  { value: 1, label: "1 passenger" },
+                  { value: 300, label: "300 passengers" },
+                ]}
+                onChange={(e) => getpassengers(e)}
+              ></Slider>
+            </div>
+          </Center>
+
+          <Center>
+            <div className="modal-subheader">
+              Fast forward for how many days?
+            </div>
+          </Center>
+          <Center>
+            <div className="modal-slider">
+              <Slider
+                color="cyan"
+                defaultValue={1}
+                min={1}
+                max={31}
+                marks={[
+                  { value: 1, label: "1 day" },
+                  { value: 31, label: "31 days" },
+                ]}
+                onChange={(e) => getFFWdays(e)}
+              ></Slider>
+            </div>
+          </Center>
+
+          <div className="modal-button">
+            {/* <Link to="/fastforward"> */}
+            <Button color="cyan" size="lg" onClick={handleFFW}>
+              <IoIcons.IoCheckmarkOutline />
+              <span></span>
+            </Button>
+            {/* </Link> */}
+          </div>
+        </Modal>
+      </Center>
+
+      {/* this is the graph modal */}
+      <Center>
+        <Modal
+          opened={modalGraphOpen}
+          onClose={() => {
+            setModalGraphOpen(false);
+          }}
+          centered
+          size="xl"
+        >
+          <div className="modal-header">
+            <span> Live Profit Comparison: </span>
+          </div>
+
+          <div className="modal-graph">
+            {/* <img src="./dummy-graph.jpeg" width="300px"></img> */}
+            <StackedChart
+              // profitdata={profitlist}
+              // profits={profits}
+              // options={options}
+              // profits={state.profits}
+              profitlist={profitlist}
+              profits={profits}
+              variable={profitlist}
+              label={"Profit"}
+            ></StackedChart>
+          </div>
+
+          <div className="modal-header">
+            <span> Live Distance Comparison: </span>
+          </div>
+
+          <div className="modal-graph">
+            {/* <img src="./dummy-graph.jpeg" width="300px"></img> */}
+            <StackedChart
+              profitlist={profitlist}
+              variable={distancelist}
+              profits={profits}
+              label={"Distanced Travelled"}
+            ></StackedChart>
+          </div>
+
+          <div className="modal-header">
+            <span> Live Jobs Done Comparison: </span>
+          </div>
+
+          <div className="modal-graph">
+            {/* <img src="./dummy-graph.jpeg" width="300px"></img> */}
+            <StackedChart
+              profitlist={profitlist}
+              profits={profits}
+              variable={jobsdonelist}
+              label={"Jobs Done"}
+            ></StackedChart>
+          </div>
+          {/* <div className='nav-subheader'>
+            <span> Live Profit Comparison: </span>
+        </div>
+
+        <div className='nav-graph'>
+            <img src= './dummy-graph.jpeg'width = '300px' ></img>
+        </div> */}
+        </Modal>
+      </Center>
+
+      <div className="map-container" ref={mapContainer} />
+
+      <div className="map-overlay">
+        {visible && (
+          <Overlay
+            color="#000"
+            opacity={0.75}
+            style={{ right: 350, top: 70 }}
+          />
+        )}
       </div>
+
+      <div>
+        {/* <div className="map-container" ref={mapContainer} /> */}
+        <div className="topbar">
+          <IoIcons.IoCarSportOutline className="topbar-icon" />
+          <h1>Simulation</h1>
+        </div>
+
+        <div className="simulation-container">
+          <div className="map-container" ref={mapContainer} />
+          <div className="simulation-controls">
+            <div className="small-space-right"></div>
+            <Button color="cyan" size="lg" onClick={startAnimation}>
+              <IoIcons.IoPlayOutline />
+              <span></span>
+            </Button>
+
+            <div className="small-space-right"></div>
+            <Button color="cyan" size="lg" onClick={stopAnimation}>
+              <IoIcons.IoPauseOutline />
+              <span></span>
+            </Button>
+            <div className="small-space-right"></div>
+
+            <Button color="cyan" size="lg" onClick={openModalKw}>
+              <IoIcons.IoPlayForwardOutline /> <span></span>
+            </Button>
+          </div>
+        </div>
+      </div>
+      {/* <Button onClick={spawnPassenger}>Spawn Passenger</Button> */}
+      {/* <Button onClick={startAnimation}>Start Animation</Button>
+      <Button onClick={stopAnimation}>Stop Animation</Button> */}
+      {/* <Button onClick={continueAnimation}>Continue Animation</Button> */}
+      {/* <Link to="/fastforward">
+        <Button>Fast Forward</Button>
+      </Link> */}
+      {/* 
+      <div> No. of drivers : {drivers.length}</div>
+      <div> No. of passengers : {passengers.length}</div>
+      <div>Check Time Update: {time}</div>
+      <div> Check State Update: {state} </div> */}
+      <Sidebar
+        // driver={drivers[0]}
+
+        // time={time}
+        // time={time}
+        timelist={timelist}
+        statelist={statelist}
+        speedlist={speedlist}
+        jobsdonelist={jobsdonelist}
+        profitlist={profitlist}
+        distancelist={distancelist}
+        avgdistancelist={avgdistancelist}
+        avgprofitlist={avgprofitlist}
+        avgjobsdonelist={avgjobsdonelist}
+        weatherlist={weatherlist}
+        peakHourlist={peakHourlist}
+        createSpecialDriver={createSpecialDriver}
+        openModalGraph={openModalGraph}
+        visible={visible}
+        setVisible={setVisible}
+        handlecreatedDriver={handlecreatedDriver}
+      ></Sidebar>
     </>
   );
 }

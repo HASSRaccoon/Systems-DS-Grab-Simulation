@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map + PathFinder</title>
+
+    <!-- GeoJSON Path Finder -->
+    <script src="https://unpkg.com/geojson-path-finder@1.1.0/dist/geojson-path-finder.min.js"></script>
+
+
+    <!-- leaflet css  -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+    integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI="
+    crossorigin=""/>
+
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+    integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM="
+    crossorigin=""></script>
+
+    <script src="index.js"></script>
+
+    <style>
+        #map {
+            height: 95vh;
+        }
+
+    </style>
+
+</head>
+
+<body>
+    <div id="map">
+
+    </div>
+</body>
+
+
+<!-- leaflet js  -->
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+<script>
+    // Var to store the GeoJSON layer
+    var geojsonLayer;
+
+    // Load GeoJSON from a file using XMLHttpRequest
+    var request = new XMLHttpRequest();
+    request.open('GET', 'data/lta-lane-marking-geojson.geojson'); //import geojson file
+    request.responseType = 'json';
+    request.send();
+
+    request.onload = function() {
+        if (request.status === 200) {
+            geojsonLayer.addData(request.response);
+            // L.geoJSON(geojsonLayer).addTo(map);
+        } else {
+        console.log('Failed to load GeoJSON data');
+        }
+    };
+    
+    // // Load GeoJSON data when the map moves
+    // map.on('moveend', function() {
+    //     if (!geojsonLayer) {
+        //     // Create a new GeoJSON layer if one doesn't exist
+    //     geojsonLayer = L.geoJSON().addTo(map);
+    //     }
+    
+    //     // Load GeoJSON data if the layer is empty or if the map bounds have changed
+    //     if (geojsonLayer.getLayers().length === 0 || map.getBounds().intersects(geojsonLayer.getBounds())) {
+        //     loadGeoJSON();
+        //     }
+        // });
+        
+
+    // Map initialization 
+    var center = L.bounds([1.56073, 104.11475], [1.16, 103.502]).getCenter();
+    var map = L.map('map').setView([center.x, center.y], 13);
+    // var map = L.map('map').setView([1.3397254088067054, 103.70038345301907], 12);
+        
+        /*==============================================
+        TILE LAYER and WMS
+        ================================================*/
+        //osm layer
+    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    });
+    // osm.addTo(map);
+    // map.addLayer(osm)
+
+
+    var Stadia_AlidadeSmoothDark = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
+    maxZoom: 20,
+    attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+    });
+    Stadia_AlidadeSmoothDark.addTo(map);
+
+
+    var oneMap = L.tileLayer('https://maps-{s}.onemap.sg/v3/Default/{z}/{x}/{y}.png', {
+        // detectRetina: true,
+        maxZoom: 20,
+        //Do not remove this attribution
+        attribution: '<img src="https://www.onemap.gov.sg/docs/maps/images/oneMap64-01.png" style="height:20px;width:20px;"/> OneMap | Map data &copy; contributors, <a href="http://SLA.gov.sg">Singapore Land Authority</a>'
+        });
+    // oneMap.addTo(map);
+
+    //   Set Start and End Points objects
+    const startPoint = L.latLng(1.3413760280356875, 103.96375049044487);
+    const endPoint = L.latLng(1.3606607628285536, 103.98979608694115);
+    const marker = L.marker(startPoint).addTo(map);
+
+    
+    const pathFinder = new PathFinder(geojsonLayer, {
+        precision: 1e-6, // sets the tolerance for snapping the start and end points to the nearest graph node.
+        snapToFirst: true, //Indicates whether to snap the start point to the nearest node, or to the nearest point on an edge.
+        edgeDataReduceFunction: (r, e) => r + e.properties.distance, //reduce function that accumulates edge data along the path
+        edgeDataInserter: (d, e) => { d.distance = e.properties.distance; }, // inserts edge data into the path.
+    });
+    
+    //finds the shortest path between the start and end points.
+    const path = pathFinder.findPath(startPoint, endPoint); // returns an array of L.LatLng objects representing the shortest path between the start and end points.
+    const pathPolyline = L.polyline(path, { color: 'blue', weight: 5 }).addTo(map); // returns a Leaflet Polyline object representing the shortest path between the start and end points.
+    
+
+
+</script>
