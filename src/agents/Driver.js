@@ -71,7 +71,7 @@ export default class Driver {
       // console.log('picking up')
       this.destination = this.passenger.currentLocation;
       this.state = "picking up"
-      console.log("from Driver class, Driver " + this.id + " has been appointed passenger" + this.passenger.id + " thus moving into the picking up state. Checking state: " + this.state + " and going to passenger current location now: " + this.destination);
+      console.log("from Driver class, Driver " + this.id + " has been appointed passenger " + this.passenger.id + " thus moving into the picking up state. Checking state: " + this.state + " and going to passenger current location now: " + this.destination);
     } else {
       // console.log('searching')
       // this.passenger = passenger;
@@ -127,7 +127,7 @@ export default class Driver {
     console.log("from Driver class, Driver " + this.id + " has completed this " + this.passenger.id + "'s journey, thus demarcated as completed state. Checking state: " + this.state + " but currently still holding this destination: " + this.destination);
     this.state = "searching";
     console.log("was in the completed state, already changed state to searching. Checking state: " + this.state);
-    this.completedJobs += 1;
+    this.completedJobs ++;
     this.passenger = null;
     // this.destination = [Math.random() * 200, Math.random() * 200];
 
@@ -149,3 +149,26 @@ export default class Driver {
     });
   };
 }
+
+    //initialising variables
+    
+
+    //updating the fresh log entry for this driver with <new state> segment
+
+
+    //affecting the driver object
+
+
+    //actual picking up responsibility
+
+
+    //populating the fresh log entry
+
+
+    //console log the driver's log entry
+
+
+    //the actual animation call to move the driver to the searching location
+
+
+    //preparing to move to the next state
