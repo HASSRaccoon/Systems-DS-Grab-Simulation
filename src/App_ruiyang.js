@@ -1,6 +1,6 @@
-import Driver from "./agents/Driver.js";
-import Passenger from "./agents/passenger.js";
-import Globals from "./agents/globals.js";
+import Driver from "./Agents/driver.js";
+import Passenger from "./Agents/passenger.js";
+import Globals from "./Agents/Globals.js";
 
 import sgJSON from "./data/road-network.json";
 import * as turf from "@turf/turf";
@@ -17,7 +17,7 @@ export default function App_ruiyang() {
   const inputNumPassengersPeak = location.state.numPassengersPeak;
   const inputNumPassengersNPeak = location.state.numPassengersNPeak;
   const inputFFW = location.state.ffwdays;
-  
+
   console.log("Days input:", inputFFW);
   console.log("Drivers", inputNumDrivers);
   let DAYS = 1;
@@ -26,15 +26,14 @@ export default function App_ruiyang() {
 
   if (inputFFW === 0) {
     DAYS = 1;
-  }else{
-
+  } else {
     DAYS = inputFFW; //1
   }
-  
+
   let NUM_DRIVERS = 1; //5
   if (inputNumDrivers === 0) {
     NUM_DRIVERS = 1;
-  }else{
+  } else {
     NUM_DRIVERS = inputNumDrivers; //5
   }
   const NUM_PASSENGERS = inputNumPassengersNPeak; //50
@@ -70,35 +69,37 @@ export default function App_ruiyang() {
         }
       );
     } else if (DRIVER_TYPE === "B") {
-      drivers.push( //CHANGE PER SIMULATION
-              {
-                  id: `B${i}`,
-                  speed: 90,
-                  state: 'searching',
-                  framesToMove: 0,
-                  moveRadius: 5,
-                  startTime: 420, //NOTE: 7am
-                  endTime: 1140, //NOTE: 7pm
-                  breakStart: 600, //NOTE: 10am
-                  breakEnd: 660, //NOTE: 11am
-              }
-          );
+      drivers.push(
+        //CHANGE PER SIMULATION
+        {
+          id: `B${i}`,
+          speed: 90,
+          state: "searching",
+          framesToMove: 0,
+          moveRadius: 5,
+          startTime: 420, //NOTE: 7am
+          endTime: 1140, //NOTE: 7pm
+          breakStart: 600, //NOTE: 10am
+          breakEnd: 660, //NOTE: 11am
+        }
+      );
     } else if (DRIVER_TYPE === "C") {
       // //Type C
-      drivers.push( //CHANGE PER SIMULATION
-              {
-                  id: `C${i}`,
-                  speed: 70,
-                  state: 'searching',
-                  framesToMove: 9999999,
-                  moveRadius: 0,
-                  startTime: 480, //NOTE: 8am
-                  endTime: 1080, //NOTE: 6pm
-                  breakStart: 660, //NOTE: 10am
-                  breakEnd: 720, //NOTE: 11am
-              }
-          );
-      }
+      drivers.push(
+        //CHANGE PER SIMULATION
+        {
+          id: `C${i}`,
+          speed: 70,
+          state: "searching",
+          framesToMove: 9999999,
+          moveRadius: 0,
+          startTime: 480, //NOTE: 8am
+          endTime: 1080, //NOTE: 6pm
+          breakStart: 660, //NOTE: 10am
+          breakEnd: 720, //NOTE: 11am
+        }
+      );
+    }
   }
 
   let passengers = [
@@ -223,7 +224,8 @@ export default function App_ruiyang() {
     }
   }
 
-  function newPassenger() { // NOTE: generate new passenger
+  function newPassenger() {
+    // NOTE: generate new passenger
     let passenger = new Passenger({
       id: "passenger" + generateString(7),
       cancelTendency: Math.floor(Math.random() * 10),
@@ -231,7 +233,8 @@ export default function App_ruiyang() {
     passengerLs.push(passenger);
   }
 
-  function pathGenerator(driver, location, destination) {  //NOTE: generate path for driver
+  function pathGenerator(driver, location, destination) {
+    //NOTE: generate path for driver
     if (location === destination || destination === null) return;
     // console.log('pathGenerator driver ', driver.id,' loc: ', location, ' dest: ', destination)
     let path = buildPath(location, destination);
@@ -260,8 +263,9 @@ export default function App_ruiyang() {
       }
     }
   }
-  function updateCurrentLoc(driver, location, destination, distance) { //NOTE: update driver's current location
-    if (location === destination || destination === null) return; 
+  function updateCurrentLoc(driver, location, destination, distance) {
+    //NOTE: update driver's current location
+    if (location === destination || destination === null) return;
 
     if (
       driver.path !== null &&

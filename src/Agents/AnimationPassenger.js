@@ -1,6 +1,5 @@
 import React from "react";
 import styles from "./styles.module.css";
-import { moveTo } from "./move.js";
 
 export default class AnimationPassenger {
   constructor(props) {
@@ -44,7 +43,6 @@ export default class AnimationPassenger {
     console.log(
       `passenger current location when transit: ${this.currentLocation}`
     );
-    moveTo(this.ref.current, this.currentLocation, this.destination, this.ref);
   }
   arrived() {
     this.state = "arrived";

@@ -1,6 +1,5 @@
 import React from "react";
 import styles from "./styles.module.css";
-import { moveTo } from "./move.js";
 
 export default class AnimationDriver {
   constructor(props) {

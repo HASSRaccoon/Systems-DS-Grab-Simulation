@@ -20,9 +20,9 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 // import { Center } from "@mantine/core";
-import AnimationDriver from "../agents/AnimationDriver.js";
-import AnimationPassenger from "../agents/AnimationPassenger.js";
-import Globals from "../agents/globals.js";
+import AnimationDriver from "../Agents/AnimationDriver.js";
+import AnimationPassenger from "../Agents/AnimationPassenger.js";
+// import Globals from "../Agents/globals.js";
 import Sidebar from "./Sidebar.js";
 import { convertLength } from "@turf/turf";
 import "./Map.css";
@@ -75,7 +75,7 @@ export default function Map() {
   }
   const spawnProbability = 0.5;
 
-  let god = new Globals();
+  // let god = new Globals();
 
   let driversList = [];
 
