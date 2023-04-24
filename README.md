@@ -1,6 +1,6 @@
 # System Design Studio 2023: Team Grabies Code
 
-Our Agen-based Model is built on React, JavaScript and HTML.
+Our Agent-based Model is built on React, JavaScript and HTML.
 
 Steps to launch our code:
 
