@@ -20,9 +20,8 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 // import { Center } from "@mantine/core";
-import AnimationDriver from "../Agents/AnimationDriver.js";
-import AnimationPassenger from "../Agents/AnimationPassenger.js";
-import Globals from "../Agents/globals.js";
+import AnimationDriver from "../agents/AnimationDriver.js";
+import AnimationPassenger from "../agents/AnimationPassenger.js";
 import Sidebar from "./Sidebar.js";
 import { convertLength } from "@turf/turf";
 import "./Map.css";
@@ -74,8 +73,6 @@ export default function Map() {
     path.geometry.coordinates = arc;
   }
   const spawnProbability = 0.5;
-
-  let god = new Globals();
 
   let driversList = [];
 
@@ -325,7 +322,7 @@ export default function Map() {
     }),
   };
   // console.log(specialdriver, "special");
-  //problem at 187
+
   let driverPaths = {
     type: "FeatureCollection",
     features: drivers.map((driver) => {
@@ -357,18 +354,12 @@ export default function Map() {
     },
   };
 
-  // console.log(drivers, "initial drivers");
-  // console.log(driverPaths, "initial paths");
-  // console.log(specialPath, "initial paths");
-
   function animatespecialdriver(driver) {
-    // console.log(driver.currentSteps, "steps in animate");
     if (driver.timeCounter === 0) {
       console.log("start of the day");
       console.log("driver starting from ", driver.currentLocation);
     }
 
-    // console.log(driver.timeLog, "hello");
 
     const start =
       driver.path.geometry.coordinates[
@@ -387,58 +378,30 @@ export default function Map() {
       running = false;
       return;
     }
-    // if (driver.id === 4) {
+
     specialPoint.geometry.coordinates =
       driver.path.geometry.coordinates[driver.counter];
-    // } else {
-    //   driverPoints.features[driver.id - 1].geometry.coordinates =
-    //     driver.path.geometry.coordinates[driver.counter];
-    // }
-    // driverPoints.features[driver.id - 1].geometry.coordinates =
-    //   driver.path.geometry.coordinates[driver.counter];
-    //update currentLocation is here
+
     driver.currentLocation = driver.path.geometry.coordinates[driver.counter];
     // if (driver.id === 4) {
     specialPoint.properties.bearing = turf.bearing(
       turf.point(start),
       turf.point(end)
     );
-    // } else {
-    //   driverPoints.features[driver.id - 1].properties.bearing = turf.bearing(
-    //     turf.point(start),
-    //     turf.point(end)
-    //   );
-    // }
-
-    // driverPoints.features[driver.id - 1].properties.bearing = turf.bearing(
-    //   turf.point(start),
-    //   turf.point(end)
-    // );
-    // if (driver.id === 4) {
     map.getSource("me").setData(specialPoint);
-    // } else {
-    //   map.getSource("drivers").setData(driverPoints);
-    // }
-    // map.getSource("drivers").setData(driverPoints);
 
     if (driver.counter < driver.currentSteps) {
-      // requestAnimationFrame(() => animatedriver(driver, steps));
-      // animationId = requestAnimationFrame(() => animatedriver(driver, steps));
-      // const animationId = requestAnimationFrame(() => animatedriver(driver));
-      // animationIds.push(animationId);
-      //error
+
       const animationId = requestAnimationFrame(() =>
         animatespecialdriver(driver)
       );
       animationIds[driver.id - 1].push(animationId);
     }
-    // console.log(driver.counter, driver.currentLocation);
+
     driver.counter = driver.counter + 1;
 
     driver.timeCounter = driver.timeCounter + 1;
-    // if (driver.id === 1) {
-    //   setTime(time);
-    // }
+
     driver.timeLog[driver.timeCounter] = {};
     driver.timeLog[driver.timeCounter]["state"] = driver.state;
     driver.timeLog[driver.timeCounter]["distance travelled"] =
@@ -460,29 +423,20 @@ export default function Map() {
       driver.totalFuelCosts +
       getFuelCost(driver.timeLog[driver.timeCounter]["distance travelled"]);
 
-    // if (driver.id === 1) {
-    //   setTime(driver.timeCounter);
-    // }
-    // console.log(driver.id, driver.timeLog, "time log per frame");
     if (driver.timeCounter === 1440) {
       console.log("end of the day");
       console.log("driver reached destination at ", driver.currentLocation);
     }
 
-    // if (driver.counter === steps) {
-    // console.log(driver.currentLocation, "last");
-    // }
-    // console.log(driver.currentLocation, driver.counter);
   }
 
   function animatedriver(driver) {
-    // console.log(driver.currentSteps, "steps in animate");
+
     if (driver.timeCounter === 0) {
       console.log("start of the day");
       console.log("driver starting from ", driver.currentLocation);
     }
 
-    // console.log(driver.timeLog, "hello");
 
     const start =
       driver.path.geometry.coordinates[
@@ -1016,9 +970,9 @@ export default function Map() {
     setDriverType(e);
   }
   function getFFWdays(e) {
-    console.log(e, "hello????");
-    const value = e;
-    setFFWDays(value);
+    // console.log(e, "hello????");
+    // const value = e;
+    setFFWDays(e);
     // console.log(ffwdays, "hello?");
   }
 
@@ -1525,7 +1479,7 @@ export default function Map() {
                 max={50}
                 marks={[
                   { value: 1, label: "1 driver" },
-                  { value: 50, label: "50 drivers" },
+                  { value: 300, label: "50 drivers" },
                 ]}
                 onChange={(e) => getdrivers(e)}
               ></Slider>

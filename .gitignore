@@ -1,6 +1,6 @@
 # Large asset files, to keep local
 archived_data/
-data/
+analytics/data/archive
 
 # venv folder
 sdsgvenv/

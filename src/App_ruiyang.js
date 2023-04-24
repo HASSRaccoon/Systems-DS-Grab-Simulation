@@ -1,31 +1,42 @@
-import Driver from "./Agents/driver.js";
-import Passenger from "./Agents/passenger.js";
-import Globals from "./Agents/globals.js";
+import Driver from "./agents/Driver.js";
+import Passenger from "./agents/passenger.js";
+import Globals from "./agents/globals.js";
 
 import sgJSON from "./data/road-network.json";
 import * as turf from "@turf/turf";
 import PathFinder, { pathToGeoJSON } from "geojson-path-finder";
 import { useLocation } from "react-router-dom";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import exportFromJSON from "export-from-json";
 import "./App.css";
 
 export default function App_ruiyang() {
   const location = useLocation();
-  console.log("Fast Forward Days: ", location.state.ffwdays);
-  console.log("Driver Type: ", location.state.drivertype);
-  // const navigate = useNavigate();
   const inputDriverType = location.state.drivertype;
   const inputNumDrivers = location.state.numDrivers;
   const inputNumPassengersPeak = location.state.numPassengersPeak;
   const inputNumPassengersNPeak = location.state.numPassengersNPeak;
   const inputFFW = location.state.ffwdays;
-
-  const DAYS = inputFFW; //1
+  
+  console.log("Days input:", inputFFW);
+  console.log("Drivers", inputNumDrivers);
+  let DAYS = 1;
   const TICKRATE = 1440; //NOTE: 1 tick = 1 minute
   const TICKS = TICKRATE * DAYS;
 
-  const NUM_DRIVERS = inputNumDrivers; //5
+  if (inputFFW === 0) {
+    DAYS = 1;
+  }else{
+
+    DAYS = inputFFW; //1
+  }
+  
+  let NUM_DRIVERS = 1; //5
+  if (inputNumDrivers === 0) {
+    NUM_DRIVERS = 1;
+  }else{
+    NUM_DRIVERS = inputNumDrivers; //5
+  }
   const NUM_PASSENGERS = inputNumPassengersNPeak; //50
   const NUM_PASSENGERS_PEAK = inputNumPassengersPeak; //300
   const PROB_PASSENGERS_CANCEL = 0.05;
@@ -39,6 +50,7 @@ export default function App_ruiyang() {
   //CHANGE PER SIMULATION
 
   let drivers = [];
+
   const jsonName = "Grabie_Simulation_Output";
   for (let i = 0; i < NUM_DRIVERS; i++) {
     if (DRIVER_TYPE === "A") {
@@ -58,7 +70,6 @@ export default function App_ruiyang() {
         }
       );
     } else if (DRIVER_TYPE === "B") {
-    // //Type B
       drivers.push( //CHANGE PER SIMULATION
               {
                   id: `B${i}`,
@@ -87,29 +98,29 @@ export default function App_ruiyang() {
                   breakEnd: 720, //NOTE: 11am
               }
           );
-    }   
+      }
   }
-  // Testing: passenger spawns
-  // let passengers = [
-  //   {
-  //     id: "passenger1",
-  //     cancelTendency: 1000,
-  //     // currentLocation: generateRandomCoord(),
-  //     // destination: generateRandomCoord(),
-  //   },
-  //   {
-  //     id: "passenger2",
-  //     cancelTendency: 1000,
-  //   },
-  //   {
-  //     id: "passenger3",
-  //     cancelTendency: 1000,
-  //   },
-  //   {
-  //     id: "passenger4",
-  //     cancelTendency: 1000,
-  //   },
-  // ];
+
+  let passengers = [
+    {
+      id: "passenger1",
+      cancelTendency: 1000,
+      // currentLocation: generateRandomCoord(),
+      // destination: generateRandomCoord(),
+    },
+    {
+      id: "passenger2",
+      cancelTendency: 1000,
+    },
+    {
+      id: "passenger3",
+      cancelTendency: 1000,
+    },
+    {
+      id: "passenger4",
+      cancelTendency: 1000,
+    },
+  ];
 
   let god = new Globals();
   let passengerLs = [];
@@ -120,7 +131,7 @@ export default function App_ruiyang() {
   // drivers.map((driver) => driverLs.push(new Driver(driver)));
   drivers.map((driver) => god.registerDriver(new Driver(driver)));
 
-  // passengers.map((passenger) => passengerLs.push(new Passenger(passenger)));
+  passengers.map((passenger) => passengerLs.push(new Passenger(passenger)));
 
   function buildPath(start, end) {
     const path = pathToGeoJSON(
@@ -142,7 +153,7 @@ export default function App_ruiyang() {
     return result;
   }
 
-  function assignPassenger(driver) { //Assign passenger to driver if driver is searching
+  function assignPassenger(driver) {
     // console.log('assigning passenger')
     if (passengerLs.length > 0 && driver.state === "searching") {
       let radius = 0;
@@ -212,8 +223,7 @@ export default function App_ruiyang() {
     }
   }
 
-
-  function newPassenger() { //Generate new passenger
+  function newPassenger() { // NOTE: generate new passenger
     let passenger = new Passenger({
       id: "passenger" + generateString(7),
       cancelTendency: Math.floor(Math.random() * 10),
@@ -221,7 +231,7 @@ export default function App_ruiyang() {
     passengerLs.push(passenger);
   }
 
-  function pathGenerator(driver, location, destination) { //Generate path for driver
+  function pathGenerator(driver, location, destination) {  //NOTE: generate path for driver
     if (location === destination || destination === null) return;
     // console.log('pathGenerator driver ', driver.id,' loc: ', location, ' dest: ', destination)
     let path = buildPath(location, destination);
@@ -250,8 +260,8 @@ export default function App_ruiyang() {
       }
     }
   }
-  function updateCurrentLoc(driver, location, destination, distance) { //Update driver's current location
-    if (location === destination || destination === null) return;
+  function updateCurrentLoc(driver, location, destination, distance) { //NOTE: update driver's current location
+    if (location === destination || destination === null) return; 
 
     if (
       driver.path !== null &&
@@ -274,7 +284,7 @@ export default function App_ruiyang() {
 
   let driverBucket = []; //NOTE: bucket to store drivers that are available to be assigned to passenger
 
-  function getRandomFromBucket() { //Get random driver from bucket
+  function getRandomFromBucket() {
     var randomIndex = Math.floor(Math.random() * driverBucket.length);
     return driverBucket.splice(randomIndex, 1)[0];
   }
@@ -319,7 +329,7 @@ export default function App_ruiyang() {
           }
         }
         for (let i = 0; i < passengerLs.length; i++) {
-          //NOTE: passenger cancelling behaviour
+          //NOTE: passenger cancelling
           passengerLs[i].waitingTime += 1;
           if (passengerLs[i].waitingTime >= passengerLs[i].cancelTendency) {
             let cancelRate = Math.random();
